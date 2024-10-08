@@ -20,7 +20,8 @@ class MainFrame:
         self.pink_card_value = 0
         self.joker_card_value = 0
 
-        self.sanfransisco_portland_1_color = "red"
+        self.routes_view_dictionary = {'sanfransisco_portland_1': [True, "red"], 'sanfransisco_portland_2': [False, "red"]}
+
 
     def create_main_frame(self):
         main_frame = tk.Frame(self.root, width=1284, height=527, bg="black")
@@ -106,7 +107,8 @@ class MainFrame:
         if(hasattr(self.canvas, 'sanfransisco_portland_1')):
             self.canvas.delete(self.canvas.sanfransisco_portland_1)
 
-        self.canvas.sanfransisco_portland_1, self.canvas.sanfransisco_portland_1_img = self.create_road_image("../Assets/MapRoads/sanfransisco_portland_1.png", self.sanfransisco_portland_1_color)
+        if(self.routes_view_dictionary['sanfransisco_portland_1'][0]):
+            self.canvas.sanfransisco_portland_1, self.canvas.sanfransisco_portland_1_img = self.create_road_image("../Assets/MapRoads/sanfransisco_portland_1.png", self.routes_view_dictionary['sanfransisco_portland_1'][1])
 
 
     def update_destination_tickets(self):
