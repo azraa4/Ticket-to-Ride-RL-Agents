@@ -2,9 +2,6 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
 
-
-
-
 class TrainCardSelectionFrame:
     def __init__(self, root):
         self.root = root

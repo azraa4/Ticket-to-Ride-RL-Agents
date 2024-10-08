@@ -3,10 +3,13 @@ from train_card_selection_view import TrainCardSelectionFrame
 from claimable_routes_view import ClaimableRoutesFrame
 from draw_ticket_frame_view import DrawTicketFrame
 from main_frame_view import MainFrame
+import console
 
 import tkinter as tk
 from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
+
+import threading
 
 class MainGameApp:
     def __init__(self):
@@ -14,22 +17,19 @@ class MainGameApp:
         self.root.title("Ticket to Ride")
         self.root.geometry("1280x720")
         self.root.resizable(False, False)
+        self.main_frame = MainFrame(self.root)
+        self.train_cards = TrainCardSelectionFrame(self.root)
+        self.claimable_routes = ClaimableRoutesFrame(self.root)
+        self.draw_ticket = DrawTicketFrame(self.root)
+        self.header = HeaderInfo(self.root)
 
     def setup_ui(self):
-        train_cards = TrainCardSelectionFrame(self.root)
-        train_cards.create_train_card_selection_frame()
 
-        claimable_routes = ClaimableRoutesFrame(self.root)
-        claimable_routes.create_claimable_routes_frame()
-
-        draw_ticket = DrawTicketFrame(self.root)
-        draw_ticket.create_draw_ticket_frame()
-
-        main_frame = MainFrame(self.root)
-        main_frame.create_main_frame()
-
-        header = HeaderInfo(self.root)
-        header.create_header_info_frame()
+        self.train_cards.create_train_card_selection_frame()
+        self.claimable_routes.create_claimable_routes_frame()
+        self.draw_ticket.create_draw_ticket_frame()
+        self.main_frame.create_main_frame()
+        self.header.create_header_info_frame()
 
     def run(self):
         self.setup_ui()
@@ -38,4 +38,8 @@ class MainGameApp:
 
 if __name__ == "__main__":
     app = MainGameApp()
+
+    console_thread = threading.Thread(target=console.open_console_window, args=(app, app.main_frame, app.train_cards, app.claimable_routes, app.draw_ticket, app.header))
+    console_thread.start()
+
     app.run()
