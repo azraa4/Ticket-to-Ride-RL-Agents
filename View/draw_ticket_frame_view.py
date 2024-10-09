@@ -3,8 +3,9 @@ from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
 
 class DrawTicketFrame:
-    def __init__(self, root):
+    def __init__(self, root, controller):
         self.root = root
+        self.controller = controller
 
     def create_draw_ticket_frame(self):
         ticket_frame = tk.Frame(self.root, width=120, height=150, bg="#fdf8ed", highlightthickness=4,

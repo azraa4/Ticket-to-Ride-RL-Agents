@@ -3,8 +3,9 @@ from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
 
 class TrainCardSelectionFrame:
-    def __init__(self, root):
+    def __init__(self, root, controller):
         self.root = root
+        self.controller = controller
 
         self.card_1_img = None
         self.card_1_img_path = "../Assets/whitecard.png"

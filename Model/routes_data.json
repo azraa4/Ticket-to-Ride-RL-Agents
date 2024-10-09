@@ -1,0 +1,32 @@
+{
+  "routes_data": [
+    {
+      "id": "sanfransisco_portland_1",
+      "city1": "San Fransisco",
+      "city2": "Portland",
+      "length": 5,
+      "color": "green"
+    },
+    {
+      "id": "sanfransisco_portland_2",
+      "city1": "San Fransisco",
+      "city2": "Portland",
+      "length": 5,
+      "color": "pink"
+    },
+    {
+      "id": "sanfransisco_losangeles_1",
+      "city1": "San Fransisco",
+      "city2": "Los Angeles",
+      "length": 3,
+      "color": "yellow"
+    },
+    {
+      "id": "sanfransisco_losangeles_2",
+      "city1": "San Fransisco",
+      "city2": "Los Angeles",
+      "length": 3,
+      "color": "pink"
+    }
+  ]
+}

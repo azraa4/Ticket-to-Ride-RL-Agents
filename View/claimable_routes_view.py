@@ -3,8 +3,9 @@ from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
 
 class ClaimableRoutesFrame:
-    def __init__(self, root):
+    def __init__(self, root, controller):
         self.root = root
+        self.controller = controller
 
     def create_claimable_routes_frame(self):
         claimable_routes_frame = tk.Frame(self.root, width=240, height=150, bg="#fdf8ed",

@@ -2,10 +2,12 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageEnhance, ImageOps
 from ttr_gui_view import TTRGui
 
+
 class MainFrame:
-    def __init__(self, root):
+    def __init__(self, root, controller):
         self.root = root
-        self.sanfransisco_portland_1_image_visible = True
+        self.controller = controller
+
         self.canvas = None
 
         self.dest_card_1_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
@@ -25,8 +27,6 @@ class MainFrame:
         self.black_card_value = 0
         self.pink_card_value = 0
         self.joker_card_value = 0
-
-        self.routes_view_dictionary = {'sanfransisco_portland_1': [True, "red"], 'sanfransisco_portland_2': [False, "red"]}
 
 
     def create_main_frame(self):
@@ -108,11 +108,15 @@ class MainFrame:
     def create_roads(self):
         print("Roads are updated.")
 
-        if(hasattr(self.canvas, 'sanfransisco_portland_1')):
-            self.canvas.delete(self.canvas.sanfransisco_portland_1)
+        for route in self.controller.get_unclaimed_routes():
+            if(hasattr(self.canvas, route.id)):
+                self.canvas.delete(getattr(self.canvas, route.id))
 
-        if(self.routes_view_dictionary['sanfransisco_portland_1'][0]):
-            self.canvas.sanfransisco_portland_1, self.canvas.sanfransisco_portland_1_img = self.create_road_image("../Assets/MapRoads/sanfransisco_portland_1.png", self.routes_view_dictionary['sanfransisco_portland_1'][1])
+        for route in self.controller.get_claimed_routes():
+            road_image, road_image_img = self.create_road_image(route.get_image_path(), route.get_claimed_color())
+            setattr(self.canvas, f"{route.id}", road_image)
+            setattr(self.canvas, f"{route.id}_img", road_image_img)
+
 
     def create_destination_tickets(self):
         if hasattr(self.canvas, 'dest_card_1'):

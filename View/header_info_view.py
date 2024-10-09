@@ -2,8 +2,9 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
 class HeaderInfo:
-    def __init__(self, root):
+    def __init__(self, root, controller):
         self.root = root
+        self.controller = controller
 
     def create_header_info_frame(self):
         header_info_canvas = tk.Canvas(self.root, width=1288, height=40, bg="#fdf8ed",
