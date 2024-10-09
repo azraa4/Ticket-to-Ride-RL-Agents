@@ -52,7 +52,7 @@ class MainFrame:
         yellow_card_img, self.canvas.yellow_text_id = self.create_card_with_text("../Assets/yellowcard.png", 120, 190, self.yellow_card_value)
         white_card_img, self.canvas.white_text_id = self.create_card_with_text("../Assets/whitecard.png", 10, 190, self.white_card_value)
         black_card_img, self.canvas.black_text_id = self.create_card_with_text("../Assets/blackcard.png", 120, 260, self.black_card_value)
-        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("../Assets/pinkcard.png", 10, 260, self.pink_card_value)
+        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("../Assets/purplecard.png", 10, 260, self.pink_card_value)
         joker_card_img, self.canvas.joker_text_id = self.create_card_with_text("../Assets/jokercard.png", 10, 330, self.joker_card_value)
 
         # Keep references to images to avoid garbage collection
