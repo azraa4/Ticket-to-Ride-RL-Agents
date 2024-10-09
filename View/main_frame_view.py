@@ -1,11 +1,17 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageEnhance, ImageOps
+from ttr_gui_view import TTRGui
 
 class MainFrame:
     def __init__(self, root):
         self.root = root
         self.sanfransisco_portland_1_image_visible = True
         self.canvas = None
+
+        self.dest_card_1_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+        self.dest_card_2_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+        self.dest_card_3_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+
         self.dest_card_1_img = None
         self.dest_card_2_img = None
         self.dest_card_3_img = None
@@ -61,12 +67,10 @@ class MainFrame:
         self.canvas.joker_card_img = joker_card_img
 
         # Destination tickets
-        self.update_destination_tickets()
+        self.create_destination_tickets()
 
         #Update Roads
-        self.update_roads()
-
-
+        self.create_roads()
 
     def create_card_with_text(self, image_path, x, y, card_value):
         card_img = Image.open(image_path)
@@ -101,8 +105,8 @@ class MainFrame:
         created_road = self.canvas.create_image(0, 0, anchor="nw", image=final_img)
         return created_road, final_img
 
-    def update_roads(self):
-        print("roads")
+    def create_roads(self):
+        print("Roads are updated.")
 
         if(hasattr(self.canvas, 'sanfransisco_portland_1')):
             self.canvas.delete(self.canvas.sanfransisco_portland_1)
@@ -110,8 +114,7 @@ class MainFrame:
         if(self.routes_view_dictionary['sanfransisco_portland_1'][0]):
             self.canvas.sanfransisco_portland_1, self.canvas.sanfransisco_portland_1_img = self.create_road_image("../Assets/MapRoads/sanfransisco_portland_1.png", self.routes_view_dictionary['sanfransisco_portland_1'][1])
 
-
-    def update_destination_tickets(self):
+    def create_destination_tickets(self):
         if hasattr(self.canvas, 'dest_card_1'):
             self.canvas.delete(self.canvas.dest_card_1)
         if hasattr(self.canvas, 'dest_card_2'):
@@ -119,23 +122,29 @@ class MainFrame:
         if hasattr(self.canvas, 'dest_card_3'):
             self.canvas.delete(self.canvas.dest_card_3)
 
-        self.dest_card_1_img = Image.open("../Assets/DestinationTickets/backsideOfTicket.png")
+        self.dest_card_1_img = Image.open(self.dest_card_1_img_path)
         self.dest_card_1_img = self.dest_card_1_img.resize((150, 102), Image.Resampling.LANCZOS)
         self.dest_card_1_img = ImageTk.PhotoImage(self.dest_card_1_img)
-        self.canvas.dest_card_1 = self.canvas.create_image(10, 420, anchor="nw", image=self.dest_card_1_img)
+        self.canvas.dest_card_1_img_id = self.canvas.create_image(10, 420, anchor="nw", image=self.dest_card_1_img)
 
-        self.dest_card_2_img = Image.open("../Assets/DestinationTickets/backsideOfTicket.png")
+        self.dest_card_2_img = Image.open(self.dest_card_2_img_path)
         self.dest_card_2_img = self.dest_card_2_img.resize((150, 102), Image.Resampling.LANCZOS)
         self.dest_card_2_img = ImageTk.PhotoImage(self.dest_card_2_img)
-        self.canvas.dest_card_2 = self.canvas.create_image(170, 420, anchor="nw", image=self.dest_card_2_img)
+        self.canvas.dest_card_2_img_id = self.canvas.create_image(170, 420, anchor="nw", image=self.dest_card_2_img)
 
-        self.dest_card_3_img = Image.open("../Assets/DestinationTickets/backsideOfTicket.png")
+        self.dest_card_3_img = Image.open(self.dest_card_3_img_path)
         self.dest_card_3_img = self.dest_card_3_img.resize((150, 102), Image.Resampling.LANCZOS)
         self.dest_card_3_img = ImageTk.PhotoImage(self.dest_card_3_img)
-        self.canvas.dest_card_3 = self.canvas.create_image(330, 420, anchor="nw", image=self.dest_card_3_img)
+        self.canvas.dest_card_3_img_id = self.canvas.create_image(330, 420, anchor="nw", image=self.dest_card_3_img)
 
-    def update_ticket_numbers(self):
-        print("ticket numbers are updated")
+    def update_destination_tickets(self):
+        print("Dest Tickets are Updated")
+        self.dest_card_1_img = TTRGui.change_image(self, self.canvas.dest_card_1_img_id, self.dest_card_1_img, self.dest_card_1_img_path)
+        self.dest_card_2_img = TTRGui.change_image(self, self.canvas.dest_card_2_img_id, self.dest_card_2_img, self.dest_card_2_img_path)
+        self.dest_card_3_img = TTRGui.change_image(self, self.canvas.dest_card_3_img_id, self.dest_card_3_img, self.dest_card_3_img_path)
+
+    def update_train_numbers(self):
+        print("train numbers are updated")
 
         if hasattr(self.canvas, 'blue_text_id'):
             self.canvas.itemconfig(self.canvas.blue_text_id, text=str(self.blue_card_value))

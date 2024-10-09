@@ -27,3 +27,25 @@ class TTRGui:
         )
         button.place(x=x, y=y)
         return button
+
+    @staticmethod
+    def set_active_canvas_image(self, canvas_img_id, active_bool):
+        if active_bool:
+            # Görüntüyü görünür hale getir
+            self.canvas.itemconfig(canvas_img_id, state=tk.NORMAL)
+        else:
+            # Görüntüyü gizle (deaktif yap)
+            self.canvas.itemconfig(canvas_img_id, state=tk.HIDDEN)
+
+    @staticmethod
+    def change_image(self, canvas_img_id, canvas_img, new_image_path):
+        current_image = canvas_img
+        width, height = current_image.width(), current_image.height()
+
+        new_image = Image.open(new_image_path)
+        new_image = new_image.resize((width, height), Image.Resampling.LANCZOS)
+        new_image_tk = ImageTk.PhotoImage(new_image)
+
+        self.canvas.itemconfig(canvas_img_id, image=new_image_tk)
+
+        return new_image_tk
