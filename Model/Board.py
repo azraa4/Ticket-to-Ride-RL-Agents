@@ -38,9 +38,3 @@ class Board:
                 un_claimed_routes.append(route)
         return un_claimed_routes
 
-    def get_route_by_id(self, route_id):
-        """ID'ye göre bir rotayı bul ve geri döndür."""
-        for route in self.routes:
-            if route.id == route_id:
-                return route
-        return None  # Eğer ID bulunamazsa None döndür

@@ -59,3 +59,4 @@ def open_console_window(view):
 
 
     console_root.mainloop()
+
