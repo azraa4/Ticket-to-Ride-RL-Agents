@@ -9,6 +9,8 @@ class MainFrame:
         self.controller = controller
 
         self.canvas = None
+        self.select_card_for_gray_roads_frame = None
+        self.select_tickets_frame = None
 
         self.dest_card_1_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
         self.dest_card_2_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
@@ -89,15 +91,15 @@ class MainFrame:
         r, g, b, alpha = card_img.split()
         grayscale_img = Image.merge("RGB", (r, g, b)).convert("L") #only colors the opaque part
 
-        if color == "blue":
+        if color == "Blue":
             colorized_img = ImageOps.colorize(grayscale_img, black="black", white="blue")
-        elif color == "red":
+        elif color == "Red":
             colorized_img = ImageOps.colorize(grayscale_img, black="black", white="red")
-        elif color == "green":
+        elif color == "Green":
             colorized_img = ImageOps.colorize(grayscale_img, black="black", white="green")
-        elif color == "yellow":
+        elif color == "Yellow":
             colorized_img = ImageOps.colorize(grayscale_img, black="black", white="yellow")
-        elif color == "black":
+        elif color == "Black":
             colorized_img = ImageOps.colorize(grayscale_img, black="black", white="black")
 
         final_img = Image.merge("RGBA", (*colorized_img.split(), alpha))
@@ -177,4 +179,39 @@ class MainFrame:
         if hasattr(self.canvas, 'joker_text_id'):
             self.canvas.itemconfig(self.canvas.joker_text_id, text=str(self.joker_card_value))
 
+    def create_select_card_for_gray_roads_frame(self, selected_route):
+        if self.select_card_for_gray_roads_frame is None:
+            self.select_card_for_gray_roads_frame = tk.Frame(self.root, width=400, height=600, bg="gray")
+            self.select_card_for_gray_roads_frame.place(x=600, y=400)
+
+            label = tk.Label(self.select_card_for_gray_roads_frame, text="Select Card to Give", bg="gray", font=("Helvetica", 16))
+            label.pack(pady=10)
+
+            card_options = self.controller.cards_needed_to_claim_gray_route(selected_route)
+            selected_card = tk.StringVar(self.select_card_for_gray_roads_frame)
+            selected_card.set(card_options[0])
+
+            dropdown = tk.OptionMenu(self.select_card_for_gray_roads_frame, selected_card, *card_options)
+            dropdown.pack(pady=10)
+
+            select_button = tk.Button(self.select_card_for_gray_roads_frame, text="Select", command=lambda: self.controller.claim_gray_route(selected_card.get(), selected_route))
+            select_button.pack(pady=10)
+
+    def destroy_select_card_for_gray_roads_frame(self):
+        if self.select_card_for_gray_roads_frame is not None:
+            self.select_card_for_gray_roads_frame.destroy()
+            self.select_card_for_gray_roads_frame = None
+
+    def create_select_tickets_frame(self):
+        if self.select_tickets_frame is None:
+            self.select_tickets_frame = tk.Frame(self.root, width=400, height=600, bg="gray")
+            self.select_tickets_frame.place(x=600, y=400)
+
+            label = tk.Label(self.select_tickets_frame, text="Select Tickets", bg="gray", font=("Helvetica", 16))
+            label.pack(pady=10)
+
+    def destroy_select_tickets_frame(self):
+        if self.select_card_for_gray_roads_frame is not None:
+            self.select_card_for_gray_roads_frame.destroy()
+            self.select_card_for_gray_roads_frame = None
 

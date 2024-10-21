@@ -1,0 +1,11 @@
+{
+  "destination_tickets_data": [
+    {
+      "id": "sault_nashville",
+      "city1": "sault",
+      "city2": "nashville",
+      "points": 8
+    }
+
+  ]
+}

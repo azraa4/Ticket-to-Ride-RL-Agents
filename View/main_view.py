@@ -3,10 +3,12 @@ from train_card_selection_view import TrainCardSelectionFrame
 from claimable_routes_view import ClaimableRoutesFrame
 from draw_ticket_frame_view import DrawTicketFrame
 from main_frame_view import MainFrame
-from Model.Board import Board
+from Model.game_manager import GameManager
+from main_menu import MainMenu
 
 from Controller.game_controller import GameController
-import console
+from Controller.main_menu_controller import MainMenuController
+from console import Console
 
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -15,8 +17,7 @@ from ttr_gui_view import TTRGui
 import threading
 
 class MainGameApp:
-    def __init__(self, game_controller):
-
+    def __init__(self, game_controller, main_menu_controller):
         self.game_controller = game_controller
 
         self.root = tk.Tk()
@@ -31,6 +32,9 @@ class MainGameApp:
         self.draw_ticket = DrawTicketFrame(self.root, game_controller)
         self.header = HeaderInfo(self.root, game_controller)
 
+        #main menu view
+        self.main_menu = MainMenu(self.root, main_menu_controller, self.start_game)
+
     def setup_ui(self):
         self.train_cards.create_train_card_selection_frame()
         self.claimable_routes.create_claimable_routes_frame()
@@ -39,24 +43,30 @@ class MainGameApp:
         self.header.create_header_info_frame()
 
     def run(self):
-        self.setup_ui()
+        self.main_menu.create_menu()
         self.root.mainloop()
+
+    def start_game(self):
+        self.setup_ui()
+        self.game_controller.start_game()
 
 
 if __name__ == "__main__":
     #Define Models
-    board = Board()
+    game_manager = GameManager()
 
 
-    #Defin Controller
-    game_controller = GameController(None, board)
+    #Define Controllerso
+    game_controller = GameController(None, game_manager)
+    main_menu_controller = MainMenuController(None, game_manager)
 
     # Define Main View
-    app = MainGameApp(game_controller)
+    app = MainGameApp(game_controller, main_menu_controller)
 
     game_controller.view = app
 
-    console_thread = threading.Thread(target=console.open_console_window, args=(app, ))
+    console = Console(app)
+    console_thread = threading.Thread(target=console.open_console_window)
     console_thread.start()
 
     app.run()

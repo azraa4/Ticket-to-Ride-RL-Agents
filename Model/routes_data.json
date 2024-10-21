@@ -27,6 +27,636 @@
       "city2": "Los Angeles",
       "length": 3,
       "color": "pink"
+    },
+    {
+      "id": "portland_saltlakecity",
+      "city1": "Portland",
+      "city2": "Salt Lake City",
+      "length": 6,
+      "color": "blue"
+    },
+    {
+      "id": "seattle_portland",
+      "city1": "Seattle",
+      "city2": "Portland",
+      "length": 1,
+      "color": "gray"
+    },
+    {
+      "id": "seattle_voncouver",
+      "city1": "Seattle",
+      "city2": "Vancouver",
+      "length": 1,
+      "color": "gray"
+    },
+    {
+      "id": "vancouver_calgary",
+      "city1": "Calgary",
+      "city2": "Vancouver",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "sanfransisco_saltlakecity_1",
+      "city1": "San Fransisco",
+      "city2": "Salt Lake City",
+      "length": 5,
+      "color": "orange"
+    },
+    {
+      "id": "sanfransisco_saltlakecity_2",
+      "city1": "San Fransisco",
+      "city2": "Salt Lake City",
+      "length": 5,
+      "color": "white"
+    },
+    {
+      "id": "sanfransisco_losangeles_1",
+      "city1": "San Fransisco",
+      "city2": "losangeles",
+      "length": 3,
+      "color": "yellow"
+    },
+    {
+      "id": "sanfransisco_losangeles_1",
+      "city1": "San Fransisco",
+      "city2": "Los Angeles",
+      "length": 3,
+      "color": "yellow"
+    },
+    {
+      "id": "sanfransisco_losangeles_2",
+      "city1": "San Fransisco",
+      "city2": "Los Angeles",
+      "length": 3,
+      "color": "pink"
+    },
+    {
+      "id": "losangales_lasvegas",
+      "city1": "Las Vegas",
+      "city2": "Los Angeles",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "losangales_phoneix",
+      "city1": "Phoneix",
+      "city2": "Los Angeles",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "losangales_elpaso",
+      "city1": "El Paso",
+      "city2": "Los Angeles",
+      "length": 6,
+      "color": "black"
+    },
+    {
+      "id": "lasvegas_saltlakecity",
+      "city1": "lasvegas",
+      "city2": "saltlakecity",
+      "length": 3,
+      "color": "orange"
+    },
+    {
+      "id": "phoneix_denver",
+      "city1": "phoneix",
+      "city2": "denver",
+      "length": 5,
+      "color": "white"
+    },
+    {
+      "id": "saltlakecity_denver_1",
+      "city1": "saltlakecity",
+      "city2": "denver",
+      "length": 3,
+      "color": "yellow"
+    },
+    {
+      "id": "saltlakecity_denver_2",
+      "city1": "saltlakecity",
+      "city2": "denver",
+      "length": 3,
+      "color": "red"
+    },
+    {
+      "id": "saltlakecity_helena",
+      "city1": "saltlakecity",
+      "city2": "helena",
+      "length": 3,
+      "color": "pink"
+    },
+    {
+      "id": "seattle_helena",
+      "city1": "seattle",
+      "city2": "helena",
+      "length": 6,
+      "color": "yellow"
+    },
+    {
+      "id": "seattle_calgary",
+      "city1": "seattle",
+      "city2": "calgary",
+      "length": 4,
+      "color": "gray"
+    },
+    {
+      "id": "calgray_winnipeg",
+      "city1": "calgray",
+      "city2": "winnipeg",
+      "length": 6,
+      "color": "white"
+    },
+    {
+      "id": "calgary_helena",
+      "city1": "calgray",
+      "city2": "helena",
+      "length": 4,
+      "color": "gray"
+    },
+    {
+      "id": "helena_winnipeg",
+      "city1": "winnipeg",
+      "city2": "helena",
+      "length": 4,
+      "color": "blue"
+    },
+    {
+      "id": "helena_denver",
+      "city1": "denver",
+      "city2": "helena",
+      "length": 4,
+      "color": "green"
+    },
+    {
+      "id": "denver_santafe",
+      "city1": "denver",
+      "city2": "santafe",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "phoneix_santafe",
+      "city1": "phoneix",
+      "city2": "santafe",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "phoeix_elpaso",
+      "city1": "phoneix",
+      "city2": "elpaso",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "santafe_elpaso",
+      "city1": "santafe",
+      "city2": "elpaso",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "santafe_oklahomacity",
+      "city1": "santafe",
+      "city2": "oklahomacity",
+      "length": 3,
+      "color": "blue"
+    },
+    {
+      "id": "denver_oklahomacity",
+      "city1": "denver",
+      "city2": "oklahomacity",
+      "length": 4,
+      "color": "red"
+    },
+    {
+      "id": "elpaso_oklahomacity",
+      "city1": "elpaso",
+      "city2": "oklahomacity",
+      "length": 5,
+      "color": "yellow"
+    },
+    {
+      "id": "elpaso_dallas",
+      "city1": "elpaso",
+      "city2": "dallas",
+      "length": 4,
+      "color": "red"
+    },
+    {
+      "id": "elpaso_houston",
+      "city1": "elpaso",
+      "city2": "houston",
+      "length": 6,
+      "color": "green"
+    },
+    {
+      "id": "dallas_houston",
+      "city1": "dallas",
+      "city2": "houston",
+      "length": 1,
+      "color": "gray"
+    },
+    {
+      "id": "dallas_oklahomacity",
+      "city1": "dallas",
+      "city2": "oklahomacity",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "houston_neworleans",
+      "city1": "houston",
+      "city2": "neworleans",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "dallas_littlerock",
+      "city1": "dallas",
+      "city2": "littlerock",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "oklahomacity_littlerock",
+      "city1": "oklahomacity",
+      "city2": "littlerock",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "denver_kansascity_1",
+      "city1": "denver",
+      "city2": "kansascity",
+      "length": 4,
+      "color": "orange"
+    },
+    {
+      "id": "denver_kansascity_2",
+      "city1": "denver",
+      "city2": "kansascity",
+      "length": 4,
+      "color": "black"
+    },
+    {
+      "id": "denver_omaha",
+      "city1": "denver",
+      "city2": "omaha",
+      "length": 4,
+      "color": "pink"
+    },
+    {
+      "id": "helena_omaha",
+      "city1": "helena",
+      "city2": "omaha",
+      "length": 5,
+      "color": "red"
+    },
+    {
+      "id": "helena_duluth",
+      "city1": "helena",
+      "city2": "duluth",
+      "length": 6,
+      "color": "orange"
+    },
+    {
+      "id": "winnipeg_duluth",
+      "city1": "winnipeg",
+      "city2": "duluth",
+      "length": 4,
+      "color": "black"
+    },
+    {
+      "id": "omaha_duluth",
+      "city1": "omaha",
+      "city2": "duluth",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "winnipeg_sault",
+      "city1": "winnipeg",
+      "city2": "sault",
+      "length": 6,
+      "color": "gray"
+    },
+    {
+      "id": "duluth_sault",
+      "city1": "duluth",
+      "city2": "sault",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "duluth_toronto",
+      "city1": "duluth",
+      "city2": "toronto",
+      "length": 6,
+      "color": "pink"
+    },
+    {
+      "id": "duluth_chicago",
+      "city1": "duluth",
+      "city2": "chicago",
+      "length": 3,
+      "color": "red"
+    },
+    {
+      "id": "omaha_chicago",
+      "city1": "omaha",
+      "city2": "chicago",
+      "length": 4,
+      "color": "blue"
+    },
+    {
+      "id": "kansascity_saintlouis_1",
+      "city1": "kansascity",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "blue"
+    },
+    {
+      "id": "kansascity_saintlouis_2",
+      "city1": "kansascity",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "pink"
+    },
+    {
+      "id": "saintlouis_chicago_1",
+      "city1": "chicago",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "green"
+    },
+    {
+      "id": "saintlouis_chicago_2",
+      "city1": "chicago",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "white"
+    },
+    {
+      "id": "saintlouis_littlerock",
+      "city1": "littlerock",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "saintlouis_nashville",
+      "city1": "nashville",
+      "city2": "saintlouis",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "littlerock_nashville",
+      "city1": "nashville",
+      "city2": "littlerock",
+      "length": 3,
+      "color": "white"
+    },
+    {
+      "id": "littlerock_neworleans",
+      "city1": "neworleans",
+      "city2": "littlerock",
+      "length": 3,
+      "color": "green"
+    },
+    {
+      "id": "neworleans_atlanta_1",
+      "city1": "neworleans",
+      "city2": "atlanta",
+      "length": 4,
+      "color": "yellow"
+    },
+    {
+      "id": "neworleans_atlanta_2",
+      "city1": "neworleans",
+      "city2": "atlanta",
+      "length": 4,
+      "color": "orange"
+    },
+    {
+      "id": "neworleans_miami",
+      "city1": "neworleans",
+      "city2": "miami",
+      "length": 6,
+      "color": "red"
+    },
+    {
+      "id": "atlanta_miami",
+      "city1": "atlanta",
+      "city2": "miami",
+      "length": 5,
+      "color": "blue"
+    },
+    {
+      "id": "charleston_miami",
+      "city1": "charleston",
+      "city2": "miami",
+      "length": 4,
+      "color": "pink"
+    },
+    {
+      "id": "atlanta_charleston",
+      "city1": "charleston",
+      "city2": "atlanta",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "nashville_atlanta",
+      "city1": "nashville",
+      "city2": "atlanta",
+      "length": 1,
+      "color": "gray"
+    },
+    {
+      "id": "atlanta_raleigh",
+      "city1": "raleigh",
+      "city2": "atlanta",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "raleigh_charleston",
+      "city1": "raleigh",
+      "city2": "charleston",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "nashville_raleigh",
+      "city1": "raleigh",
+      "city2": "nashville",
+      "length": 3,
+      "color": "black"
+    },
+    {
+      "id": "nashville_pittsburgh",
+      "city1": "pittsburgh",
+      "city2": "nashville",
+      "length": 4,
+      "color": "yellow"
+    },
+    {
+      "id": "saintlouis_pittsburgh",
+      "city1": "pittsburgh",
+      "city2": "saintlouis",
+      "length": 5,
+      "color": "green"
+    },
+    {
+      "id": "chicago_pittsburgh_2",
+      "city1": "pittsburgh",
+      "city2": "chicago",
+      "length": 3,
+      "color": "black"
+    },
+    {
+      "id": "chicago_pittsburgh_1",
+      "city1": "pittsburgh",
+      "city2": "chicago",
+      "length": 3,
+      "color": "orange"
+    },
+    {
+      "id": "chicago_toronto",
+      "city1": "toronto",
+      "city2": "chicago",
+      "length": 4,
+      "color": "white"
+    },
+    {
+      "id": "toronto_pittsburgh",
+      "city1": "toronto",
+      "city2": "pittsburgh",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "sault_toronto",
+      "city1": "toronto",
+      "city2": "sault",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "sault_montreal",
+      "city1": "montreal",
+      "city2": "sault",
+      "length": 5,
+      "color": "black"
+    },
+    {
+      "id": "toronto_montreal",
+      "city1": "montreal",
+      "city2": "toronto",
+      "length": 3,
+      "color": "gray"
+    },
+    {
+      "id": "montreal_newyork",
+      "city1": "montreal",
+      "city2": "newyork",
+      "length": 3,
+      "color": "blue"
+    },
+    {
+      "id": "montreal_boston",
+      "city1": "montreal",
+      "city2": "boston",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "boston_newyork_1",
+      "city1": "newyork",
+      "city2": "boston",
+      "length": 2,
+      "color": "yellow"
+    },
+    {
+      "id": "boston_newyork_2",
+      "city1": "newyork",
+      "city2": "boston",
+      "length": 2,
+      "color": "red"
+    },
+    {
+      "id": "pittsburgh_newyork_1",
+      "city1": "newyork",
+      "city2": "pittsburgh",
+      "length": 2,
+      "color": "white"
+    },
+    {
+      "id": "pittsburgh_newyork_2",
+      "city1": "newyork",
+      "city2": "pittsburgh",
+      "length": 2,
+      "color": "green"
+    },
+    {
+      "id": "newyork_washington_1",
+      "city1": "newyork",
+      "city2": "washington",
+      "length": 2,
+      "color": "orange"
+    },
+    {
+      "id": "newyork_washington_2",
+      "city1": "newyork",
+      "city2": "washington",
+      "length": 2,
+      "color": "black"
+    },
+    {
+      "id": "pittsburgh_washington",
+      "city1": "pittsburgh",
+      "city2": "washington",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "raleigh_washington",
+      "city1": "raleigh",
+      "city2": "washington",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "raleigh_washington",
+      "city1": "raleigh",
+      "city2": "washington",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "pittsburgh_raleigh",
+      "city1": "raleigh",
+      "city2": "pittsburgh",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "oklahoma_kansas",
+      "city1": "oklahoma",
+      "city2": "kansas",
+      "length": 2,
+      "color": "gray"
+    },
+    {
+      "id": "omaha_kansas",
+      "city1": "omaha",
+      "city2": "kansas",
+      "length": 1,
+      "color": "gray"
     }
   ]
 }
