@@ -13,6 +13,44 @@ class Player:
     def add_destination_ticket(self, destination_ticket):
         self.destination_tickets.append(destination_ticket)
 
+    def add_route(self, route):
+        self.claimed_routes.append(route)
+        print(self.claimed_routes)
+
+    def calculate_points(self):
+        total_points = 0
+
+        # Create adjacency list from claimed routes
+        adjacency_list = {}
+        for route in self.claimed_routes:
+            if route.city1 not in adjacency_list:
+                adjacency_list[route.city1] = []
+            if route.city2 not in adjacency_list:
+                adjacency_list[route.city2] = []
+            adjacency_list[route.city1].append(route.city2)
+            adjacency_list[route.city2].append(route.city1)
+
+        # Function to perform DFS to check connection between two cities
+        def dfs(current_city, target_city, visited):
+            if current_city == target_city:
+                return True
+            visited.add(current_city)
+            for neighbor in adjacency_list.get(current_city, []):
+                if neighbor not in visited:
+                    if dfs(neighbor, target_city, visited):
+                        return True
+            return False
+
+        # Check each destination ticket for completion
+        for ticket in self.destination_tickets:
+            if dfs(ticket.city1, ticket.city2, set()):
+                ticket.mark_as_completed()
+                total_points += ticket.points
+
+        # Update player points
+        self.points = total_points
+        print(f"{self.name} has now {self.points} points.")
+
     def get_number_of_cards(self, color):
         num = 0
         for train_card in self.train_cards:
@@ -29,3 +67,4 @@ class Player:
             if color == train_card.color and num!=0:
                 self.train_cards.remove(train_card)
                 num -=1
+

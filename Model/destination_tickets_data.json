@@ -1,11 +1,412 @@
 {
   "destination_tickets_data": [
     {
-      "id": "sault_nashville",
-      "city1": "sault",
-      "city2": "nashville",
+      "id": "boston_miami",
+      "city1": "Boston",
+      "city2": "Miami",
+      "points": 12
+    },
+    {
+      "id": "boston_washington",
+      "city1": "Boston",
+      "city2": "Washington",
+      "points": 4
+    },
+    {
+      "id": "calgary_nashville",
+      "city1": "Calgary",
+      "city2": "Nashville",
+      "points": 14
+    },
+    {
+      "id": "calgary_phoenix",
+      "city1": "Calgary",
+      "city2": "Phoenix",
+      "points": 13
+    },
+    {
+      "id": "calgary_saltlakecity",
+      "city1": "Calgary",
+      "city2": "Salt Lake City",
+      "points": 7
+    },
+    {
+      "id": "chicago_atlanta",
+      "city1": "Chicago",
+      "city2": "Atlanta",
+      "points": 5
+    },
+    {
+      "id": "chicago_boston",
+      "city1": "Chicago",
+      "city2": "Boston",
+      "points": 7
+    },
+    {
+      "id": "chicago_neworleans",
+      "city1": "Chicago",
+      "city2": "New Orleans",
+      "points": 7
+    },
+    {
+      "id": "chicago_newyork",
+      "city1": "Chicago",
+      "city2": "New York",
+      "points": 5
+    },
+    {
+      "id": "chicago_santafe",
+      "city1": "Chicago",
+      "city2": "Santa Fe",
+      "points": 9
+    },
+    {
+      "id": "dallas_newyork",
+      "city1": "Dallas",
+      "city2": "New York",
+      "points": 11
+    },
+    {
+      "id": "denver_elposa",
+      "city1": "Denver",
+      "city2": "El Paso",
+      "points": 4
+    },
+    {
+      "id": "denver_pittsburgh",
+      "city1": "Denver",
+      "city2": "Pittsburgh",
+      "points": 11
+    },
+    {
+      "id": "denver_saintlouis",
+      "city1": "Denver",
+      "city2": "Saint Louis",
+      "points": 6
+    },
+    {
+      "id": "duluth_dallas",
+      "city1": "Duluth",
+      "city2": "Dallas",
+      "points": 7
+    },
+    {
+      "id": "duluth_elpaso",
+      "city1": "Duluth",
+      "city2": "El Paso",
+      "points": 10
+    },
+    {
+      "id": "duluth_houston",
+      "city1": "Duluth",
+      "city2": "Houston",
       "points": 8
+    },
+    {
+      "id": "helena_loasangeles",
+      "city1": "Helena",
+      "city2": "Los Angeles",
+      "points": 8
+    },
+    {
+      "id": "houston_washington",
+      "city1": "Houston",
+      "city2": "Washington",
+      "points": 10
+    },
+    {
+      "id": "kansascity_boston",
+      "city1": "Kansas City",
+      "city2": "Boston",
+      "points": 11
+    },
+    {
+      "id": "kansascity_houston",
+      "city1": "Kansas City",
+      "city2": "Houston",
+      "points": 5
+    },
+    {
+      "id": "lasvegas_miami",
+      "city1": "Las Vegas",
+      "city2": "Miami",
+      "points": 21
+    },
+    {
+      "id": "lasvegas_newyork",
+      "city1": "Las Vegas",
+      "city2": "New York",
+      "points": 19
+    },
+    {
+      "id": "losangeles_calgary",
+      "city1": "Los Angeles",
+      "city2": "Calgary",
+      "points": 12
+    },
+    {
+      "id": "losangeles_newyork",
+      "city1": "Los Angeles",
+      "city2": "New York",
+      "points": 20
+    },
+    {
+      "id": "losangeles_oklahomacity",
+      "city1": "Los Angeles",
+      "city2": "Oklahoma City",
+      "points": 9
+    },
+    {
+      "id": "losangeles_atlanta",
+      "city1": "Los Angeles",
+      "city2": "Atlanta",
+      "points": 15
+    },
+    {
+      "id": "losangeles_chicago",
+      "city1": "Los Angeles",
+      "city2": "Chicago",
+      "points": 16
+    },
+    {
+      "id": "losangeles_miami",
+      "city1": "Los Angeles",
+      "city2": "Miami",
+      "points": 19
+    },
+    {
+      "id": "montreal_atlanta",
+      "city1": "Montreal",
+      "city2": "Atlanta",
+      "points": 9
+    },
+    {
+      "id": "montreal_chicago",
+      "city1": "Montreal",
+      "city2": "Chicago",
+      "points": 7
+    },
+    {
+      "id": "montreal_dallas",
+      "city1": "Montreal",
+      "city2": "Dallas",
+      "points": 13
+    },
+    {
+      "id": "montreal_neworleans",
+      "city1": "Montreal",
+      "city2": "New Orleans",
+      "points": 13
+    },
+    {
+      "id": "montreal_raleigh",
+      "city1": "Montreal",
+      "city2": "Raleigh",
+      "points": 7
+    },
+    {
+      "id": "nashville_newyork",
+      "city1": "Nashville",
+      "city2": "New York",
+      "points": 6
+    },
+    {
+      "id": "newyork_atlanta",
+      "city1": "New York",
+      "city2": "Atlanta",
+      "points": 6
+    },
+    {
+      "id": "newyork_miami",
+      "city1": "New York",
+      "city2": "Miami",
+      "points": 10
+    },
+    {
+      "id": "omaha_neworleans",
+      "city1": "Omaha",
+      "city2": "New Orleans",
+      "points": 8
+    },
+    {
+      "id": "phoenix_boston",
+      "city1": "Phoenix",
+      "city2": "Boston",
+      "points": 19
+    },
+    {
+      "id": "pittsburgh_neworleans",
+      "city1": "Pittsburgh",
+      "city2": "New Orleans",
+      "points": 8
+    },
+    {
+      "id": "portland_houston",
+      "city1": "Portland",
+      "city2": "Houston",
+      "points": 16
+    },
+    {
+      "id": "portland_nashville",
+      "city1": "Portland",
+      "city2": "Nashville",
+      "points": 17
+    },
+    {
+      "id": "portland_phoenix",
+      "city1": "Portland",
+      "city2": "Phoenix",
+      "points": 11
+    },
+    {
+      "id": "portland_pittsburgh",
+      "city1": "Portland",
+      "city2": "Pittsburgh",
+      "points": 19
+    },
+    {
+      "id": "saintlouis_miami",
+      "city1": "Saint Louis",
+      "city2": "Miami",
+      "points": 8
+    },
+    {
+      "id": "saltlakecity_chicago",
+      "city1": "Salt Lake City",
+      "city2": "Chicago",
+      "points": 11
+    },
+    {
+      "id": "saltlakecity_kansascity",
+      "city1": "Salt Lake City",
+      "city2": "Kansas City",
+      "points": 7
+    },
+    {
+      "id": "sanfrancisco_atlanta",
+      "city1": "San Francisco",
+      "city2": "Atlanta",
+      "points": 17
+    },
+    {
+      "id": "sanfrancisco_saultstmarie",
+      "city1": "San Francisco",
+      "city2": "Sault St Marie",
+      "points": 17
+    },
+    {
+      "id": "sanfrancisco_washington",
+      "city1": "San Francisco",
+      "city2": "Washington",
+      "points": 21
+    },
+    {
+      "id": "saultstmarie_miami",
+      "city1": "Sault St Marie",
+      "city2": "Miami",
+      "points": 12
+    },
+    {
+      "id": "saultstmarie_oklahomacity",
+      "city1": "Sault St Marie",
+      "city2": "Oklahoma City",
+      "points": 8
+    },
+    {
+      "id": "seattle_lasvegas",
+      "city1": "Seattle",
+      "city2": "Las Vegas",
+      "points": 10
+    },
+    {
+      "id": "seattle_losangeles",
+      "city1": "Seattle",
+      "city2": "Los Angeles",
+      "points": 9
+    },
+    {
+      "id": "seattle_newyork",
+      "city1": "Seattle",
+      "city2": "New York",
+      "points": 20
+    },
+    {
+      "id": "seattle_oklahomacity",
+      "city1": "Seattle",
+      "city2": "Oklahoma City",
+      "points": 14
+    },
+    {
+      "id": "toronto_charleston",
+      "city1": "Toronto",
+      "city2": "Charleston",
+      "points": 6
+    },
+    {
+      "id": "toronto_miami",
+      "city1": "Toronto",
+      "city2": "Miami",
+      "points": 10
+    },
+    {
+      "id": "vancouver_denver",
+      "city1": "Vancouver",
+      "city2": "Denver",
+      "points": 11
+    },
+    {
+      "id": "vancouver_duluth",
+      "city1": "Vancouver",
+      "city2": "Duluth",
+      "points": 13
+    },
+    {
+      "id": "vancouver_montreal",
+      "city1": "Vancouver",
+      "city2": "Montreal",
+      "points": 20
+    },
+    {
+      "id": "vancouver_portland",
+      "city1": "Vancouver",
+      "city2": "Portland",
+      "points": 2
+    },
+    {
+      "id": "vancouver_santafe",
+      "city1": "Vancouver",
+      "city2": "Santa Fe",
+      "points": 13
+    },
+    {
+      "id": "washington_atlanta",
+      "city1": "Washington",
+      "city2": "Atlanta",
+      "points": 4
+    },
+    {
+      "id": "winnipeg_houston",
+      "city1": "Winnipeg",
+      "city2": "Houston",
+      "points": 12
+    },
+    {
+      "id": "winnipeg_littlerock",
+      "city1": "Winnipeg",
+      "city2": "Little Rock",
+      "points": 11
+    },
+    {
+      "id": "winnipeg_omaha",
+      "city1": "Winnipeg",
+      "city2": "Omaha",
+      "points": 6
+    },
+    {
+      "id": "winnipeg_santafe",
+      "city1": "Winnipeg",
+      "city2": "Santa Fe",
+      "points": 10
     }
-
   ]
 }

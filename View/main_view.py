@@ -1,7 +1,9 @@
+from View.destination_tickets_view import DestinationTicketsFrame
 from header_info_view import HeaderInfo
 from train_card_selection_view import TrainCardSelectionFrame
 from claimable_routes_view import ClaimableRoutesFrame
 from draw_ticket_frame_view import DrawTicketFrame
+from destination_tickets_view import DestinationTicketsFrame
 from main_frame_view import MainFrame
 from Model.game_manager import GameManager
 from main_menu import MainMenu
@@ -31,6 +33,7 @@ class MainGameApp:
         self.claimable_routes = ClaimableRoutesFrame(self.root, game_controller)
         self.draw_ticket = DrawTicketFrame(self.root, game_controller)
         self.header = HeaderInfo(self.root, game_controller)
+        self.destination_tickets = DestinationTicketsFrame(self.root, game_controller)
 
         #main menu view
         self.main_menu = MainMenu(self.root, main_menu_controller, self.start_game)
@@ -41,6 +44,7 @@ class MainGameApp:
         self.draw_ticket.create_draw_ticket_frame()
         self.main_frame.create_main_frame()
         self.header.create_header_info_frame()
+        self.destination_tickets.create_destination_tickets_frame()
 
     def run(self):
         self.main_menu.create_menu()

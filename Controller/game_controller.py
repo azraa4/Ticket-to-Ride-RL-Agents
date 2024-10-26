@@ -12,6 +12,7 @@ class GameController:
         self.set_inventory()
         self.deal_the_cards_to_train_card_selection_frame()
         self.update_claimable_routes_frame()
+        self.view.destination_tickets.update_destination_tickets_frame()
 
     def update_turn_text(self):
         self.view.header.update_turn_text(f"Turn: {self.game_manager.current_turn+1}")
@@ -92,14 +93,15 @@ class GameController:
                 self.set_inventory()
                 self.update_claimable_routes_frame()
                 self.go_to_next_turn()
+                print(self.draw_train_card_limit)
         else:
             self.game_manager.draw_train_card(train_card)
             self.deal_the_cards_to_train_card_selection_frame()
             self.set_inventory()
             self.update_claimable_routes_frame()
-            if self.draw_train_card_limit == 1:
-                self.go_to_next_turn()
             self.draw_train_card_limit -= 1
+            if self.draw_train_card_limit == 0:
+                self.go_to_next_turn()
 
     def draw_cards_from_blind_deck(self):
         print("blind cards is drawn.")
@@ -108,13 +110,39 @@ class GameController:
         self.update_claimable_routes_frame()
         self.go_to_next_turn()
 
+    def open_draw_destination_ticket_frame(self):
+        self.game_manager.destination_tickets_deck.shuffle()
+
+        card1 = self.game_manager.destination_tickets_deck.draw_card()
+        card2 = self.game_manager.destination_tickets_deck.draw_card()
+        card3 = self.game_manager.destination_tickets_deck.draw_card()
+
+        self.view.main_frame.create_select_destination_tickets_canvas(card1, card2, card3)
+
+    def draw_destination_ticket(self, cards_list):
+        print("Dest cards are drawn.")
+        for card in cards_list:
+            self.game_manager.current_player.add_destination_ticket(card)
+        self.view.destination_tickets.update_destination_tickets_frame()
+
+    def get_current_player_destination_tickets(self):
+        destination_tickets = []
+        if self.game_manager.current_player is not None:
+            destination_tickets = self.game_manager.current_player.destination_tickets
+        return destination_tickets
+
     def go_to_next_turn(self):
         if self.turns_available:
             self.game_manager.next_turn()
+            self.draw_train_card_limit = 2
             self.update_turn_text()
             self.update_player_info_text()
             self.set_inventory()
             self.update_claimable_routes_frame()
+            self.view.destination_tickets.update_destination_tickets_frame()
+            print(self.draw_train_card_limit)
+            print(self.calculate_current_player_points())
+
 
     def change_turn_availability(self, bool):
         self.turns_available = bool
@@ -141,6 +169,7 @@ class GameController:
             self.view.main_frame.create_roads()
             self.view.claimable_routes.update_routes_frame()
             self.set_inventory()
+            self.game_manager.current_player.add_route(selected_route)
             self.go_to_next_turn()
 
 
@@ -202,6 +231,7 @@ class GameController:
         self.view.claimable_routes.update_routes_frame()
         self.set_inventory()
         self.view.main_frame.destroy_select_card_for_gray_roads_frame()
+        self.game_manager.current_player.add_route(selected_route)
         self.go_to_next_turn()
 
     def claim_route_force(self, id, player):
@@ -220,3 +250,7 @@ class GameController:
 
     def update_claimable_routes_frame(self):
         self.view.claimable_routes.update_routes_frame()
+
+    def calculate_current_player_points(self):
+        self.game_manager.current_player.calculate_points()
+        print(self.game_manager.current_player.points)

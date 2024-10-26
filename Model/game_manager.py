@@ -3,7 +3,8 @@ from Model.deck import Deck
 from Model.player import Player
 from Model.train_card import TrainCard
 from Model.destination_ticket import DestinationTicket
-
+from Model.destination_ticket import DestinationTicket
+import json
 
 class GameManager:
     def __init__(self):
@@ -11,6 +12,8 @@ class GameManager:
 
         self.train_cards_deck = Deck([TrainCard(color) for color in ["blue", "red", "green", "orange", "yellow", "white", "black", "pink", "joker"]] * 12)
         self.cards_on_the_table = []
+
+        self.destination_tickets_deck = Deck(self.create_destination_tickets_list())
 
         #self.destination_cards_deck =
 
@@ -40,6 +43,23 @@ class GameManager:
         if self.current_player is not None:
             self.current_player.train_cards.append(self.train_cards_deck.draw_card())
             self.current_player.train_cards.append(self.train_cards_deck.draw_card())
+
+    def create_destination_tickets_list(self):
+        destination_tickets_list = []
+        with open("../Model/destination_tickets_data.json", "r") as json_file:
+            data = json.load(json_file)
+            destination_tickets_data = data["destination_tickets_data"]
+
+        for destination_ticket in destination_tickets_data:
+            dest_ticket_to_add = DestinationTicket(
+                destination_ticket["city1"],
+                destination_ticket["city2"],
+                destination_ticket["points"],
+                destination_ticket["id"],
+            )
+            destination_tickets_list.append(dest_ticket_to_add)
+
+        return destination_tickets_list
 
     def next_turn(self):
         self.current_turn = self.current_turn + 1
@@ -108,3 +128,6 @@ class GameManager:
                             claimable_routes.append(route)
 
         return claimable_routes
+
+
+

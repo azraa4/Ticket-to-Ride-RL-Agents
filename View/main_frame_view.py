@@ -10,15 +10,24 @@ class MainFrame:
 
         self.canvas = None
         self.select_card_for_gray_roads_frame = None
-        self.select_tickets_frame = None
+        self.select_destination_tickets_canvas = None
 
-        self.dest_card_1_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
-        self.dest_card_2_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
-        self.dest_card_3_img_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+        self.back_side_of_ticket_image_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+        self.dest_card_1_img_path = self.back_side_of_ticket_image_path
+        self.dest_card_2_img_path = self.back_side_of_ticket_image_path
+        self.dest_card_3_img_path = self.back_side_of_ticket_image_path
 
         self.dest_card_1_img = None
         self.dest_card_2_img = None
         self.dest_card_3_img = None
+
+        self.selectable_dest_card_1_img = None
+        self.selectable_dest_card_2_img = None
+        self.selectable_dest_card_3_img = None
+
+        self.check_var1 = None
+        self.check_var2 = None
+        self.check_var3 = None
 
         self.blue_card_value = 0
         self.red_card_value = 0
@@ -68,9 +77,6 @@ class MainFrame:
         self.canvas.pink_card_img = pink_card_img
         self.canvas.joker_card_img = joker_card_img
 
-        # Destination tickets
-        self.create_destination_tickets()
-
         #Update Roads
         self.create_roads()
 
@@ -118,36 +124,6 @@ class MainFrame:
             road_image, road_image_img = self.create_road_image(route.get_image_path(), route.get_claimed_color())
             setattr(self.canvas, f"{route.id}", road_image)
             setattr(self.canvas, f"{route.id}_img", road_image_img)
-
-
-    def create_destination_tickets(self):
-        if hasattr(self.canvas, 'dest_card_1'):
-            self.canvas.delete(self.canvas.dest_card_1)
-        if hasattr(self.canvas, 'dest_card_2'):
-            self.canvas.delete(self.canvas.dest_card_2)
-        if hasattr(self.canvas, 'dest_card_3'):
-            self.canvas.delete(self.canvas.dest_card_3)
-
-        self.dest_card_1_img = Image.open(self.dest_card_1_img_path)
-        self.dest_card_1_img = self.dest_card_1_img.resize((150, 102), Image.Resampling.LANCZOS)
-        self.dest_card_1_img = ImageTk.PhotoImage(self.dest_card_1_img)
-        self.canvas.dest_card_1_img_id = self.canvas.create_image(10, 420, anchor="nw", image=self.dest_card_1_img)
-
-        self.dest_card_2_img = Image.open(self.dest_card_2_img_path)
-        self.dest_card_2_img = self.dest_card_2_img.resize((150, 102), Image.Resampling.LANCZOS)
-        self.dest_card_2_img = ImageTk.PhotoImage(self.dest_card_2_img)
-        self.canvas.dest_card_2_img_id = self.canvas.create_image(170, 420, anchor="nw", image=self.dest_card_2_img)
-
-        self.dest_card_3_img = Image.open(self.dest_card_3_img_path)
-        self.dest_card_3_img = self.dest_card_3_img.resize((150, 102), Image.Resampling.LANCZOS)
-        self.dest_card_3_img = ImageTk.PhotoImage(self.dest_card_3_img)
-        self.canvas.dest_card_3_img_id = self.canvas.create_image(330, 420, anchor="nw", image=self.dest_card_3_img)
-
-    def update_destination_tickets(self):
-        print("Dest Tickets are Updated")
-        self.dest_card_1_img = TTRGui.change_image(self, self.canvas.dest_card_1_img_id, self.dest_card_1_img, self.dest_card_1_img_path)
-        self.dest_card_2_img = TTRGui.change_image(self, self.canvas.dest_card_2_img_id, self.dest_card_2_img, self.dest_card_2_img_path)
-        self.dest_card_3_img = TTRGui.change_image(self, self.canvas.dest_card_3_img_id, self.dest_card_3_img, self.dest_card_3_img_path)
 
     def update_train_numbers(self):
         print("train numbers are updated")
@@ -202,16 +178,71 @@ class MainFrame:
             self.select_card_for_gray_roads_frame.destroy()
             self.select_card_for_gray_roads_frame = None
 
-    def create_select_tickets_frame(self):
-        if self.select_tickets_frame is None:
-            self.select_tickets_frame = tk.Frame(self.root, width=400, height=600, bg="gray")
-            self.select_tickets_frame.place(x=600, y=400)
+    def create_select_destination_tickets_canvas(self, card1, card2, card3):
+        if self.select_destination_tickets_canvas is None:
+            self.select_destination_tickets_canvas = tk.Canvas(self.root, width=600, height=300, bg="gray")
+            self.select_destination_tickets_canvas.place(x=300, y=200)
 
-            label = tk.Label(self.select_tickets_frame, text="Select Tickets", bg="gray", font=("Helvetica", 16))
-            label.pack(pady=10)
+            label = tk.Label(self.select_destination_tickets_canvas, text="Select Tickets", bg="gray", font=("Helvetica", 16))
+            label.place(x=5, y=5)
 
-    def destroy_select_tickets_frame(self):
-        if self.select_card_for_gray_roads_frame is not None:
-            self.select_card_for_gray_roads_frame.destroy()
-            self.select_card_for_gray_roads_frame = None
+            # Selection variables
+            self.check_var1 = tk.IntVar()
+            self.check_var2 = tk.IntVar()
+            self.check_var3 = tk.IntVar()
+
+            if card1 is not None:
+                # First Image and Checkbox
+                self.selectable_dest_card_1_img = Image.open(card1.image_path)
+                self.selectable_dest_card_1_img = self.selectable_dest_card_1_img.resize((150, 102), Image.Resampling.LANCZOS)
+                self.selectable_dest_card_1_img = ImageTk.PhotoImage(self.selectable_dest_card_1_img)
+                self.select_destination_tickets_canvas.selectable_dest_card_1_img_id = self.select_destination_tickets_canvas.create_image(5, 35, anchor="nw", image=self.selectable_dest_card_1_img)
+
+                check_button1 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var1, bg="gray")
+                check_button1.place(x=5, y=140)
+
+            if card2 is not None:
+                # Second Image and Checkbox
+                self.selectable_dest_card_2_img = Image.open(card2.image_path)
+                self.selectable_dest_card_2_img = self.selectable_dest_card_2_img.resize((150, 102),
+                                                                                         Image.Resampling.LANCZOS)
+                self.selectable_dest_card_2_img = ImageTk.PhotoImage(self.selectable_dest_card_2_img)
+                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(160, 35, anchor="nw",
+                                                                    image=self.selectable_dest_card_2_img)
+
+                check_button2 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var2,
+                                               bg="gray")
+                check_button2.place(x=165, y=140)
+
+            if card3 is not None:
+                # Third Image and Checkbox
+                self.selectable_dest_card_3_img = Image.open(card3.image_path)
+                self.selectable_dest_card_3_img = self.selectable_dest_card_3_img.resize((150, 102),
+                                                                                         Image.Resampling.LANCZOS)
+                self.selectable_dest_card_3_img = ImageTk.PhotoImage(self.selectable_dest_card_3_img)
+                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(315, 35, anchor="nw",
+                                                                    image=self.selectable_dest_card_3_img)
+
+                check_button3 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var3, bg="gray")
+                check_button3.place(x=325, y=140)
+
+            # Apply Button
+            apply_button = tk.Button(self.select_destination_tickets_canvas, text="Apply", command=lambda:self.apply_selection(card1,card2,card3))
+            apply_button.place(x=10, y=170)
+
+    def apply_selection(self, card1, card2, card3):
+        list_of_selected = []
+        if self.check_var1.get() == 1 and card1 is not None:
+            list_of_selected.append(card1)
+        if self.check_var2.get() == 1 and card2 is not None:
+            list_of_selected.append(card2)
+        if self.check_var3.get() == 1 and card3 is not None:
+            list_of_selected.append(card3)
+        self.controller.draw_destination_ticket(list_of_selected)
+        self.destroy_select_destination_tickets_canvas()
+
+    def destroy_select_destination_tickets_canvas(self):
+        if self.select_destination_tickets_canvas is not None:
+            self.select_destination_tickets_canvas.destroy()
+            self.select_destination_tickets_canvas = None
 

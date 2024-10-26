@@ -21,3 +21,4 @@ class DrawTicketFrame:
         image_label.place(x=0, y=0)
 
         draw_ticket_card_button = TTRGui.create_modern_button(ticket_frame, "Draw Ticket Card", 0, 110, 14, 2, 10)
+        draw_ticket_card_button.config(command=lambda: self.controller.open_draw_destination_ticket_frame())
