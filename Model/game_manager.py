@@ -23,6 +23,8 @@ class GameManager:
         self.current_player = None
         self.claimed_routes = []
 
+        self.all_cards_on_the_players_hands = False
+
     def start_game(self):
         self.current_player = self.players[0]
         self.train_cards_deck.shuffle()
@@ -31,7 +33,37 @@ class GameManager:
 
     def deal_train_cards_on_the_table(self):
         for i in range(0, 5-len(self.cards_on_the_table)):
-            self.cards_on_the_table.append(self.train_cards_deck.draw_card())
+            train_card = self.train_cards_deck.draw_card()
+            if train_card is not None:
+                self.cards_on_the_table.append(train_card)
+            else:
+                # Recreate the train card deck based on the colors and total count
+                all_colors = ["blue", "red", "green", "orange", "yellow", "white", "black", "pink", "joker"]
+                card_count_per_color = 12
+
+                # Count how many cards of each color are currently with players
+                color_counts = {color: card_count_per_color for color in all_colors}
+                for player in self.players:
+                    for card in player.train_cards:
+                        color_counts[card.color] -= 1  # Decrease based on player's current cards
+
+                # Recreate the deck with the remaining card counts
+                new_deck = []
+                for color, count in color_counts.items():
+                    new_deck.extend([TrainCard(color) for _ in range(count)])
+
+                if len(new_deck) >= 5:
+                    self.train_cards_deck = Deck(new_deck)
+                    self.train_cards_deck.shuffle()
+
+                    print("deck is resetted.")
+                    self.cards_on_the_table = []
+                    self.deal_train_cards_on_the_table()
+                else:
+                    print("All cards are in players' hands. No more cards to draw until players discard or play cards.")
+                    self.all_cards_on_the_players_hands = True
+                    return
+
 
     def draw_train_card(self, train_card):
         self.cards_on_the_table.remove(train_card)
@@ -66,7 +98,7 @@ class GameManager:
         self.current_player = self.players[self.current_turn%len(self.players)]
 
     def get_current_player(self):
-        return self.players[self.current_turn]
+        return self.current_player
 
     def get_player_by_name(self, name):
         for player in self.players:
@@ -109,23 +141,24 @@ class GameManager:
             }
 
             for route in self.board.get_unclaimed_routes():
-                if route.color == "gray":
-                    for color, card_value in train_tickets.items():
-                        if card_value >= route.length:
-                            claimable_routes.append(route)
-                            break
-                        elif card_value + joker_card_value >= route.length:
-                            claimable_routes.append(route)
-                            break
-                else:
-                    needed_cards = route.length
-                    available_cards = train_tickets[route.color]
-                    if available_cards >= needed_cards:
-                        claimable_routes.append(route)
+                if self.current_player.train_cars >= route.length:
+                    if route.color == "gray":
+                        for color, card_value in train_tickets.items():
+                            if card_value >= route.length:
+                                claimable_routes.append(route)
+                                break
+                            elif card_value + joker_card_value >= route.length:
+                                claimable_routes.append(route)
+                                break
                     else:
-                        missing_cards = needed_cards - available_cards
-                        if missing_cards <= joker_card_value:
+                        needed_cards = route.length
+                        available_cards = train_tickets[route.color]
+                        if available_cards >= needed_cards:
                             claimable_routes.append(route)
+                        else:
+                            missing_cards = needed_cards - available_cards
+                            if missing_cards <= joker_card_value:
+                                claimable_routes.append(route)
 
         return claimable_routes
 

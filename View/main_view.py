@@ -5,12 +5,16 @@ from claimable_routes_view import ClaimableRoutesFrame
 from draw_ticket_frame_view import DrawTicketFrame
 from destination_tickets_view import DestinationTicketsFrame
 from main_frame_view import MainFrame
-from Model.game_manager import GameManager
 from main_menu import MainMenu
+from game_end_frame import GameEndFrame
 
 from Controller.game_controller import GameController
 from Controller.main_menu_controller import MainMenuController
 from console import Console
+
+from Model.game_manager import GameManager
+
+from Controller.game_service import GameService
 
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -34,9 +38,13 @@ class MainGameApp:
         self.draw_ticket = DrawTicketFrame(self.root, game_controller)
         self.header = HeaderInfo(self.root, game_controller)
         self.destination_tickets = DestinationTicketsFrame(self.root, game_controller)
+        self.game_end_frame = GameEndFrame(self.root, game_controller)
 
         #main menu view
         self.main_menu = MainMenu(self.root, main_menu_controller, self.start_game)
+
+        #game_services
+        self.game_service = GameService(game_controller)
 
     def setup_ui(self):
         self.train_cards.create_train_card_selection_frame()
@@ -54,6 +62,9 @@ class MainGameApp:
         self.setup_ui()
         self.game_controller.start_game()
 
+    def show_game_end_frame(self):
+        self.game_end_frame.create_game_end_frame()
+
 
 if __name__ == "__main__":
     #Define Models
@@ -61,13 +72,14 @@ if __name__ == "__main__":
 
 
     #Define Controllerso
-    game_controller = GameController(None, game_manager)
+    game_controller = GameController(None, game_manager, None)
     main_menu_controller = MainMenuController(None, game_manager)
 
     # Define Main View
     app = MainGameApp(game_controller, main_menu_controller)
 
     game_controller.view = app
+    game_controller.game_service = app.game_service
 
     console = Console(app)
     console_thread = threading.Thread(target=console.open_console_window)

@@ -1,24 +1,52 @@
 class GameController:
-    def __init__(self, view, game_manager):
+    def __init__(self, view, game_manager, game_service):
         self.view = view
         self.game_manager = game_manager
+        self.game_service = game_service
         self.turns_available = True
         self.draw_train_card_limit = 2
+        self.selecting_second_train_card = False
+        self.last_turn = None
+        self.game_end = False
+
+        self.game_start_destination_tickets_list_for_ai = None
 
     def start_game(self):
         self.game_manager.start_game()
         self.update_turn_text()
         self.update_player_info_text()
+        self.update_players_info_text()
         self.set_inventory()
         self.deal_the_cards_to_train_card_selection_frame()
+        self.view.train_cards.update_remaining_cards_in_deck(self.game_manager.train_cards_deck.get_length())
         self.update_claimable_routes_frame()
         self.view.destination_tickets.update_destination_tickets_frame()
 
+        if self.get_current_player().first_turn:
+            self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
+            self.get_current_player().first_turn = False
+
     def update_turn_text(self):
-        self.view.header.update_turn_text(f"Turn: {self.game_manager.current_turn+1}")
+        self.view.header.update_turn_text(f"Turn: {((self.game_manager.current_turn) // len(self.game_manager.players)+1)}")
 
     def update_player_info_text(self):
-        self.view.header.update_players_info_text(f"Player: {self.game_manager.current_player.name} ({self.game_manager.current_player.color}) Points: {self.game_manager.current_player.points}")
+        self.view.header.update_player_info_text(f"Player: {self.game_manager.current_player.name} ({self.game_manager.current_player.color}) Points: {self.game_manager.current_player.points}")
+
+    def get_current_player(self):
+        return self.game_manager.current_player
+
+    def update_players_info_text(self):
+        players_info = [
+            f"{player.color} : {player.points} pts - {player.train_cars} cars"
+            for player in self.game_manager.players
+        ]
+
+        all_players_text = " | ".join(players_info)
+
+        self.view.header.update_players_info_text(all_players_text)
+
+    def get_players(self):
+        return self.game_manager.players
 
     def set_inventory(self):
         self.view.main_frame.blue_card_value = 0
@@ -70,6 +98,10 @@ class GameController:
         self.view.main_frame.update_train_numbers()
 
     def deal_the_cards_to_train_card_selection_frame(self):
+        if self.game_manager.all_cards_on_the_players_hands:
+            self.view.train_cards.destroy_all_train_cards()
+            print("delete all cards")
+            return
         print(self.game_manager.cards_on_the_table)
         self.view.train_cards.card_1 = self.game_manager.cards_on_the_table[0]
         self.view.train_cards.card_1_img_path = self.game_manager.cards_on_the_table[0].image_path
@@ -83,6 +115,9 @@ class GameController:
         self.view.train_cards.card_5_img_path = self.game_manager.cards_on_the_table[4].image_path
         self.view.train_cards.update_train_card_selection_frame()
 
+    def get_train_cards_on_the_table(self):
+        return self.game_manager.cards_on_the_table
+
     def draw_train_card(self, train_card):
         if train_card.color == "joker":
             if self.draw_train_card_limit == 1:
@@ -95,22 +130,51 @@ class GameController:
                 self.go_to_next_turn()
                 print(self.draw_train_card_limit)
         else:
+            self.selecting_second_train_card = True
             self.game_manager.draw_train_card(train_card)
             self.deal_the_cards_to_train_card_selection_frame()
             self.set_inventory()
             self.update_claimable_routes_frame()
             self.draw_train_card_limit -= 1
+            self.view.destination_tickets.destroy_draw_ticket_button()
+            self.view.claimable_routes.update_routes_frame()
+            self.view.train_cards.update_train_card_pick_buttons(True)
             if self.draw_train_card_limit == 0:
+                self.view.destination_tickets.create_draw_ticket_button()
+                self.selecting_second_train_card = False
+                self.view.claimable_routes.update_routes_frame()
+                self.view.train_cards.update_train_card_pick_buttons(False)
                 self.go_to_next_turn()
 
+        self.view.train_cards.update_remaining_cards_in_deck(self.game_manager.train_cards_deck.get_length())
+
+    def draw_train_card_for_ai(self, train_card):
+        if train_card == "select_blind":
+            self.draw_cards_from_blind_deck()
+        else:
+            self.draw_train_card(train_card)
+
     def draw_cards_from_blind_deck(self):
+        if self.game_manager.train_cards_deck.get_length()<=2:
+            print("can't draw blind cards since there is less than two cards in the deck.")
+            return
+        if self.draw_train_card_limit == 1:
+            print("You can't take blind card as second card!!!")
+            return
         print("blind cards is drawn.")
         self.game_manager.draw_cards_from_blind_deck()
         self.set_inventory()
         self.update_claimable_routes_frame()
+        self.view.train_cards.update_remaining_cards_in_deck(self.game_manager.train_cards_deck.get_length())
         self.go_to_next_turn()
 
+    def can_draw_destination_ticket(self):
+        return not self.game_manager.destination_tickets_deck.is_empty()
     def open_draw_destination_ticket_frame(self):
+        if not self.can_draw_destination_ticket():
+            print("destination tickets deck is empty")
+            return
+
         self.game_manager.destination_tickets_deck.shuffle()
 
         card1 = self.game_manager.destination_tickets_deck.draw_card()
@@ -119,11 +183,17 @@ class GameController:
 
         self.view.main_frame.create_select_destination_tickets_canvas(card1, card2, card3)
 
+        return [card1, card2, card3]
+
     def draw_destination_ticket(self, cards_list):
         print("Dest cards are drawn.")
         for card in cards_list:
             self.game_manager.current_player.add_destination_ticket(card)
         self.view.destination_tickets.update_destination_tickets_frame()
+        self.go_to_next_turn()
+
+    def destroy_select_destination_tickets_canvas_for_ai(self):
+        self.view.main_frame.destroy_select_destination_tickets_canvas()
 
     def get_current_player_destination_tickets(self):
         destination_tickets = []
@@ -133,15 +203,42 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available:
+            #Before going next turn
+            self.calculate_current_player_points()
+            self.update_players_info_text()
+            self.check_last_turn()
+
+            if self.game_manager.train_cards_deck.get_length() <= 2:
+                print("Blind card deleted since there is less than two cards on the deck.")
+                self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
+                self.view.destination_tickets.create_draw_ticket_button()
+                self.view.claimable_routes.update_routes_frame()
+                self.selecting_second_train_card = False
+                self.draw_train_card_limit = 2
+                return
+
+
+            # Going next turn
             self.game_manager.next_turn()
+
+            #After going next turn
+            self.check_if_game_ended()
+            self.selecting_second_train_card = False
+            self.update_player_info_text()
+            self.update_claimable_routes_frame()
             self.draw_train_card_limit = 2
             self.update_turn_text()
-            self.update_player_info_text()
             self.set_inventory()
-            self.update_claimable_routes_frame()
             self.view.destination_tickets.update_destination_tickets_frame()
-            print(self.draw_train_card_limit)
-            print(self.calculate_current_player_points())
+
+            self.game_service.on_change_of_turn()
+
+            if self.get_current_player().first_turn:
+                self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
+                self.get_current_player().first_turn = False
+
+
+            print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
 
     def change_turn_availability(self, bool):
@@ -170,8 +267,8 @@ class GameController:
             self.view.claimable_routes.update_routes_frame()
             self.set_inventory()
             self.game_manager.current_player.add_route(selected_route)
+            self.game_manager.current_player.decrease_train_cars(selected_route.length)
             self.go_to_next_turn()
-
 
     def cards_needed_to_claim_gray_route(self, selected_route):
         cards_can_be_used = []
@@ -210,28 +307,31 @@ class GameController:
     def claim_gray_route(self, using, selected_route):
         if using == "Claim using blue cards.":
             self.game_manager.current_player.remove_card_according_to_color("blue", selected_route.length)
-        if using == "Claim using red cards.":
+        elif using == "Claim using red cards.":
             self.game_manager.current_player.remove_card_according_to_color("red", selected_route.length)
-        if using == "Claim using green cards.":
+        elif using == "Claim using green cards.":
             self.game_manager.current_player.remove_card_according_to_color("green", selected_route.length)
-        if using == "Claim using orange cards.":
+        elif using == "Claim using orange cards.":
             self.game_manager.current_player.remove_card_according_to_color("orange", selected_route.length)
-        if using == "Claim using yellow cards.":
+        elif using == "Claim using yellow cards.":
             self.game_manager.current_player.remove_card_according_to_color("yellow", selected_route.length)
-        if using == "Claim using white cards.":
+        elif using == "Claim using white cards.":
             self.game_manager.current_player.remove_card_according_to_color("white", selected_route.length)
-        if using == "Claim using black cards.":
+        elif using == "Claim using black cards.":
             self.game_manager.current_player.remove_card_according_to_color("black", selected_route.length)
-        if using == "Claim using pink cards.":
+        elif using == "Claim using pink cards.":
             self.game_manager.current_player.remove_card_according_to_color("pink", selected_route.length)
-        if using == "Claim using joker cards.":
+        elif using == "Claim using joker cards.":
             self.game_manager.current_player.remove_card_according_to_color("joker", selected_route.length)
+        else:
+            print("there is an error about claim gray route using color")
 
         self.view.main_frame.create_roads()
         self.view.claimable_routes.update_routes_frame()
         self.set_inventory()
         self.view.main_frame.destroy_select_card_for_gray_roads_frame()
         self.game_manager.current_player.add_route(selected_route)
+        self.game_manager.current_player.decrease_train_cars(selected_route.length)
         self.go_to_next_turn()
 
     def claim_route_force(self, id, player):
@@ -243,6 +343,26 @@ class GameController:
                 route.claimed_color = "blue"
         self.view.main_frame.create_roads()
 
+    def claim_route_for_ai(self, selected_route, with_color):
+        selected_route.claimed_by = self.game_manager.current_player
+        selected_route.claimed_color = self.game_manager.current_player.color
+
+        if selected_route.color == "gray":
+            self.claim_gray_route(f"Claim using {with_color} cards.", selected_route)
+        else:
+            if self.game_manager.current_player.get_number_of_cards(selected_route.color) >= selected_route.length:
+                self.game_manager.current_player.remove_card_according_to_color(selected_route.color, selected_route.length)
+            else:
+                amount_of_joker_card_to_delete = selected_route.length - self.game_manager.current_player.get_number_of_cards(selected_route.color)
+                self.game_manager.current_player.remove_card_according_to_color(selected_route.color, self.game_manager.current_player.get_number_of_cards(selected_route.color))
+                self.game_manager.current_player.remove_card_according_to_color("joker", amount_of_joker_card_to_delete)
+            self.view.main_frame.create_roads()
+            self.view.claimable_routes.update_routes_frame()
+            self.set_inventory()
+            self.game_manager.current_player.add_route(selected_route)
+            self.game_manager.current_player.decrease_train_cars(selected_route.length)
+            self.go_to_next_turn()
+
     def get_claimable_routes(self):
         routes = self.game_manager.get_claimable_routes()
 
@@ -253,4 +373,37 @@ class GameController:
 
     def calculate_current_player_points(self):
         self.game_manager.current_player.calculate_points()
-        print(self.game_manager.current_player.points)
+
+    def check_last_turn(self):
+        if self.last_turn is not None:
+            return
+
+        for player in self.game_manager.players:
+            if player.train_cars <= 2:
+                self.last_turn = ((self.game_manager.current_turn) // len(self.game_manager.players)+1) + 1
+                print("Entered to last turn!")
+
+    def get_last_turn_info(self):
+        if self.last_turn is not None:
+            return True
+        return False
+
+    def check_if_game_ended(self):
+        if self.last_turn is not None:
+            if (((self.game_manager.current_turn) // len(self.game_manager.players)+1)) == self.last_turn+1:
+                print("GAME END")
+                self.game_end = True
+                self.view.show_game_end_frame()
+
+    def get_game_end(self):
+        return self.game_end
+
+    def change_player_cars(self, player_index, car_amount):
+        self.game_manager.players[player_index].train_cars = car_amount
+
+    def get_player_by_color(self, color):
+        for player in self.game_manager.players:
+            if player.color == color:
+                return player
+
+

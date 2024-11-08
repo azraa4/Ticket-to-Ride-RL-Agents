@@ -21,3 +21,18 @@ class Route:
     def get_claimed_color(self):
         if self.claimed_color is not None:
             return self.claimed_color
+
+    def get_points_of_the_route(self):
+        if self.length == 1:
+            return 1
+        elif self.length == 2:
+            return 2
+        elif self.length == 3:
+            return 4
+        elif self.length == 4:
+            return 7
+        elif self.length == 5:
+            return 10
+        elif self.length == 6:
+            return 15
+

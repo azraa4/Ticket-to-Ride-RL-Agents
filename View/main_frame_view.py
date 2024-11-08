@@ -55,16 +55,16 @@ class MainFrame:
 
         # Player inventory section
         # Displaying cards
-        self.canvas.create_text(65, 15, anchor="nw", text="Inventory", fill="#e4a21d", font=("Helvetica", 16, "bold"))
-        blue_card_img, self.canvas.blue_text_id = self.create_card_with_text("../Assets/bluecard.png", 120, 50, self.blue_card_value)
+        self.canvas.create_text(80, 15, anchor="nw", text="Inventory", fill="#e4a21d", font=("Helvetica", 16, "bold"))
+        blue_card_img, self.canvas.blue_text_id = self.create_card_with_text("../Assets/bluecard.png", 144, 50, self.blue_card_value)
         red_card_img, self.canvas.red_text_id = self.create_card_with_text("../Assets/redcard.png", 10, 50, self.red_card_value)
-        green_card_img, self.canvas.green_text_id = self.create_card_with_text("../Assets/greencard.png", 120, 120, self.green_card_value)
-        orange_card_img, self.canvas.orange_text_id = self.create_card_with_text("../Assets/orangecard.png", 10, 120, self.orange_card_value)
-        yellow_card_img, self.canvas.yellow_text_id = self.create_card_with_text("../Assets/yellowcard.png", 120, 190, self.yellow_card_value)
-        white_card_img, self.canvas.white_text_id = self.create_card_with_text("../Assets/whitecard.png", 10, 190, self.white_card_value)
-        black_card_img, self.canvas.black_text_id = self.create_card_with_text("../Assets/blackcard.png", 120, 260, self.black_card_value)
-        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("../Assets/pinkcard.png", 10, 260, self.pink_card_value)
-        joker_card_img, self.canvas.joker_text_id = self.create_card_with_text("../Assets/jokercard.png", 10, 330, self.joker_card_value)
+        green_card_img, self.canvas.green_text_id = self.create_card_with_text("../Assets/greencard.png", 144, 140, self.green_card_value)
+        orange_card_img, self.canvas.orange_text_id = self.create_card_with_text("../Assets/orangecard.png", 10, 140, self.orange_card_value)
+        yellow_card_img, self.canvas.yellow_text_id = self.create_card_with_text("../Assets/yellowcard.png", 144, 230, self.yellow_card_value)
+        white_card_img, self.canvas.white_text_id = self.create_card_with_text("../Assets/whitecard.png", 10, 230, self.white_card_value)
+        black_card_img, self.canvas.black_text_id = self.create_card_with_text("../Assets/blackcard.png", 144, 320, self.black_card_value)
+        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("../Assets/pinkcard.png", 10, 320, self.pink_card_value)
+        joker_card_img, self.canvas.joker_text_id = self.create_card_with_text("../Assets/jokercard.png", 77, 410, self.joker_card_value)
 
         # Keep references to images to avoid garbage collection
         self.canvas.blue_card_img = blue_card_img
@@ -82,11 +82,11 @@ class MainFrame:
 
     def create_card_with_text(self, image_path, x, y, card_value):
         card_img = Image.open(image_path)
-        card_img = card_img.resize((100, 65), Image.Resampling.LANCZOS)
+        card_img = card_img.resize((130, 85), Image.Resampling.LANCZOS)
         card_img = ImageTk.PhotoImage(card_img)
         self.canvas.create_image(x, y, anchor="nw", image=card_img)
-        self.canvas.create_rectangle(x+41, y+22, x+60, y+42, fill="white", outline="black", width=2)
-        text_id = self.canvas.create_text(x+50, y+32, text=str(card_value), fill="black", font=("Helvetica", 12, "bold"))
+        self.canvas.create_rectangle(x+52, y+32, x+78, y+52, fill="white", outline="black", width=2)
+        text_id = self.canvas.create_text(x+65, y+42, text=str(card_value), fill="black", font=("Helvetica", 12, "bold"))
         return card_img, text_id
 
     def create_road_image(self, image_path, color):
@@ -232,14 +232,18 @@ class MainFrame:
 
     def apply_selection(self, card1, card2, card3):
         list_of_selected = []
-        if self.check_var1.get() == 1 and card1 is not None:
-            list_of_selected.append(card1)
-        if self.check_var2.get() == 1 and card2 is not None:
-            list_of_selected.append(card2)
-        if self.check_var3.get() == 1 and card3 is not None:
-            list_of_selected.append(card3)
-        self.controller.draw_destination_ticket(list_of_selected)
-        self.destroy_select_destination_tickets_canvas()
+
+        if self.check_var1.get() == 0 and self.check_var2.get() == 0 and self.check_var3.get() == 0:
+            print("You must select at least one destination card!")
+        else:
+            if self.check_var1.get() == 1 and card1 is not None:
+                list_of_selected.append(card1)
+            if self.check_var2.get() == 1 and card2 is not None:
+                list_of_selected.append(card2)
+            if self.check_var3.get() == 1 and card3 is not None:
+                list_of_selected.append(card3)
+            self.destroy_select_destination_tickets_canvas()
+            self.controller.draw_destination_ticket(list_of_selected)
 
     def destroy_select_destination_tickets_canvas(self):
         if self.select_destination_tickets_canvas is not None:

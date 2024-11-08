@@ -8,21 +8,26 @@ class DestinationTicketsFrame:
         self.controller = controller
         self.destination_scroll_frame = None
         self.canvas = None
+        self.deactivated_frame = None
+        self.canvas_for_text = None
+        self.draw_ticket_card_button = None
 
     def create_destination_tickets_frame(self):
-        destination_tickets_frame = tk.Frame(self.root, width=250, height=100, bg="#fdf8ed",
+        destination_tickets_frame = tk.Frame(self.root, width=202, height=150, bg="#fdf8ed",
                                           highlightthickness=4, highlightbackground="#e4a21d")
-        destination_tickets_frame.place(x=0, y=470)
+        destination_tickets_frame.place(x=1078, y=570)
 
-        canvas_for_text = tk.Canvas(destination_tickets_frame, bg="#fdf8ed", width=230, height=20)
-        canvas_for_text.place(x=0, y=0)
-        canvas_for_text.create_text(5, 5, anchor="nw", text="Destination Tickets", fill="black",
+        self.canvas_for_text = tk.Canvas(destination_tickets_frame, bg="#fdf8ed", width=230, height=30)
+        self.canvas_for_text.place(x=0, y=0)
+        self.canvas_for_text.create_text(5, 5, anchor="nw", text="Destination Tickets", fill="black",
                                     font=("Helvetica", 10, "bold"))
 
-        self.canvas = tk.Canvas(destination_tickets_frame, bg="#fdf8ed", width=225, height=80)
-        self.canvas.place(x=0, y=20)
+        self.create_draw_ticket_button()
+
+        self.canvas = tk.Canvas(destination_tickets_frame, bg="#fdf8ed", width=225, height=120)
+        self.canvas.place(x=0, y=30)
         scrollbar = tk.Scrollbar(destination_tickets_frame, orient="vertical", command=self.canvas.yview)
-        scrollbar.place(x=225, y=20, height=80)
+        scrollbar.place(x=180, y=30, height=120)
         self.canvas.configure(yscrollcommand=scrollbar.set)
 
         self.update_destination_tickets_frame()
@@ -65,6 +70,16 @@ class DestinationTicketsFrame:
         self.canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
+    def create_draw_ticket_button(self):
+        self.draw_ticket_card_button = TTRGui.create_modern_button(
+            self.canvas_for_text, "Draw", 130, 3, 4, 2, 7
+        )
+        self.draw_ticket_card_button.config(command=lambda: self.controller.open_draw_destination_ticket_frame())
+
+    def destroy_draw_ticket_button(self):
+        if self.draw_ticket_card_button is not None:
+            self.draw_ticket_card_button.destroy()
+            self.draw_ticket_card_button = None
 
 
 

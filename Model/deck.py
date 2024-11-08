@@ -14,3 +14,8 @@ class Deck:
             return self.cards.pop(0)
         return None
 
+    def is_empty(self):
+        return len(self.cards) == 0
+
+    def get_length(self):
+        return len(self.cards)

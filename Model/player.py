@@ -6,6 +6,8 @@ class Player:
         self.train_cards = []
         self.destination_tickets = []
         self.claimed_routes = []
+        self.train_cars = 45
+        self.first_turn = True
 
     def add_train_card(self, train_card):
         self.train_cards.append(train_card)
@@ -47,6 +49,9 @@ class Player:
                 ticket.mark_as_completed()
                 total_points += ticket.points
 
+        for route in self.claimed_routes:
+            total_points += route.get_points_of_the_route()
+
         # Update player points
         self.points = total_points
         print(f"{self.name} has now {self.points} points.")
@@ -67,4 +72,8 @@ class Player:
             if color == train_card.color and num!=0:
                 self.train_cards.remove(train_card)
                 num -=1
+
+    def decrease_train_cars(self, num):
+        self.train_cars -= num
+        print(f"{self.name} has now {self.train_cars} train cars.")
 
