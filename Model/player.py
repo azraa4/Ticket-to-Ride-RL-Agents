@@ -54,7 +54,7 @@ class Player:
 
         # Update player points
         self.points = total_points
-        print(f"{self.name} has now {self.points} points.")
+        print(f"POINTS STATUS: {self.name} with color {self.color} has now {self.points} points.")
 
     def get_number_of_cards(self, color):
         num = 0

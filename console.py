@@ -78,6 +78,9 @@ class Console:
     def go_to_next_turn(self):
         self.view.game_controller.go_to_next_turn()
 
+    def force_go_to_next_turn(self):
+        self.view.game_controller.force_go_to_next_turn()
+
     def print_claimable_routes(self):
         self.view.game_controller.get_claimable_routes()
 

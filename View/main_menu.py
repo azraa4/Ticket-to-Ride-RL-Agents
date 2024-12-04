@@ -29,6 +29,12 @@ class MainMenu:
         player_name_entry = tk.Entry(self.frame, textvariable=self.player_name_var, font=("Helvetica", 14))
         player_name_entry.pack(pady=5)
 
+        self.player_type_var = tk.StringVar(value="Select Type")
+        player_type_label = tk.Label(self.frame, text="Player Type:", font=("Helvetica", 14))
+        player_type_label.pack(pady=5)
+        player_type_options = ["Human", "AI"]
+        player_type_dropdown = tk.OptionMenu(self.frame, self.player_type_var, *player_type_options)
+        player_type_dropdown.pack(pady=5)
 
         self.color_var = tk.StringVar(value="Select a color")
         color_label = tk.Label(self.frame, text="Select Color:", font=("Helvetica", 14))
@@ -45,6 +51,9 @@ class MainMenu:
         selected_color = self.color_var.get()
         print(f"Player Added: {player_name} with color {selected_color}")
         self.controller.add_player_button(player_name, selected_color)
+        if self.player_type_var.get() == "AI":
+            self.controller.add_ai(selected_color)
+            print("AI added.")
 
     def start_game(self):
         self.frame.pack_forget()

@@ -13,6 +13,7 @@ from Controller.main_menu_controller import MainMenuController
 from console import Console
 
 from Model.game_manager import GameManager
+from Model.ai_manager import AIManager
 
 from Controller.game_service import GameService
 
@@ -69,17 +70,22 @@ class MainGameApp:
 if __name__ == "__main__":
     #Define Models
     game_manager = GameManager()
+    ai_manager = AIManager(None)
 
 
     #Define Controllerso
-    game_controller = GameController(None, game_manager, None)
-    main_menu_controller = MainMenuController(None, game_manager)
+    game_controller = GameController(None, game_manager, None, None)
+    main_menu_controller = MainMenuController(None, game_manager, ai_manager)
 
     # Define Main View
     app = MainGameApp(game_controller, main_menu_controller)
 
+    ai_manager.game_service = app.game_service
+
+
     game_controller.view = app
     game_controller.game_service = app.game_service
+    game_controller.ai_manager = ai_manager
 
     console = Console(app)
     console_thread = threading.Thread(target=console.open_console_window)

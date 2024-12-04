@@ -83,6 +83,12 @@ class GameService:
         '''
         return self.controller.game_start_destination_tickets_list_for_ai
 
+    def check_if_second_train_card_needed(self):
+        if self.controller.draw_train_card_limit == 1:
+            return True
+        else:
+            return False
+
     def perform_action(self, action, action_params):
         if action not in self.get_available_actions(self.controller.get_current_player().color):
             print("This action is not in the available actions list.")
@@ -90,11 +96,11 @@ class GameService:
             '''
             Claimable routes'a baktın seçeceğin route'a karar verdin 
             Eğer düz rengi olan bir route ise action_params sadece route bilgisini alır. 
-                EX: action_params = {"selected_route":route, "with_colors":None}
+                EX: action_params = {"selected_route":route, "use_this_color":None}
             
             
             Eğer gri renkli bir route ise action_params hem route hem de route'u hangi renkle alacağını bildirmen gerekir. 
-                EX: action_params = {"selected_route":route, "with_colors":"red"}
+                EX: action_params = {"selected_route":route, "use_this_color":"red"}
             '''
             #self.controller.claim_route_for_ai(action_params["selected_route"], action_params["with_colors"])
             if action_params["use_this_color"] is None:
@@ -115,7 +121,9 @@ class GameService:
             Yani bir renkli aldıysam önce masaya konacak yeni kartı görmeliyim ve ikinci kartı da seçmeliyim. 
             Böylece turumu bitirmiş olurum.
             '''
+
             self.controller.draw_train_card_for_ai(action_params["selected_card"])
+            print("AI drawed a train card")
 
         elif action == "draw_destination_ticket":
             if action_params is None: #ÖNCE KARTLARI AÇIP GÖRMEN LAZIM SONRA SEÇECEKSİN
@@ -128,6 +136,7 @@ class GameService:
                 Yani action_params kısmında bir seçili kartlar listesi döndürmeliyiz (çünkü birden fazla kart da seçilebiliyor)
                     EX: action_params = {"selected_destination_tickets" : seçilen_kartların_listesi}
                 '''
+                print(self.get_destination_tickets_list_at_the_start_of_the_game())
                 self.controller.draw_destination_ticket(action_params["selected_destination_tickets"])
                 self.controller.destroy_select_destination_tickets_canvas_for_ai()
 
@@ -138,7 +147,15 @@ class GameService:
         Sonuç olarak ai'ın sırası geldiğini bilmesi ve sırası geldiğinde burdaki işlemleri gerçekleştirmesi lazım.
         '''
 
-        print("Turn Changed. AI informed.")
+        print("Turn changed")
+
+        ai_list = self.controller.get_ai_list()
+        current_color = self.controller.get_current_player().color
+        for agent in ai_list:
+            if agent.color == current_color:
+                agent.perform_action()
+
+        print("AI informed.")
         return
 
 

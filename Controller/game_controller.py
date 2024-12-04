@@ -1,5 +1,5 @@
 class GameController:
-    def __init__(self, view, game_manager, game_service):
+    def __init__(self, view, game_manager, game_service, ai_manager):
         self.view = view
         self.game_manager = game_manager
         self.game_service = game_service
@@ -9,10 +9,17 @@ class GameController:
         self.last_turn = None
         self.game_end = False
 
+        self.ai_manager = ai_manager
         self.game_start_destination_tickets_list_for_ai = None
 
     def start_game(self):
         self.game_manager.start_game()
+
+        if self.get_current_player().first_turn:
+            self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
+            self.get_current_player().first_turn = False
+
+
         self.update_turn_text()
         self.update_player_info_text()
         self.update_players_info_text()
@@ -22,9 +29,8 @@ class GameController:
         self.update_claimable_routes_frame()
         self.view.destination_tickets.update_destination_tickets_frame()
 
-        if self.get_current_player().first_turn:
-            self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
-            self.get_current_player().first_turn = False
+        self.game_service.on_change_of_turn()
+
 
     def update_turn_text(self):
         self.view.header.update_turn_text(f"Turn: {((self.game_manager.current_turn) // len(self.game_manager.players)+1)}")
@@ -100,9 +106,7 @@ class GameController:
     def deal_the_cards_to_train_card_selection_frame(self):
         if self.game_manager.all_cards_on_the_players_hands:
             self.view.train_cards.destroy_all_train_cards()
-            print("delete all cards")
             return
-        print(self.game_manager.cards_on_the_table)
         self.view.train_cards.card_1 = self.game_manager.cards_on_the_table[0]
         self.view.train_cards.card_1_img_path = self.game_manager.cards_on_the_table[0].image_path
         self.view.train_cards.card_2 = self.game_manager.cards_on_the_table[1]
@@ -121,14 +125,13 @@ class GameController:
     def draw_train_card(self, train_card):
         if train_card.color == "joker":
             if self.draw_train_card_limit == 1:
-                print("You can only take 1 joker or 2 colored cards!!!")
+                print("!        ERROR: You can only take 1 joker or 2 colored cards!!!")
             else:
                 self.game_manager.draw_train_card(train_card)
                 self.deal_the_cards_to_train_card_selection_frame()
                 self.set_inventory()
                 self.update_claimable_routes_frame()
                 self.go_to_next_turn()
-                print(self.draw_train_card_limit)
         else:
             self.selecting_second_train_card = True
             self.game_manager.draw_train_card(train_card)
@@ -187,6 +190,7 @@ class GameController:
 
     def draw_destination_ticket(self, cards_list):
         print("Dest cards are drawn.")
+        print("Cards List: ", cards_list)
         for card in cards_list:
             self.game_manager.current_player.add_destination_ticket(card)
         self.view.destination_tickets.update_destination_tickets_frame()
@@ -203,43 +207,81 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available:
-            #Before going next turn
-            self.calculate_current_player_points()
-            self.update_players_info_text()
-            self.check_last_turn()
+            self.view.root.after(1000, self._go_to_next_turn)
+    def _go_to_next_turn(self):
+        # Before going next turn
+        self.calculate_current_player_points()
+        self.update_players_info_text()
+        self.check_last_turn()
 
-            if self.game_manager.train_cards_deck.get_length() <= 2:
-                print("Blind card deleted since there is less than two cards on the deck.")
-                self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
-                self.view.destination_tickets.create_draw_ticket_button()
-                self.view.claimable_routes.update_routes_frame()
-                self.selecting_second_train_card = False
-                self.draw_train_card_limit = 2
-                return
-
-
-            # Going next turn
-            self.game_manager.next_turn()
-
-            #After going next turn
-            self.check_if_game_ended()
+        if self.game_manager.train_cards_deck.get_length() <= 2:
+            print("Blind card deleted since there is less than two cards on the deck.")
+            self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
+            self.view.destination_tickets.create_draw_ticket_button()
+            self.view.claimable_routes.update_routes_frame()
             self.selecting_second_train_card = False
-            self.update_player_info_text()
-            self.update_claimable_routes_frame()
             self.draw_train_card_limit = 2
-            self.update_turn_text()
-            self.set_inventory()
-            self.view.destination_tickets.update_destination_tickets_frame()
+            return
 
-            self.game_service.on_change_of_turn()
+        # Going next turn
+        self.game_manager.next_turn()
 
-            if self.get_current_player().first_turn:
-                self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
-                self.get_current_player().first_turn = False
+        # After going next turn
+        if self.get_current_player().first_turn:
+            print(self.get_current_player().color, "'s First Turn")
+            self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
+            self.get_current_player().first_turn = False
+
+        self.check_if_game_ended()
+        self.selecting_second_train_card = False
+        self.update_player_info_text()
+        self.update_claimable_routes_frame()
+        self.draw_train_card_limit = 2
+        self.update_turn_text()
+        self.set_inventory()
+        self.view.destination_tickets.update_destination_tickets_frame()
+
+        self.game_service.on_change_of_turn()
+
+        print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
 
-            print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
+    def force_go_to_next_turn(self):
+        # Before going next turn
+        self.calculate_current_player_points()
+        self.update_players_info_text()
+        self.check_last_turn()
 
+        if self.game_manager.train_cards_deck.get_length() <= 2:
+            print("Blind card deleted since there is less than two cards on the deck.")
+            self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
+            self.view.destination_tickets.create_draw_ticket_button()
+            self.view.claimable_routes.update_routes_frame()
+            self.selecting_second_train_card = False
+            self.draw_train_card_limit = 2
+            return
+
+        # Going next turn
+        self.game_manager.next_turn()
+
+        # After going next turn
+        if self.get_current_player().first_turn:
+            print(self.get_current_player().color, "'s First Turn")
+            self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
+            self.get_current_player().first_turn = False
+
+        self.check_if_game_ended()
+        self.selecting_second_train_card = False
+        self.update_player_info_text()
+        self.update_claimable_routes_frame()
+        self.draw_train_card_limit = 2
+        self.update_turn_text()
+        self.set_inventory()
+        self.view.destination_tickets.update_destination_tickets_frame()
+
+        self.game_service.on_change_of_turn()
+
+        print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
     def change_turn_availability(self, bool):
         self.turns_available = bool
@@ -406,4 +448,6 @@ class GameController:
             if player.color == color:
                 return player
 
+    def get_ai_list(self):
+        return self.ai_manager.agents
 

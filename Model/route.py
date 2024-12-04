@@ -13,7 +13,7 @@ class Route:
         if self.claimed_by is None:
             self.claimed_by = player
         else:
-            print("it is already claimed")
+            print("!        ERROR: it is already claimed")
 
     def get_image_path(self):
         return f"../Assets/MapRoads/{self.id}.png"

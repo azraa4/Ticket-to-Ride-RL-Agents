@@ -56,11 +56,10 @@ class GameManager:
                     self.train_cards_deck = Deck(new_deck)
                     self.train_cards_deck.shuffle()
 
-                    print("deck is resetted.")
                     self.cards_on_the_table = []
                     self.deal_train_cards_on_the_table()
                 else:
-                    print("All cards are in players' hands. No more cards to draw until players discard or play cards.")
+                    print("!        ERROR:All cards are in players' hands. No more cards to draw until players discard or play cards.")
                     self.all_cards_on_the_players_hands = True
                     return
 
