@@ -29,7 +29,6 @@ class GameManager:
         self.current_player = self.players[0]
         self.train_cards_deck.shuffle()
         self.deal_train_cards_on_the_table()
-        print(self.current_player)
 
     def deal_train_cards_on_the_table(self):
         for i in range(0, 5-len(self.cards_on_the_table)):
@@ -67,7 +66,6 @@ class GameManager:
     def draw_train_card(self, train_card):
         self.cards_on_the_table.remove(train_card)
         self.current_player.train_cards.append(train_card)
-        print(self.current_player.train_cards)
         self.deal_train_cards_on_the_table()
 
     def draw_cards_from_blind_deck(self):
@@ -112,7 +110,6 @@ class GameManager:
 
     def add_player(self, player_name, player_color):
         self.players.append(Player(player_name, player_color))
-        print(self.players)
 
     def get_claimable_routes(self):
         claimable_routes = []

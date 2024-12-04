@@ -33,7 +33,7 @@ class GameService:
             "train_cards_on_the_table": train_cards_on_the_table,
         }
 
-        print(game_state)
+        print("GAME STATE CALLED: ", game_state)
 
         return game_state
 
@@ -48,16 +48,16 @@ class GameService:
             "destination_cards": destination_cards,
         }
 
-        print(current_player_state)
+        print("CURRENT PLAYER STATE: ", current_player_state)
         return current_player_state
 
     def get_available_actions(self, player_color):
         player = self.controller.get_player_by_color(player_color)
         if player is None:
-            print("Player not found. Color must be written as Red, Blue, Green etc.")
+            print("!        ERROR: Player not found. Color must be written as Red, Blue, Green etc.")
             return
         if player != self.controller.get_current_player():
-            print(f"No available actions since it is not {player.color}'s turn")
+            print(f"!        ERROR: No available actions since it is not {player.color}'s turn")
             return
 
         available_actions = []
@@ -71,7 +71,7 @@ class GameService:
             available_actions.append("draw_train_card")
 
 
-        print(available_actions)
+        print("AVAILABLE ACTIONS CALLED: ", available_actions)
         return available_actions
 
     def get_destination_tickets_list_at_the_start_of_the_game(self):
@@ -90,8 +90,11 @@ class GameService:
             return False
 
     def perform_action(self, action, action_params):
+        '''
+        draw_destination_ticket seçimined ikinci aşamaya geçerken destination card biterse ikinci aşamaya geçmene izin vermiyor.
         if action not in self.get_available_actions(self.controller.get_current_player().color):
-            print("This action is not in the available actions list.")
+            print("!        ERROR: This action is not in the available actions list.")
+        '''
         if action == "claim_route":
             '''
             Claimable routes'a baktın seçeceğin route'a karar verdin 
@@ -112,9 +115,10 @@ class GameService:
         elif action == "draw_train_card":
             '''
             Masada 6 kart var bunlardan 5'i tekli kartlar 6.sı ise blind pick yani desteden çekmek.
-            Bu masadaki 6 kart seçeneği listenin indexleri olarak gözükür list = [1.kart, 2.kart, 3.kart, 4.kart, 5.kart, 6.kart(blind_pick)]  
-                EX: action_params = {"selected_index":1} //masadaki 2. kartı seçer (çünkü liste 0 dan başlıyor !!!)
-                EX: action_params = {"selected_index":5} //masadaki 6. kartı seçer yani blind pick (çünkü liste 0 dan başlıyor !!!)
+            Bu masadaki 6 kart seçeneği listenin indexleri olarak gözükür list = [1.kart, 2.kart, 3.kart, 4.kart, 5.kart, 6.kart(blind_pick)] 
+            önce index belirle sonra kartı seç ve gönder agent tarafında 
+                EX: action_params = {"selected_card":card1} 
+                EX: action_params = {"selected_card":card2} 
                 
             ÖNEMLİ NOT: Bu action bir kere alındıysa ve renkli kart seçildiyse (joker ya da blind card seçilmediyse) TEKRAR ALINMAK ZORUNDADIR
             ÇÜNKÜ: 2 renkli ya da 1 joker ya da blind carddan iki kartı görmeden seçebiliyoruz.
@@ -122,8 +126,7 @@ class GameService:
             Böylece turumu bitirmiş olurum.
             '''
 
-            self.controller.draw_train_card_for_ai(action_params["selected_card"])
-            print("AI drawed a train card")
+            return self.controller.draw_train_card_for_ai(action_params["selected_card"])
 
         elif action == "draw_destination_ticket":
             if action_params is None: #ÖNCE KARTLARI AÇIP GÖRMEN LAZIM SONRA SEÇECEKSİN
@@ -136,7 +139,6 @@ class GameService:
                 Yani action_params kısmında bir seçili kartlar listesi döndürmeliyiz (çünkü birden fazla kart da seçilebiliyor)
                     EX: action_params = {"selected_destination_tickets" : seçilen_kartların_listesi}
                 '''
-                print(self.get_destination_tickets_list_at_the_start_of_the_game())
                 self.controller.draw_destination_ticket(action_params["selected_destination_tickets"])
                 self.controller.destroy_select_destination_tickets_canvas_for_ai()
 
@@ -146,16 +148,13 @@ class GameService:
         Bu metodu kullanarak ai turn değişti mi sıra bana geldi mi kontrolünü yaptırabilirsin.
         Sonuç olarak ai'ın sırası geldiğini bilmesi ve sırası geldiğinde burdaki işlemleri gerçekleştirmesi lazım.
         '''
-
-        print("Turn changed")
-
         ai_list = self.controller.get_ai_list()
         current_color = self.controller.get_current_player().color
         for agent in ai_list:
             if agent.color == current_color:
                 agent.perform_action()
 
-        print("AI informed.")
+        print("AI: AI informed about turn change.")
         return
 
 

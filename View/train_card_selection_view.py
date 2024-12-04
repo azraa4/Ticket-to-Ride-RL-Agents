@@ -200,7 +200,6 @@ class TrainCardSelectionFrame:
 
 
     def update_train_card_selection_frame(self):
-        print("Train Card Selection Frame is Updated.")
         self.card_1_img = TTRGui.change_image(self, self.canvas.card_1_img_id, self.card_1_img,
                                                    self.card_1_img_path)
         self.card_2_img = TTRGui.change_image(self, self.canvas.card_2_img_id, self.card_2_img,

@@ -153,18 +153,17 @@ class GameController:
 
     def draw_train_card_for_ai(self, train_card):
         if train_card == "select_blind":
-            self.draw_cards_from_blind_deck()
+            return self.draw_cards_from_blind_deck()
         else:
-            self.draw_train_card(train_card)
+            return self.draw_train_card(train_card)
 
     def draw_cards_from_blind_deck(self):
         if self.game_manager.train_cards_deck.get_length()<=2:
-            print("can't draw blind cards since there is less than two cards in the deck.")
-            return
+            print("!        ERROR: can't draw blind cards since there is less than two cards in the deck.")
+            return 0
         if self.draw_train_card_limit == 1:
-            print("You can't take blind card as second card!!!")
+            print("!        ERROR: You can't take blind card as second card!!!")
             return
-        print("blind cards is drawn.")
         self.game_manager.draw_cards_from_blind_deck()
         self.set_inventory()
         self.update_claimable_routes_frame()
@@ -175,7 +174,7 @@ class GameController:
         return not self.game_manager.destination_tickets_deck.is_empty()
     def open_draw_destination_ticket_frame(self):
         if not self.can_draw_destination_ticket():
-            print("destination tickets deck is empty")
+            print("!        IMPORTANT INFO: destination tickets deck is empty")
             return
 
         self.game_manager.destination_tickets_deck.shuffle()
@@ -189,8 +188,6 @@ class GameController:
         return [card1, card2, card3]
 
     def draw_destination_ticket(self, cards_list):
-        print("Dest cards are drawn.")
-        print("Cards List: ", cards_list)
         for card in cards_list:
             self.game_manager.current_player.add_destination_ticket(card)
         self.view.destination_tickets.update_destination_tickets_frame()
@@ -207,7 +204,7 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available:
-            self.view.root.after(1000, self._go_to_next_turn)
+            self.view.root.after(400, self._go_to_next_turn)
     def _go_to_next_turn(self):
         # Before going next turn
         self.calculate_current_player_points()
@@ -215,7 +212,7 @@ class GameController:
         self.check_last_turn()
 
         if self.game_manager.train_cards_deck.get_length() <= 2:
-            print("Blind card deleted since there is less than two cards on the deck.")
+            print("!        ERROR:Blind card deleted since there is less than two cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
@@ -228,7 +225,7 @@ class GameController:
 
         # After going next turn
         if self.get_current_player().first_turn:
-            print(self.get_current_player().color, "'s First Turn")
+            print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
             self.get_current_player().first_turn = False
 
@@ -243,7 +240,6 @@ class GameController:
 
         self.game_service.on_change_of_turn()
 
-        print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
 
     def force_go_to_next_turn(self):
@@ -253,7 +249,7 @@ class GameController:
         self.check_last_turn()
 
         if self.game_manager.train_cards_deck.get_length() <= 2:
-            print("Blind card deleted since there is less than two cards on the deck.")
+            print("!        IMPORTANT INFO: Blind card deleted since there is less than two cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
@@ -266,7 +262,7 @@ class GameController:
 
         # After going next turn
         if self.get_current_player().first_turn:
-            print(self.get_current_player().color, "'s First Turn")
+            print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
             self.get_current_player().first_turn = False
 
@@ -281,7 +277,7 @@ class GameController:
 
         self.game_service.on_change_of_turn()
 
-        print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
+        #print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
     def change_turn_availability(self, bool):
         self.turns_available = bool
@@ -366,7 +362,7 @@ class GameController:
         elif using == "Claim using joker cards.":
             self.game_manager.current_player.remove_card_according_to_color("joker", selected_route.length)
         else:
-            print("there is an error about claim gray route using color")
+            print("!        ERROR: there is an error about claim gray route using color")
 
         self.view.main_frame.create_roads()
         self.view.claimable_routes.update_routes_frame()
@@ -377,7 +373,7 @@ class GameController:
         self.go_to_next_turn()
 
     def claim_route_force(self, id, player):
-        print("claimed")
+        print("forced claim")
         unclaimed_routes = self.game_manager.board.get_unclaimed_routes()
         for route in unclaimed_routes:
             if route.id == id:
@@ -423,7 +419,7 @@ class GameController:
         for player in self.game_manager.players:
             if player.train_cars <= 2:
                 self.last_turn = ((self.game_manager.current_turn) // len(self.game_manager.players)+1) + 1
-                print("Entered to last turn!")
+                print("GAME INFO: Entered to last turn!")
 
     def get_last_turn_info(self):
         if self.last_turn is not None:
@@ -433,7 +429,7 @@ class GameController:
     def check_if_game_ended(self):
         if self.last_turn is not None:
             if (((self.game_manager.current_turn) // len(self.game_manager.players)+1)) == self.last_turn+1:
-                print("GAME END")
+                print("---GAME END---")
                 self.game_end = True
                 self.view.show_game_end_frame()
 

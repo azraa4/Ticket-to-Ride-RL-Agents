@@ -49,11 +49,11 @@ class MainMenu:
     def add_player(self):
         player_name = self.player_name_var.get()
         selected_color = self.color_var.get()
-        print(f"Player Added: {player_name} with color {selected_color}")
+        print(f"GAME MENU: Player Added: {player_name} with color {selected_color}")
         self.controller.add_player_button(player_name, selected_color)
         if self.player_type_var.get() == "AI":
             self.controller.add_ai(selected_color)
-            print("AI added.")
+            print(f"GAME MENU: AI added with color {selected_color}")
 
     def start_game(self):
         self.frame.pack_forget()

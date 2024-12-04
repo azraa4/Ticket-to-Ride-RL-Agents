@@ -17,7 +17,6 @@ class Player:
 
     def add_route(self, route):
         self.claimed_routes.append(route)
-        print(self.claimed_routes)
 
     def calculate_points(self):
         total_points = 0
@@ -65,8 +64,6 @@ class Player:
 
     def remove_card_according_to_color(self, color, amount_to_delete):
         num = amount_to_delete
-        print(self.train_cards)
-        print(len(self.train_cards))
         copy_of_train_cards_list = self.train_cards[:]
         for train_card in copy_of_train_cards_list:
             if color == train_card.color and num!=0:
@@ -75,5 +72,5 @@ class Player:
 
     def decrease_train_cars(self, num):
         self.train_cars -= num
-        print(f"{self.name} has now {self.train_cars} train cars.")
+        print(f"{self.name} with {self.color} has now {self.train_cars} train cars.")
 

@@ -114,8 +114,6 @@ class MainFrame:
         return created_road, final_img
 
     def create_roads(self):
-        print("Roads are updated.")
-
         for route in self.controller.get_unclaimed_routes():
             if(hasattr(self.canvas, route.id)):
                 self.canvas.delete(getattr(self.canvas, route.id))
@@ -126,8 +124,6 @@ class MainFrame:
             setattr(self.canvas, f"{route.id}_img", road_image_img)
 
     def update_train_numbers(self):
-        print("train numbers are updated")
-
         if hasattr(self.canvas, 'blue_text_id'):
             self.canvas.itemconfig(self.canvas.blue_text_id, text=str(self.blue_card_value))
 
