@@ -59,7 +59,7 @@ class Agent:
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:
-                    second_random_number = random.randint(0, 4)
+                    second_random_number = random.randint(0, len(train_cards_on_the_table)-1)
                     selected_second_card = train_cards_on_the_table[second_random_number]
                     if selected_second_card.color == "joker":
                         continue
