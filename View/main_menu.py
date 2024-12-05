@@ -142,6 +142,7 @@ class MainMenu:
         self.players.clear()
         self.player_listbox.delete(0, tk.END)
         self.available_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
+        self.update_color_dropdown()
 
     def update_color_dropdown(self):
         """Dropdown menüsündeki renkleri güncelle"""
