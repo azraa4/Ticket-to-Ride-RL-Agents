@@ -1,7 +1,8 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageEnhance, ImageOps
 from ttr_gui_view import TTRGui
-
+from modern_option_menu import ModernOptionMenu
+from modern_button import ModernButton
 
 class MainFrame:
     def __init__(self, root, controller):
@@ -153,20 +154,21 @@ class MainFrame:
 
     def create_select_card_for_gray_roads_frame(self, selected_route):
         if self.select_card_for_gray_roads_frame is None:
-            self.select_card_for_gray_roads_frame = tk.Frame(self.root, width=400, height=600, bg="gray")
-            self.select_card_for_gray_roads_frame.place(x=600, y=400)
+            self.select_card_for_gray_roads_frame = tk.Frame(self.root, width=1800, height=600, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
+            self.select_card_for_gray_roads_frame.place(x=0, y=535)
 
-            label = tk.Label(self.select_card_for_gray_roads_frame, text="Select Card to Give", bg="gray", font=("Helvetica", 16))
+            label = tk.Label(self.select_card_for_gray_roads_frame, text="Select Card to Use", bg="#fdf8ed", fg="#ae2907", font=("Arial", 20, "bold"))
             label.pack(pady=10)
 
             card_options = self.controller.cards_needed_to_claim_gray_route(selected_route)
             selected_card = tk.StringVar(self.select_card_for_gray_roads_frame)
             selected_card.set(card_options[0])
 
-            dropdown = tk.OptionMenu(self.select_card_for_gray_roads_frame, selected_card, *card_options)
+            dropdown = ModernOptionMenu(self.select_card_for_gray_roads_frame, selected_card, *card_options)
+            dropdown.config(width=20)
             dropdown.pack(pady=10)
 
-            select_button = tk.Button(self.select_card_for_gray_roads_frame, text="Select", command=lambda: self.controller.claim_gray_route(selected_card.get(), selected_route))
+            select_button = ModernButton(self.select_card_for_gray_roads_frame, text="Select", command=lambda: self.controller.claim_gray_route(selected_card.get(), selected_route))
             select_button.pack(pady=10)
 
     def destroy_select_card_for_gray_roads_frame(self):
@@ -176,11 +178,11 @@ class MainFrame:
 
     def create_select_destination_tickets_canvas(self, card1, card2, card3):
         if self.select_destination_tickets_canvas is None:
-            self.select_destination_tickets_canvas = tk.Canvas(self.root, width=600, height=300, bg="gray")
+            self.select_destination_tickets_canvas = tk.Canvas(self.root, width=680, height=270, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
             self.select_destination_tickets_canvas.place(x=300, y=200)
 
-            label = tk.Label(self.select_destination_tickets_canvas, text="Select Tickets", bg="gray", font=("Helvetica", 16))
-            label.place(x=5, y=5)
+            label = tk.Label(self.select_destination_tickets_canvas, text="Select Tickets", bg="#fdf8ed", fg="#ae2907", font=("Arial", 20, "bold"))
+            label.place(x=250, y=5)
 
             # Selection variables
             self.check_var1 = tk.IntVar()
@@ -190,41 +192,40 @@ class MainFrame:
             if card1 is not None:
                 # First Image and Checkbox
                 self.selectable_dest_card_1_img = Image.open(card1.image_path)
-                self.selectable_dest_card_1_img = self.selectable_dest_card_1_img.resize((150, 102), Image.Resampling.LANCZOS)
+                self.selectable_dest_card_1_img = self.selectable_dest_card_1_img.resize((225, 153), Image.Resampling.LANCZOS)
                 self.selectable_dest_card_1_img = ImageTk.PhotoImage(self.selectable_dest_card_1_img)
                 self.select_destination_tickets_canvas.selectable_dest_card_1_img_id = self.select_destination_tickets_canvas.create_image(5, 35, anchor="nw", image=self.selectable_dest_card_1_img)
 
-                check_button1 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var1, bg="gray")
-                check_button1.place(x=5, y=140)
+                check_button1 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", fg="#ae2907", bg="#fdf8ed", font=("Arial", 20, "bold"), variable=self.check_var1)
+                check_button1.place(x=5, y=183)
 
             if card2 is not None:
                 # Second Image and Checkbox
                 self.selectable_dest_card_2_img = Image.open(card2.image_path)
-                self.selectable_dest_card_2_img = self.selectable_dest_card_2_img.resize((150, 102),
+                self.selectable_dest_card_2_img = self.selectable_dest_card_2_img.resize((225, 153),
                                                                                          Image.Resampling.LANCZOS)
                 self.selectable_dest_card_2_img = ImageTk.PhotoImage(self.selectable_dest_card_2_img)
-                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(160, 35, anchor="nw",
+                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(230, 35, anchor="nw",
                                                                     image=self.selectable_dest_card_2_img)
 
-                check_button2 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var2,
-                                               bg="gray")
-                check_button2.place(x=165, y=140)
+                check_button2 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", fg="#ae2907", bg="#fdf8ed", font=("Arial", 20, "bold"), variable=self.check_var2)
+                check_button2.place(x=230, y=183)
 
             if card3 is not None:
                 # Third Image and Checkbox
                 self.selectable_dest_card_3_img = Image.open(card3.image_path)
-                self.selectable_dest_card_3_img = self.selectable_dest_card_3_img.resize((150, 102),
+                self.selectable_dest_card_3_img = self.selectable_dest_card_3_img.resize((225, 153),
                                                                                          Image.Resampling.LANCZOS)
                 self.selectable_dest_card_3_img = ImageTk.PhotoImage(self.selectable_dest_card_3_img)
-                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(315, 35, anchor="nw",
+                self.select_destination_tickets_canvas.selectable_dest_card_2_img_id = self.select_destination_tickets_canvas.create_image(455, 35, anchor="nw",
                                                                     image=self.selectable_dest_card_3_img)
 
-                check_button3 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", variable=self.check_var3, bg="gray")
-                check_button3.place(x=325, y=140)
+                check_button3 = tk.Checkbutton(self.select_destination_tickets_canvas, text="Select", fg="#ae2907", bg="#fdf8ed", font=("Arial", 20, "bold"), variable=self.check_var3)
+                check_button3.place(x=455, y=183)
 
             # Apply Button
-            apply_button = tk.Button(self.select_destination_tickets_canvas, text="Apply", command=lambda:self.apply_selection(card1,card2,card3))
-            apply_button.place(x=10, y=170)
+            apply_button = ModernButton(self.select_destination_tickets_canvas, text="Apply", command=lambda:self.apply_selection(card1,card2,card3))
+            apply_button.place(x=290, y=220)
 
     def apply_selection(self, card1, card2, card3):
         list_of_selected = []
