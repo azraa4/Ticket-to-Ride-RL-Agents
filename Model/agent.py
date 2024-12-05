@@ -51,8 +51,11 @@ class Agent:
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
             selected_card = train_cards_on_the_table[random_number]
             action_params = {"selected_card": selected_card}
+            print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
             print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
+            train_cards_on_the_table = game_state["train_cards_on_the_table"]
+            print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:

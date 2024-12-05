@@ -8,6 +8,7 @@ class Player:
         self.claimed_routes = []
         self.train_cars = 45
         self.first_turn = True
+        self.longest_road = False
 
     def add_train_card(self, train_card):
         self.train_cards.append(train_card)
@@ -74,3 +75,31 @@ class Player:
         self.train_cars -= num
         print(f"{self.name} with {self.color} has now {self.train_cars} train cars.")
 
+    def calculate_longest_route(self):
+        # Create adjacency list with route lengths from claimed routes
+        adjacency_list = {}
+        for route in self.claimed_routes:
+            if route.city1 not in adjacency_list:
+                adjacency_list[route.city1] = []
+            if route.city2 not in adjacency_list:
+                adjacency_list[route.city2] = []
+            # Add both directions with route length
+            adjacency_list[route.city1].append((route.city2, route.length))
+            adjacency_list[route.city2].append((route.city1, route.length))
+
+        # Function to perform DFS and calculate the longest path
+        def dfs(city, visited, current_length):
+            visited.add(city)
+            max_length = current_length
+            for neighbor, length in adjacency_list.get(city, []):
+                if neighbor not in visited:
+                    max_length = max(max_length, dfs(neighbor, visited, current_length + length))
+            visited.remove(city)
+            return max_length
+
+        # Calculate the longest path for all starting cities
+        longest_road = 0
+        for city in adjacency_list.keys():
+            longest_road = max(longest_road, dfs(city, set(), 0))
+
+        return longest_road

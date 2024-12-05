@@ -203,8 +203,8 @@ class GameController:
         return destination_tickets
 
     def go_to_next_turn(self):
-        if self.turns_available:
-            self.view.root.after(400, self._go_to_next_turn)
+        if self.turns_available and not self.game_end:
+            self.view.root.after(800, self._go_to_next_turn)
     def _go_to_next_turn(self):
         # Before going next turn
         self.calculate_current_player_points()
@@ -218,7 +218,6 @@ class GameController:
             self.view.claimable_routes.update_routes_frame()
             self.selecting_second_train_card = False
             self.draw_train_card_limit = 2
-            return
 
         # Going next turn
         self.game_manager.next_turn()
@@ -431,7 +430,40 @@ class GameController:
             if (((self.game_manager.current_turn) // len(self.game_manager.players)+1)) == self.last_turn+1:
                 print("---GAME END---")
                 self.game_end = True
-                self.view.show_game_end_frame()
+                self.reward_the_longest_route()
+                self.show_game_end_frame()
+
+    def reward_the_longest_route(self):
+        players_have_longest_route = []
+        longest_route_length = 0
+        for player in self.game_manager.players:
+            longest_route_of_the_player = player.calculate_longest_route()
+            if longest_route_length<longest_route_of_the_player:
+                players_have_longest_route = []
+                players_have_longest_route.append(player)
+                longest_route_length = longest_route_of_the_player
+            elif longest_route_length == longest_route_of_the_player:
+                players_have_longest_route.append(player)
+
+        for player in players_have_longest_route:
+            print(f"POINT STATUS: {player.color} has rewarded with longest route extra points.")
+            player.points += 10
+            player.has_longest_road = True
+
+    def show_game_end_frame(self):
+
+        #find the winner
+        winner_player = None
+        temp_max_points = 0
+        for player in self.game_manager.players:
+            if player.points>=temp_max_points:
+                winner_player = player
+                temp_max_points = player.points
+
+
+        turn_played = ((self.game_manager.current_turn) // len(self.game_manager.players)+1)
+        info = {"winner": winner_player, "players": self.game_manager.players, "turn played": turn_played}
+        self.view.game_end_frame.create_game_end_frame(info)
 
     def get_game_end(self):
         return self.game_end

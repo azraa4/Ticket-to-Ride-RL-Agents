@@ -63,9 +63,6 @@ class MainGameApp:
         self.setup_ui()
         self.game_controller.start_game()
 
-    def show_game_end_frame(self):
-        self.game_end_frame.create_game_end_frame()
-
 
 if __name__ == "__main__":
     #Define Models

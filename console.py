@@ -99,6 +99,9 @@ class Console:
     def change_player_cars(self, player_index, car_amount):
         self.view.game_controller.change_player_cars(int(player_index), int(car_amount))
 
+    def show_end_game_frame(self):
+        self.view.game_controller.show_game_end_frame()
+
     #game_services control
     def ai_get_game_state(self):
         self.view.game_service.get_game_state()
