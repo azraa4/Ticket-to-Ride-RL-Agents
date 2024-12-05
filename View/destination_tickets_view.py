@@ -14,7 +14,7 @@ class DestinationTicketsFrame:
 
     def create_destination_tickets_frame(self):
         destination_tickets_frame = tk.Frame(self.root, width=202, height=150, bg="#fdf8ed",
-                                          highlightthickness=4, highlightbackground="#e4a21d")
+                                          highlightthickness=4, highlightbackground="#ae2907")
         destination_tickets_frame.place(x=1078, y=570)
 
         self.canvas_for_text = tk.Canvas(destination_tickets_frame, bg="#fdf8ed", width=230, height=30)

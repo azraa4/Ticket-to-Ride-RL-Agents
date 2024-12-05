@@ -13,13 +13,13 @@ class HeaderInfo:
 
     def create_header_info_frame(self):
         self.header_info_canvas = tk.Canvas(self.root, width=1288, height=40, bg="#fdf8ed",
-                                            highlightthickness=4, highlightbackground="#e4a21d")
+                                            highlightthickness=4, highlightbackground="#ae2907")
         self.header_info_canvas.place(x=-4, y=-4)
 
         # Create the text elements and save their IDs
-        self.turn_text_id = self.header_info_canvas.create_text(20, 24, text="Turn: ", font=("Arial", 14), fill="#c0954a", anchor="w")
-        self.players_info_text_id = self.header_info_canvas.create_text(100, 24, text="Player Info: ", font=("Arial", 14), fill="#c0954a", anchor="w")
-        self.all_players_info_text_id = self.header_info_canvas.create_text(1260, 24, text="Players: ", font=("Arial", 14), fill="#c0954a", anchor="e")
+        self.turn_text_id = self.header_info_canvas.create_text(20, 24, text="Turn: ", font=("Arial", 14), fill="#ae2907", anchor="w")
+        self.players_info_text_id = self.header_info_canvas.create_text(100, 24, text="Player Info: ", font=("Arial", 14), fill="#ae2907", anchor="w")
+        self.all_players_info_text_id = self.header_info_canvas.create_text(1260, 24, text="Players: ", font=("Arial", 14), fill="#ae2907", anchor="e")
 
     def update_turn_text(self, new_text):
         """Update the 'Turn' text."""

@@ -4,9 +4,9 @@ from PIL import Image, ImageTk
 class TTRGui:
     @staticmethod
     def create_modern_button(parent, text, x, y, width=10, height=2, font=12):
-        colour1 = "#c0954a"
-        colour2 = "#c0954a"
-        colour3 = "#d28840"
+        colour1 = "#ae2907"
+        colour2 = "#ae2907"
+        colour3 = "#841804"
         colour4 = "#ffffff"
 
         button = tk.Button(

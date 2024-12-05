@@ -9,7 +9,7 @@ class DrawTicketFrame:
 
     def create_draw_ticket_frame(self):
         ticket_frame = tk.Frame(self.root, width=120, height=150, bg="#fdf8ed", highlightthickness=4,
-                                highlightbackground="#e4a21d")
+                                highlightbackground="#ae2907")
         ticket_frame.place(x=1160, y=570)
 
         image = Image.open("../Assets/Ticket.jpg")

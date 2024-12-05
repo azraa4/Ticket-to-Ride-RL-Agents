@@ -13,3 +13,5 @@ class AIManager:
         print(f"AI Agent Added with color {color}")
         print(self.agents)
 
+    def reset_ai_list(self):
+        self.agents.clear()

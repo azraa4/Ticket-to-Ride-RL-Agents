@@ -55,7 +55,7 @@ class MainFrame:
 
         # Player inventory section
         # Displaying cards
-        self.canvas.create_text(80, 15, anchor="nw", text="Inventory", fill="#e4a21d", font=("Helvetica", 16, "bold"))
+        self.canvas.create_text(80, 15, anchor="nw", text="Inventory", fill="white", font=("Helvetica", 16, "bold"))
         blue_card_img, self.canvas.blue_text_id = self.create_card_with_text("../Assets/bluecard.png", 144, 50, self.blue_card_value)
         red_card_img, self.canvas.red_text_id = self.create_card_with_text("../Assets/redcard.png", 10, 50, self.red_card_value)
         green_card_img, self.canvas.green_text_id = self.create_card_with_text("../Assets/greencard.png", 144, 140, self.green_card_value)

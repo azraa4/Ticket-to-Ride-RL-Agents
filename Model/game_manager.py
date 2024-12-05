@@ -111,6 +111,9 @@ class GameManager:
     def add_player(self, player_name, player_color):
         self.players.append(Player(player_name, player_color))
 
+    def reset_players_list(self):
+        self.players.clear()
+
     def get_claimable_routes(self):
         claimable_routes = []
 

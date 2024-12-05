@@ -46,7 +46,7 @@ class TrainCardSelectionFrame:
     def create_train_card_selection_frame(self):
         # Create the main frame
         train_card_selection_frame = tk.Frame(self.root, width=848, height=150, bg="#fdf8ed",
-                                              highlightthickness=4, highlightbackground="#e4a21d")
+                                              highlightthickness=4, highlightbackground="#ae2907")
         train_card_selection_frame.place(x=230, y=570)
 
         # Create one large canvas within the frame

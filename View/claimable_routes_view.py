@@ -11,12 +11,12 @@ class ClaimableRoutesFrame:
 
     def create_claimable_routes_frame(self):
         claimable_routes_frame = tk.Frame(self.root, width=234, height=145, bg="#fdf8ed",
-                                          highlightthickness=4, highlightbackground="#e4a21d")
+                                          highlightthickness=4, highlightbackground="#ae2907")
         claimable_routes_frame.place(x=-4, y=570)
 
         canvas_for_text = tk.Canvas(claimable_routes_frame, bg="#fdf8ed", width=234, height=20)
         canvas_for_text.place(x=-4, y=0)
-        canvas_for_text.create_text(5, 5, anchor="nw", text="Claimable Routes", fill="black",
+        canvas_for_text.create_text(5, 5, anchor="nw", text="Claimable Routes", fill="#ae2907",
                                     font=("Helvetica", 10, "bold"))
 
         self.canvas = tk.Canvas(claimable_routes_frame, bg="#fdf8ed", width=214, height=130)
