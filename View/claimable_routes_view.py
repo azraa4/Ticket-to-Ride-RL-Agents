@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from ttr_gui_view import TTRGui
+from modern_button import ModernButton
 
 class ClaimableRoutesFrame:
     def __init__(self, root, controller):
@@ -45,7 +46,7 @@ class ClaimableRoutesFrame:
             route_label.grid(row=i, column=0, padx=5, pady=2, sticky="w")
 
             if not self.controller.selecting_second_train_card:
-                claim_button = tk.Button(self.buttons_frame, text="Claim",
+                claim_button = ModernButton(self.buttons_frame, text="Claim", font_size=9, width=5, height=1,
                                          command=lambda r=route: self.controller.claim_route(r))
                 claim_button.grid(row=i, column=1, padx=5, pady=2)
 

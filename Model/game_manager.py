@@ -28,7 +28,20 @@ class GameManager:
     def start_game(self):
         self.current_player = self.players[0]
         self.train_cards_deck.shuffle()
+        self.deal_four_train_cards_to_players_for_starting_game()
         self.deal_train_cards_on_the_table()
+
+    def deal_four_train_cards_to_players_for_starting_game(self):
+        for player in self.players:
+            train_card_1 = self.train_cards_deck.draw_card()
+            train_card_2 = self.train_cards_deck.draw_card()
+            train_card_3 = self.train_cards_deck.draw_card()
+            train_card_4 = self.train_cards_deck.draw_card()
+            player.train_cards.append(train_card_1)
+            player.train_cards.append(train_card_2)
+            player.train_cards.append(train_card_3)
+            player.train_cards.append(train_card_4)
+
 
     def deal_train_cards_on_the_table(self):
         for i in range(0, 5-len(self.cards_on_the_table)):
