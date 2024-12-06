@@ -197,8 +197,6 @@ class MainFrame:
             self.check_var2 = tk.IntVar()
             self.check_var3 = tk.IntVar()
 
-            path = "../Assets/uncheck.png"
-            unchecked_image = tk.PhotoImage(file=path)
 
             if card1 is not None:
                 # First Image and Checkbox
