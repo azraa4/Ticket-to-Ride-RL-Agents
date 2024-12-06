@@ -141,6 +141,7 @@ class GameController:
             self.view.destination_tickets.destroy_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
             self.view.train_cards.update_train_card_pick_buttons(True)
+
             if self.draw_train_card_limit == 0:
                 self.view.destination_tickets.create_draw_ticket_button()
                 self.selecting_second_train_card = False
