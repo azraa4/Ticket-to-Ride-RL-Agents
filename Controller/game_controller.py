@@ -17,7 +17,6 @@ class GameController:
 
         if self.get_current_player().first_turn:
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
-            self.get_current_player().first_turn = False
 
 
         self.update_turn_text()
@@ -207,6 +206,8 @@ class GameController:
             self.view.root.after(800, self._go_to_next_turn)
     def _go_to_next_turn(self):
         # Before going next turn
+        self.get_current_player().first_turn = False
+
         self.calculate_current_player_points()
         self.update_players_info_text()
         self.check_last_turn()
@@ -226,7 +227,7 @@ class GameController:
         if self.get_current_player().first_turn:
             print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
-            self.get_current_player().first_turn = False
+
 
         self.check_if_game_ended()
         self.selecting_second_train_card = False

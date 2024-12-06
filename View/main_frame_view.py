@@ -230,17 +230,25 @@ class MainFrame:
     def apply_selection(self, card1, card2, card3):
         list_of_selected = []
 
-        if self.check_var1.get() == 0 and self.check_var2.get() == 0 and self.check_var3.get() == 0:
-            print("You must select at least one destination card!")
+        sum = self.check_var1.get() + self.check_var2.get() + self.check_var3.get()
+        if self.controller.game_manager.current_player.first_turn:
+            if sum < 2:
+                print("You must select at least two destination card!")
+                return
         else:
-            if self.check_var1.get() == 1 and card1 is not None:
-                list_of_selected.append(card1)
-            if self.check_var2.get() == 1 and card2 is not None:
-                list_of_selected.append(card2)
-            if self.check_var3.get() == 1 and card3 is not None:
-                list_of_selected.append(card3)
-            self.destroy_select_destination_tickets_canvas()
-            self.controller.draw_destination_ticket(list_of_selected)
+            if sum == 0:
+                print("You must select at least one destination card!")
+                return
+
+        if self.check_var1.get() == 1 and card1 is not None:
+            list_of_selected.append(card1)
+        if self.check_var2.get() == 1 and card2 is not None:
+            list_of_selected.append(card2)
+        if self.check_var3.get() == 1 and card3 is not None:
+            list_of_selected.append(card3)
+        self.destroy_select_destination_tickets_canvas()
+        self.controller.draw_destination_ticket(list_of_selected)
+
 
     def destroy_select_destination_tickets_canvas(self):
         if self.select_destination_tickets_canvas is not None:
