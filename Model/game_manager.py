@@ -172,6 +172,33 @@ class GameManager:
                             if missing_cards <= joker_card_value:
                                 claimable_routes.append(route)
 
+            double_routes_list = []
+            for route in claimable_routes:
+                if "_1" in route.id or "_2" in route.id:
+                    double_routes_list.append(route)
+
+            claimed_routes_ids_without_1_2 = []
+            for claimed_route in self.current_player.claimed_routes:
+                if "_1" in claimed_route.id:
+                    id_without = claimed_route.id.replace("_1", "")
+                    claimed_routes_ids_without_1_2.append(id_without)
+                if "_2" in claimed_route.id:
+                    id_without = claimed_route.id.replace("_2", "")
+                    claimed_routes_ids_without_1_2.append(id_without)
+
+            routes_will_be_removed = []
+            for double_route in double_routes_list:
+                for routes_id_without in claimed_routes_ids_without_1_2:
+                    if routes_id_without in double_route.id:
+                        print("DOUBLE ROUTE FOUNDED IT WILL BE REMOVED")
+                        routes_will_be_removed.append(double_route)
+
+            claimable_routes = [route for route in claimable_routes if route not in routes_will_be_removed]
+
+
+
+
+
         return claimable_routes
 
 
