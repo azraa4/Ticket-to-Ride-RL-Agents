@@ -39,6 +39,9 @@ class DestinationTicketsFrame:
                 widget.destroy()
 
     def update_destination_tickets_frame(self):
+        if not self.controller.visualize:  # optimization
+            return
+
         # Clear any existing items in the canvas
         self.clear_destination_tickets_frame()
 
@@ -71,6 +74,9 @@ class DestinationTicketsFrame:
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def create_draw_ticket_button(self):
+        if not self.controller.visualize:  # optimization
+            return
+
         self.draw_ticket_card_button = TTRGui.create_modern_button(
             self.canvas_for_text, "Draw", 130, 3, 4, 2, 7
         )

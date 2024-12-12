@@ -123,10 +123,16 @@ class TrainCardSelectionFrame:
                                                                  font=("Arial", 16), fill="black")
 
     def update_remaining_cards_in_deck(self, remaining):
+        if not self.controller.visualize:  # optimization
+            return
+
         self.remaining_cards_in_deck = remaining
         self.canvas.itemconfig(self.blind_pick_text_id, text=str(self.remaining_cards_in_deck))
 
     def update_train_card_pick_buttons(self, check):
+        if not self.controller.visualize:  # optimization
+            return
+
         if check:
             if self.card_1.color == "joker":
                 self.destroy_train_card_pick_button("train_card_pick_button1")
@@ -200,6 +206,9 @@ class TrainCardSelectionFrame:
 
 
     def update_train_card_selection_frame(self):
+        if not self.controller.visualize:  # optimization
+            return
+
         self.card_1_img = TTRGui.change_image(self, self.canvas.card_1_img_id, self.card_1_img,
                                                    self.card_1_img_path)
         self.card_2_img = TTRGui.change_image(self, self.canvas.card_2_img_id, self.card_2_img,

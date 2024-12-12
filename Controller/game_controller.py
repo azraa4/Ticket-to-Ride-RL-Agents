@@ -17,6 +17,9 @@ class GameController:
 
         self.test_name = test_name
         self.stop_process_end_game=False
+
+        self.visualize = True
+
     def start_game(self):
 
         #cleans the log file

@@ -53,6 +53,7 @@ class MainGameApp:
         #game_services
         self.game_service = GameService(game_controller)
 
+
         if self.queue:
             self.message_thread = threading.Thread(target=self.listen_to_queue)
             self.message_thread.daemon = True  # Programla birlikte kapanacak
@@ -98,6 +99,7 @@ class MainGameApp:
 
     def withdraw_window(self):
         self.root.withdraw()
+        self.game_controller.visualize = False
 
 
 def main(queue=None, game_id=None, panel=None, console=None, number_of_ai=None, visualize=None, test_name=None, time_action=None, time_turn=None):

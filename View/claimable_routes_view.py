@@ -35,23 +35,27 @@ class ClaimableRoutesFrame:
             self.buttons_frame.destroy()
 
     def update_routes_frame(self):
-        self.clear_routes_frame()
+        if not self.controller.visualize:  # optimization
+            return
 
-        self.buttons_frame = tk.Frame(self.canvas, bg="#fdf8ed")
-        self.canvas.create_window((0, 0), window=self.buttons_frame, anchor="nw")
+        if self.controller.visualize:
+            self.clear_routes_frame()
 
-        i = 0
-        for route in self.controller.get_claimable_routes():
-            route_label = tk.Label(self.buttons_frame, text=f"{route.city1} - {route.city2}", bg="#fdf8ed")
-            route_label.grid(row=i, column=0, padx=5, pady=2, sticky="w")
+            self.buttons_frame = tk.Frame(self.canvas, bg="#fdf8ed")
+            self.canvas.create_window((0, 0), window=self.buttons_frame, anchor="nw")
 
-            if not self.controller.selecting_second_train_card:
-                claim_button = ModernButton(self.buttons_frame, text="Claim", font_size=9, width=5, height=1,
-                                         command=lambda r=route: self.controller.claim_route(r))
-                claim_button.grid(row=i, column=1, padx=5, pady=2)
+            i = 0
+            for route in self.controller.get_claimable_routes():
+                route_label = tk.Label(self.buttons_frame, text=f"{route.city1} - {route.city2}", bg="#fdf8ed")
+                route_label.grid(row=i, column=0, padx=5, pady=2, sticky="w")
 
-            i += 1
+                if not self.controller.selecting_second_train_card:
+                    claim_button = ModernButton(self.buttons_frame, text="Claim", font_size=9, width=5, height=1,
+                                             command=lambda r=route: self.controller.claim_route(r))
+                    claim_button.grid(row=i, column=1, padx=5, pady=2)
 
-        self.buttons_frame.update_idletasks()
-        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+                i += 1
+
+            self.buttons_frame.update_idletasks()
+            self.canvas.config(scrollregion=self.canvas.bbox("all"))
 

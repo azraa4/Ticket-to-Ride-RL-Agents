@@ -22,16 +22,25 @@ class HeaderInfo:
         self.all_players_info_text_id = self.header_info_canvas.create_text(1260, 24, text="Players: ", font=("Arial", 14), fill="#ae2907", anchor="e")
 
     def update_turn_text(self, new_text):
+        if not self.controller.visualize:  # optimization
+            return
+
         """Update the 'Turn' text."""
         if self.turn_text_id:
             self.header_info_canvas.itemconfig(self.turn_text_id, text=new_text)
 
     def update_player_info_text(self, new_text):
+        if not self.controller.visualize:  # optimization
+            return
+
         """Update the 'Players Info' text."""
         if self.players_info_text_id:
             self.header_info_canvas.itemconfig(self.players_info_text_id, text=new_text)
 
     def update_players_info_text(self, new_text):
+        if not self.controller.visualize:  # optimization
+            return
+
         """Update the 'Players Info' text."""
         if self.all_players_info_text_id:
             self.header_info_canvas.itemconfig(self.all_players_info_text_id, text=new_text)

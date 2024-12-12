@@ -84,6 +84,9 @@ class MainFrame:
         self.status_text_id =self.canvas.create_text(1280, 500, anchor="e", text="", fill="white", font=("Helvetica", 24, "bold"))
 
     def update_status_text(self, new_text):
+        if not self.controller.visualize:  # optimization
+            return
+
         self.canvas.itemconfig(self.status_text_id, text=new_text)
 
     def create_card_with_text(self, image_path, x, y, card_value):
@@ -120,6 +123,9 @@ class MainFrame:
         return created_road, final_img
 
     def create_roads(self):
+        if not self.controller.visualize:  # optimization
+            return
+
         for route in self.controller.get_unclaimed_routes():
             if(hasattr(self.canvas, route.id)):
                 self.canvas.delete(getattr(self.canvas, route.id))
@@ -130,6 +136,8 @@ class MainFrame:
             setattr(self.canvas, f"{route.id}_img", road_image_img)
 
     def update_train_numbers(self):
+        if not self.controller.visualize:  # optimization
+            return
         if hasattr(self.canvas, 'blue_text_id'):
             self.canvas.itemconfig(self.canvas.blue_text_id, text=str(self.blue_card_value))
 
@@ -158,13 +166,14 @@ class MainFrame:
             self.canvas.itemconfig(self.canvas.joker_text_id, text=str(self.joker_card_value))
 
     def create_select_card_for_gray_roads_frame(self, selected_route):
+        if not self.controller.visualize:  # optimization
+            return
         if self.select_card_for_gray_roads_frame is None:
             self.additional_frame = tk.Frame(self.root, width=1288, height=154, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
             self.additional_frame.place(x=-4, y=570)
 
             self.select_card_for_gray_roads_frame = tk.Frame(self.root, width=1800, height=188, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
             self.select_card_for_gray_roads_frame.place(x=0, y=570)
-
             label = tk.Label(self.select_card_for_gray_roads_frame, text="Select Card to Use", bg="#fdf8ed", fg="#ae2907", font=("Arial", 18, "bold"))
             label.pack(pady=5)
 
@@ -189,6 +198,8 @@ class MainFrame:
             self.additional_frame = None
 
     def create_select_destination_tickets_canvas(self, card1, card2, card3):
+        if not self.controller.visualize:  # optimization
+            return
         if self.select_destination_tickets_canvas is None:
 
             self.select_destination_tickets_canvas = tk.Canvas(self.root, width=1280, height=270, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
