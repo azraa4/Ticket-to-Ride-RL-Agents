@@ -111,6 +111,10 @@ class MainMenu:
         reset_players_list_button.config(command=self.reset_list)
         reset_players_list_button.pack(side="left")
 
+        quit_button = self.create_modern_button(player_edit_frame, "Quit Game", width=11, height=1,
+                                                              font=20)
+        quit_button.config(command=self.quit)
+        quit_button.pack(side="left")
 
 
 
@@ -157,3 +161,10 @@ class MainMenu:
             self.start_game_callback()
         else:
             print("!     ERROR: Player Eklenmeli!")
+
+    def force_start_game(self):
+        self.frame.pack_forget()
+        self.start_game_callback()
+
+    def quit(self):
+        self.root.destroy()

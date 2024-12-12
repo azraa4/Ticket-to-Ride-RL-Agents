@@ -22,15 +22,21 @@ from PIL import Image, ImageTk
 from View.ttr_gui_view import TTRGui
 
 import threading
+import sys
+import time
 
+import global_vars
 class MainGameApp:
-    def __init__(self, game_controller, main_menu_controller):
+    def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None):
         self.game_controller = game_controller
+        self.queue = queue  # Queue nesnesi
+        self.game_id = game_id  # Bu oyunun kimliği
 
         self.root = tk.Tk()
         self.root.title("Ticket to Ride")
         self.root.geometry("1280x720")
         self.root.resizable(False, False)
+
 
         #all views
         self.main_frame = MainFrame(self.root, game_controller)
@@ -46,6 +52,30 @@ class MainGameApp:
 
         #game_services
         self.game_service = GameService(game_controller)
+
+        if self.queue:
+            self.message_thread = threading.Thread(target=self.listen_to_queue)
+            self.message_thread.daemon = True  # Programla birlikte kapanacak
+            self.message_thread.start()
+
+    def listen_to_queue(self):
+        """Queue'den gelen mesajları dinler ve işler."""
+        while True:
+            if self.queue is not None and not self.queue.empty():
+                message = self.queue.get()  # Mesajı al
+                self.process_message(message)
+
+    def process_message(self, message):
+        """Panelden gelen mesajları işler."""
+        if message.startswith(f"printThisInGame_{self.game_id}"):
+            _, text = message.split(":", 1)
+            print(f"Game {self.game_id}: {text}")
+
+        elif message == f"stop_{self.game_id}":
+            print(f"Stopping game {self.game_id}.")
+            self.game_controller.game_end = True
+            time.sleep(5)
+            self.stop_game()
 
     def setup_ui(self):
         self.train_cards.create_train_card_selection_frame()
@@ -63,29 +93,59 @@ class MainGameApp:
         self.setup_ui()
         self.game_controller.start_game()
 
+    def stop_game(self):
+        self.root.destroy()
 
-if __name__ == "__main__":
-    #Define Models
+    def withdraw_window(self):
+        self.root.withdraw()
+
+
+def main(queue=None, game_id=None, panel=None, console=None, number_of_ai=None, visualize=None, test_name=None, time_action=None, time_turn=None):
+    # Define Models
     game_manager = GameManager()
     ai_manager = AIManager(None)
 
-
-    #Define Controllerso
-    game_controller = GameController(None, game_manager, None, None)
+    # Define Controllers
+    game_controller = GameController(None, game_manager, None, None, test_name)
     main_menu_controller = MainMenuController(None, game_manager, ai_manager)
 
     # Define Main View
-    app = MainGameApp(game_controller, main_menu_controller)
+    app = MainGameApp(game_controller, main_menu_controller, queue, game_id)
 
     ai_manager.game_service = app.game_service
-
 
     game_controller.view = app
     game_controller.game_service = app.game_service
     game_controller.ai_manager = ai_manager
 
-    console = Console(app)
-    console_thread = threading.Thread(target=console.open_console_window)
-    console_thread.start()
+    main_menu_controller.view = app.main_menu
+
+
+    if console:
+        console = Console(app)
+        console_thread = threading.Thread(target=console.open_console_window)
+        console_thread.start()
+
+    if panel:
+        game_controller.stop_process_end_game = True
+
+        global_vars.time_turn = time_turn
+        global_vars.time_action = time_action
+
+        if not visualize:
+            app.withdraw_window()
+
+        number_of_ai = int(number_of_ai)
+        list_of_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
+        for i in range(number_of_ai):
+            ai_color = list_of_colors[i]
+            main_menu_controller.add_player_button(f"AI{i}", ai_color)
+            main_menu_controller.add_ai(ai_color)
+            main_menu_controller.force_start_game()
 
     app.run()
+
+if __name__ == "__main__":
+    main()
+
+

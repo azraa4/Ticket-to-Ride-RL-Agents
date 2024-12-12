@@ -33,8 +33,6 @@ class GameService:
             "train_cards_on_the_table": train_cards_on_the_table,
         }
 
-        print("GAME STATE CALLED: ", game_state)
-
         return game_state
 
     def get_current_player_state(self):
@@ -160,4 +158,9 @@ class GameService:
     def change_status_text(self, text):
         self.controller.change_status_text(text)
 
+    def log(self, text):
+        self.controller.log(text)
+
+    def wait_for_it(self, time):
+        self.controller.view.root.after(time, lambda: None)
 

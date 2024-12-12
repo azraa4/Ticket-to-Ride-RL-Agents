@@ -1,9 +1,12 @@
+import global_vars
 class MainMenuController:
 
     def __init__(self, view, game_manager, ai_manager):
         self.view = view
         self.game_manager = game_manager
         self.ai_manager = ai_manager
+        global_vars.time_action = 5
+        global_vars.time_turn = 5
         return
 
     def add_player_button(self, player_name, player_color):
@@ -15,3 +18,6 @@ class MainMenuController:
 
     def add_ai(self, ai_color):
         self.ai_manager.add_ai(ai_color)
+
+    def force_start_game(self):
+        self.view.force_start_game()
