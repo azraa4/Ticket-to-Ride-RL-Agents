@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from ttr_gui_view import TTRGui
-from modern_button import ModernButton
+from View.ttr_gui_view import TTRGui
+from View.modern_button import ModernButton
 
 class ClaimableRoutesFrame:
     def __init__(self, root, controller):

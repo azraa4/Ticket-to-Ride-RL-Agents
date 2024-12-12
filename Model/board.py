@@ -7,7 +7,7 @@ class Board:
         self.initialize_routes()
 
     def initialize_routes(self):
-        with open("../Model/routes_data.json", "r") as json_file:
+        with open("Model/routes_data.json", "r") as json_file:
             data = json.load(json_file)
             routes_data = data["routes_data"]
 

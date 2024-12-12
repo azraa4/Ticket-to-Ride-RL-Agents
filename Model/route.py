@@ -16,7 +16,7 @@ class Route:
             print("!        ERROR: it is already claimed")
 
     def get_image_path(self):
-        return f"../Assets/MapRoads/{self.id}.png"
+        return f"Assets/MapRoads/{self.id}.png"
 
     def get_claimed_color(self):
         if self.claimed_color is not None:

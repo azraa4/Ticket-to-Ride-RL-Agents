@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from ttr_gui_view import TTRGui
+from View.ttr_gui_view import TTRGui
 
 class DrawTicketFrame:
     def __init__(self, root, controller):
@@ -12,7 +12,7 @@ class DrawTicketFrame:
                                 highlightbackground="#ae2907")
         ticket_frame.place(x=1160, y=570)
 
-        image = Image.open("../Assets/Ticket.jpg")
+        image = Image.open("Assets/Ticket.jpg")
         image = image.resize((110, 106), Image.Resampling.LANCZOS)
         img = ImageTk.PhotoImage(image)
 

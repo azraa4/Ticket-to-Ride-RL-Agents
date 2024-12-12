@@ -1,8 +1,8 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageEnhance, ImageOps
-from ttr_gui_view import TTRGui
-from modern_option_menu import ModernOptionMenu
-from modern_button import ModernButton
+from View.ttr_gui_view import TTRGui
+from View.modern_option_menu import ModernOptionMenu
+from View.modern_button import ModernButton
 
 class MainFrame:
     def __init__(self, root, controller):
@@ -13,7 +13,7 @@ class MainFrame:
         self.select_card_for_gray_roads_frame = None
         self.select_destination_tickets_canvas = None
 
-        self.back_side_of_ticket_image_path = "../Assets/DestinationTickets/backsideOfTicket.png"
+        self.back_side_of_ticket_image_path = "Assets/DestinationTickets/backsideOfTicket.png"
         self.dest_card_1_img_path = self.back_side_of_ticket_image_path
         self.dest_card_2_img_path = self.back_side_of_ticket_image_path
         self.dest_card_3_img_path = self.back_side_of_ticket_image_path
@@ -48,7 +48,7 @@ class MainFrame:
         self.canvas = tk.Canvas(main_frame, width=1284, height=527, highlightthickness=0)
         self.canvas.place(x=0, y=0)
 
-        image = Image.open("../Assets/map.jpg")
+        image = Image.open("Assets/map.jpg")
         image = image.resize((1284, 527), Image.Resampling.LANCZOS)
         img = ImageTk.PhotoImage(image)
         self.canvas.create_image(0, 0, anchor="nw", image=img)
@@ -57,15 +57,15 @@ class MainFrame:
         # Player inventory section
         # Displaying cards
         self.canvas.create_text(80, 15, anchor="nw", text="Inventory", fill="white", font=("Helvetica", 16, "bold"))
-        blue_card_img, self.canvas.blue_text_id = self.create_card_with_text("../Assets/bluecard.png", 144, 50, self.blue_card_value)
-        red_card_img, self.canvas.red_text_id = self.create_card_with_text("../Assets/redcard.png", 10, 50, self.red_card_value)
-        green_card_img, self.canvas.green_text_id = self.create_card_with_text("../Assets/greencard.png", 144, 140, self.green_card_value)
-        orange_card_img, self.canvas.orange_text_id = self.create_card_with_text("../Assets/orangecard.png", 10, 140, self.orange_card_value)
-        yellow_card_img, self.canvas.yellow_text_id = self.create_card_with_text("../Assets/yellowcard.png", 144, 230, self.yellow_card_value)
-        white_card_img, self.canvas.white_text_id = self.create_card_with_text("../Assets/whitecard.png", 10, 230, self.white_card_value)
-        black_card_img, self.canvas.black_text_id = self.create_card_with_text("../Assets/blackcard.png", 144, 320, self.black_card_value)
-        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("../Assets/pinkcard.png", 10, 320, self.pink_card_value)
-        joker_card_img, self.canvas.joker_text_id = self.create_card_with_text("../Assets/jokercard.png", 77, 410, self.joker_card_value)
+        blue_card_img, self.canvas.blue_text_id = self.create_card_with_text("Assets/bluecard.png", 144, 50, self.blue_card_value)
+        red_card_img, self.canvas.red_text_id = self.create_card_with_text("Assets/redcard.png", 10, 50, self.red_card_value)
+        green_card_img, self.canvas.green_text_id = self.create_card_with_text("Assets/greencard.png", 144, 140, self.green_card_value)
+        orange_card_img, self.canvas.orange_text_id = self.create_card_with_text("Assets/orangecard.png", 10, 140, self.orange_card_value)
+        yellow_card_img, self.canvas.yellow_text_id = self.create_card_with_text("Assets/yellowcard.png", 144, 230, self.yellow_card_value)
+        white_card_img, self.canvas.white_text_id = self.create_card_with_text("Assets/whitecard.png", 10, 230, self.white_card_value)
+        black_card_img, self.canvas.black_text_id = self.create_card_with_text("Assets/blackcard.png", 144, 320, self.black_card_value)
+        pink_card_img, self.canvas.pink_text_id = self.create_card_with_text("Assets/pinkcard.png", 10, 320, self.pink_card_value)
+        joker_card_img, self.canvas.joker_text_id = self.create_card_with_text("Assets/jokercard.png", 77, 410, self.joker_card_value)
 
         # Keep references to images to avoid garbage collection
         self.canvas.blue_card_img = blue_card_img
@@ -80,6 +80,11 @@ class MainFrame:
 
         #Update Roads
         self.create_roads()
+
+        self.status_text_id =self.canvas.create_text(1280, 500, anchor="e", text="", fill="white", font=("Helvetica", 24, "bold"))
+
+    def update_status_text(self, new_text):
+        self.canvas.itemconfig(self.status_text_id, text=new_text)
 
     def create_card_with_text(self, image_path, x, y, card_value):
         card_img = Image.open(image_path)
@@ -263,4 +268,5 @@ class MainFrame:
         if self.select_destination_tickets_canvas is not None:
             self.select_destination_tickets_canvas.destroy()
             self.select_destination_tickets_canvas = None
+
 

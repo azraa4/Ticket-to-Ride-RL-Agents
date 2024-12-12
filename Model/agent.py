@@ -1,4 +1,6 @@
 import random
+import time
+
 class Agent:
     def __init__(self, color, game_service):
         self.color = color
@@ -46,6 +48,10 @@ class Agent:
             if returned_item == 0:
                 self.draw_train_card()
                 return
+
+            self.game_service.change_status_text("AI drawed from blind pick")
+            time.sleep(3)
+
         else:
             game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
@@ -54,12 +60,16 @@ class Agent:
             print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
             print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
+
+            self.game_service.change_status_text(f"AI drawed {selected_card.color} colored train card.")
+            time.sleep(3)
+
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
             print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:
-                    print("card amoun:",len(train_cards_on_the_table))
+                    print("card amount:",len(train_cards_on_the_table))
                     second_random_number = random.randint(0, len(train_cards_on_the_table)-1)
                     selected_second_card = train_cards_on_the_table[second_random_number]
                     if selected_second_card.color == "joker":
@@ -69,6 +79,10 @@ class Agent:
                         print("AI: SELECTED SECOND CARD BY AI:", selected_second_card.color)
                         self.game_service.perform_action("draw_train_card", action_params)
                         check = False
+
+                    self.game_service.change_status_text(f"AI drawed {selected_second_card.color} colored train card as second train card.")
+
+                time.sleep(3)
 
     def draw_destination_ticket(self):
         draw_destination_card_list = self.game_service.perform_action("draw_destination_ticket", None)
@@ -84,6 +98,8 @@ class Agent:
         action_params = {"selected_destination_tickets": selected_cards}
         self.game_service.perform_action("draw_destination_ticket", action_params)
 
+        self.game_service.change_status_text(f"AI drawed destination ticket card.")
+        time.sleep(2)
 
     def claim_route(self):
         current_state = self.game_service.get_current_player_state()
@@ -95,11 +111,25 @@ class Agent:
                 print("AI: A GRAY ROUTE SELECTED")
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"AI claiming a gray route.")
+                time.sleep(3)
+
                 use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
                 action_params = {"selected_route": random_route, "use_this_color": use_random_color}
                 self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"AI claimed a gray route with {use_random_color}")
+                time.sleep(2)
+
             else:
                 print("AI: A COLORED ROUTE SELECTED")
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"AI claimed a colored route.")
+                time.sleep(2)
+
+
+
 

@@ -1,12 +1,12 @@
 from View.destination_tickets_view import DestinationTicketsFrame
-from header_info_view import HeaderInfo
-from train_card_selection_view import TrainCardSelectionFrame
-from claimable_routes_view import ClaimableRoutesFrame
-from draw_ticket_frame_view import DrawTicketFrame
-from destination_tickets_view import DestinationTicketsFrame
-from main_frame_view import MainFrame
-from main_menu import MainMenu
-from game_end_frame import GameEndFrame
+from View.header_info_view import HeaderInfo
+from View.train_card_selection_view import TrainCardSelectionFrame
+from View.claimable_routes_view import ClaimableRoutesFrame
+from View.draw_ticket_frame_view import DrawTicketFrame
+from View.destination_tickets_view import DestinationTicketsFrame
+from View.main_frame_view import MainFrame
+from View.main_menu import MainMenu
+from View.game_end_frame import GameEndFrame
 
 from Controller.game_controller import GameController
 from Controller.main_menu_controller import MainMenuController
@@ -19,7 +19,7 @@ from Controller.game_service import GameService
 
 import tkinter as tk
 from PIL import Image, ImageTk
-from ttr_gui_view import TTRGui
+from View.ttr_gui_view import TTRGui
 
 import threading
 

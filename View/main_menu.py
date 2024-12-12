@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from modern_option_menu import ModernOptionMenu
+from View.modern_option_menu import ModernOptionMenu
 
 class MainMenu:
     def create_modern_button(self, parent, text, width=10, height=2, font=12):
@@ -31,7 +31,7 @@ class MainMenu:
         self.list_item_number = 0
 
         # Arka plan resmi ayarla
-        self.background_image = Image.open("../Assets/menu_background.jpg")
+        self.background_image = Image.open("Assets/menu_background.jpg")
         self.background_photo = ImageTk.PhotoImage(self.background_image)
         self.background_label = tk.Label(self.frame, image=self.background_photo)
         self.background_label.place(relwidth=1, relheight=1)

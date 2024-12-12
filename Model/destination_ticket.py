@@ -4,7 +4,7 @@ class DestinationTicket:
         self.city2 = city2
         self.points = points
         self.is_completed = False  # Biletin tamamlanıp tamamlanmadığını izlemek için bir bayrak
-        self.image_path = f"../Assets/DestinationTickets/{ticket_id}.png"  # Görsel yolu
+        self.image_path = f"Assets/DestinationTickets/{ticket_id}.png"  # Görsel yolu
 
     def mark_as_completed(self):
         """Biletin tamamlandığını işaretler."""

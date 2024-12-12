@@ -8,7 +8,7 @@ class Player:
         self.claimed_routes = []
         self.train_cars = 45
         self.first_turn = True
-        self.longest_road = False
+        self.has_longest_road = False
 
     def add_train_card(self, train_card):
         self.train_cards.append(train_card)

@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from ttr_gui_view import TTRGui
+from View.ttr_gui_view import TTRGui
 
 class TrainCardSelectionFrame:
     def __init__(self, root, controller):
@@ -9,31 +9,31 @@ class TrainCardSelectionFrame:
 
         self.card_1 = None
         self.card_1_img = None
-        self.card_1_img_path = "../Assets/whitecard.png"
+        self.card_1_img_path = "Assets/whitecard.png"
         self.train_card_pick_button1 = None
 
         self.card_2 = None
         self.card_2_img = None
-        self.card_2_img_path = "../Assets/whitecard.png"
+        self.card_2_img_path = "Assets/whitecard.png"
         self.train_card_pick_button2 = None
 
         self.card_3 = None
         self.card_3_img = None
-        self.card_3_img_path = "../Assets/whitecard.png"
+        self.card_3_img_path = "Assets/whitecard.png"
         self.train_card_pick_button3 = None
 
         self.card_4 = None
         self.card_4_img = None
-        self.card_4_img_path = "../Assets/whitecard.png"
+        self.card_4_img_path = "Assets/whitecard.png"
         self.train_card_pick_button4 = None
 
         self.card_5 = None
         self.card_5_img = None
-        self.card_5_img_path = "../Assets/whitecard.png"
+        self.card_5_img_path = "Assets/whitecard.png"
         self.train_card_pick_button5 = None
 
         self.blind_pick_img = None
-        self.blind_pick_img_path = "../Assets/deck.jpg"
+        self.blind_pick_img_path = "Assets/deck.jpg"
         self.train_card_pick_button6 = None
 
         self.canvas = None
@@ -59,7 +59,7 @@ class TrainCardSelectionFrame:
         # First card
         self.train_card_pick_button1 = TTRGui.create_modern_button(self.canvas, "Pick", spacing, 105, 16, 2, 10)
         self.train_card_pick_button1.config(command=lambda: self.controller.draw_train_card(self.card_1))
-        self.card_1_img = Image.open("../Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
+        self.card_1_img = Image.open("Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
         self.card_1_img = ImageTk.PhotoImage(self.card_1_img)
         self.canvas.card_1_img_id = self.canvas.create_image(spacing, 0, anchor='nw', image=self.card_1_img)
         self.card_1_img = self.card_1_img  # Keep a reference to avoid garbage collection
@@ -68,7 +68,7 @@ class TrainCardSelectionFrame:
         self.train_card_pick_button2 = TTRGui.create_modern_button(self.canvas, "Pick", spacing * 2 + frame_width, 105, 16,
                                                               2, 10)
         self.train_card_pick_button2.config(command=lambda: self.controller.draw_train_card(self.card_2))
-        self.card_2_img = Image.open("../Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
+        self.card_2_img = Image.open("Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
         self.card_2_img = ImageTk.PhotoImage(self.card_2_img)
         self.canvas.card_2_img_id = self.canvas.create_image(spacing * 2 + frame_width, 0, anchor='nw',
                                                              image=self.card_2_img)
@@ -78,7 +78,7 @@ class TrainCardSelectionFrame:
         self.train_card_pick_button3 = TTRGui.create_modern_button(self.canvas, "Pick", spacing * 3 + frame_width * 2, 105,
                                                               16, 2, 10)
         self.train_card_pick_button3.config(command=lambda: self.controller.draw_train_card(self.card_3))
-        self.card_3_img = Image.open("../Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
+        self.card_3_img = Image.open("Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
         self.card_3_img = ImageTk.PhotoImage(self.card_3_img)
         self.canvas.card_3_img_id = self.canvas.create_image(spacing * 3 + frame_width * 2, 0, anchor='nw',
                                                              image=self.card_3_img)
@@ -88,7 +88,7 @@ class TrainCardSelectionFrame:
         self.train_card_pick_button4 = TTRGui.create_modern_button(self.canvas, "Pick", spacing * 4 + frame_width * 3, 105,
                                                               16, 2, 10)
         self.train_card_pick_button4.config(command=lambda: self.controller.draw_train_card(self.card_4))
-        self.card_4_img = Image.open("../Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
+        self.card_4_img = Image.open("Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
         self.card_4_img = ImageTk.PhotoImage(self.card_4_img)
         self.canvas.card_4_img_id = self.canvas.create_image(spacing * 4 + frame_width * 3, 0, anchor='nw',
                                                              image=self.card_4_img)
@@ -98,7 +98,7 @@ class TrainCardSelectionFrame:
         self.train_card_pick_button5 = TTRGui.create_modern_button(self.canvas, "Pick", spacing * 5 + frame_width * 4, 105,
                                                               16, 2, 10)
         self.train_card_pick_button5.config(command=lambda: self.controller.draw_train_card(self.card_5))
-        self.card_5_img = Image.open("../Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
+        self.card_5_img = Image.open("Assets/whitecard.png").resize((frame_width, 105), Image.Resampling.LANCZOS)
         self.card_5_img = ImageTk.PhotoImage(self.card_5_img)
         self.canvas.card_5_img_id = self.canvas.create_image(spacing * 5 + frame_width * 4, 0, anchor='nw',
                                                              image=self.card_5_img)
@@ -108,7 +108,7 @@ class TrainCardSelectionFrame:
         self.train_card_pick_button6 = TTRGui.create_modern_button(self.canvas, "Blind Pick", spacing * 6 + frame_width * 5,
                                                               105, 16, 2, 10)
         self.train_card_pick_button6.config(command=lambda: self.controller.draw_cards_from_blind_deck())
-        self.blind_pick_img = Image.open("../Assets/deck.jpg").resize((frame_width-2, 105), Image.Resampling.LANCZOS)
+        self.blind_pick_img = Image.open("Assets/deck.jpg").resize((frame_width-2, 105), Image.Resampling.LANCZOS)
         self.blind_pick_img = ImageTk.PhotoImage(self.blind_pick_img)
         self.canvas.blind_pick_img_id = self.canvas.create_image(spacing * 6 + frame_width * 5, 0, anchor='nw',
                                                                  image=self.blind_pick_img)

@@ -204,7 +204,7 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available and not self.game_end:
-            self.view.root.after(800, self._go_to_next_turn)
+            self.view.root.after(8000, self._go_to_next_turn)
     def _go_to_next_turn(self):
         # Before going next turn
         self.get_current_player().first_turn = False
@@ -481,3 +481,5 @@ class GameController:
     def get_ai_list(self):
         return self.ai_manager.agents
 
+    def change_status_text(self, text):
+        self.view.main_frame.update_status_text(text)

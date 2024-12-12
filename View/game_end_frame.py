@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk, ImageEnhance, ImageOps
-from ttr_gui_view import TTRGui
-from modern_button import ModernButton
+from View.ttr_gui_view import TTRGui
+from View.modern_button import ModernButton
 class GameEndFrame:
     def __init__(self, root, controller):
         self.root = root
@@ -18,7 +18,7 @@ class GameEndFrame:
             self.game_end_frame.pack(expand=True, fill="both")
 
             # Arka plan resmi ayarla
-            self.background_image = Image.open("../Assets/end_background.jpg")
+            self.background_image = Image.open("Assets/end_background.jpg")
             self.background_photo = ImageTk.PhotoImage(self.background_image)
             self.background_label = tk.Label(self.game_end_frame, image=self.background_photo)
             self.background_label.place(relwidth=1, relheight=1)
@@ -48,7 +48,7 @@ class GameEndFrame:
             players = self.info["players"]
             if len(players) != 0:
                 for player in players:
-                    if player.longest_road == True:
+                    if player.has_longest_road == True:
                         text = f"{player.name} ({player.color}) has {player.points} points with longest road."
                     else:
                         text = f"{player.name} ({player.color}) has {player.points} points."

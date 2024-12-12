@@ -3,7 +3,6 @@ from Model.deck import Deck
 from Model.player import Player
 from Model.train_card import TrainCard
 from Model.destination_ticket import DestinationTicket
-from Model.destination_ticket import DestinationTicket
 import json
 
 class GameManager:
@@ -88,7 +87,7 @@ class GameManager:
 
     def create_destination_tickets_list(self):
         destination_tickets_list = []
-        with open("../Model/destination_tickets_data.json", "r") as json_file:
+        with open("Model/destination_tickets_data.json", "r") as json_file:
             data = json.load(json_file)
             destination_tickets_data = data["destination_tickets_data"]
 

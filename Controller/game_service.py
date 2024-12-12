@@ -157,5 +157,7 @@ class GameService:
         print("AI: AI informed about turn change.")
         return
 
+    def change_status_text(self, text):
+        self.controller.change_status_text(text)
 
 

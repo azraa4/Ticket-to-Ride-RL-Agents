@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from ttr_gui_view import TTRGui
+from View.ttr_gui_view import TTRGui
 
 class HeaderInfo:
     def __init__(self, root, controller):
