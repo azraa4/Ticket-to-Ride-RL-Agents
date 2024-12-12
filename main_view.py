@@ -143,7 +143,7 @@ def main(queue=None, game_id=None, panel=None, console=None, number_of_ai=None, 
             ai_color = list_of_colors[i]
             main_menu_controller.add_player_button(f"AI{i}", ai_color)
             main_menu_controller.add_ai(ai_color)
-            main_menu_controller.force_start_game()
+        main_menu_controller.force_start_game()
 
     app.run()
 

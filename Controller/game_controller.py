@@ -252,14 +252,16 @@ class GameController:
         self.game_manager.next_turn()
 
         # After going next turn
-        self.log(f"Turn:{((self.game_manager.current_turn) // len(self.game_manager.players)+1)}, {self.get_current_player().name}({self.get_current_player().color})'s turn.")
-
         log_this = f"GAMESTATE: Turn: {((self.game_manager.current_turn) // len(self.game_manager.players) + 1)} | "
         for i in range(len(self.game_manager.players)):
             player = self.game_manager.players[i]
-            log_this+=f"Player {i} Name: {player.name}, Player {i} Color: {player.color}, Player {i} Points: {player.points}, Player {i} Cars: {player.train_cars} | "
+            log_this += f"Player {i} Name: {player.name}, Player {i} Color: {player.color}, Player {i} Points: {player.points}, Player {i} Cars: {player.train_cars} | "
         log_this = log_this.rstrip('|')
         self.log(log_this)
+
+        self.log(f"Turn:{((self.game_manager.current_turn) // len(self.game_manager.players)+1)}, {self.get_current_player().name}({self.get_current_player().color})'s turn.")
+
+
 
         if self.get_current_player().first_turn:
             print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")

@@ -290,7 +290,10 @@ class ControlPanel:
             matching_colors = [color for keyword, color in color_keywords.items() if keyword in stripped_line]
             if len(matching_colors) == 1:
                 # If only one color matches, set the background color
-                self.log_content_listbox.itemconfig(idx, {'bg': matching_colors[0]})
+                if matching_colors[0] == "black":
+                    self.log_content_listbox.itemconfig(idx, {'bg': "gray"})
+                else:
+                    self.log_content_listbox.itemconfig(idx, {'bg': matching_colors[0]})
             elif len(matching_colors) > 1:
                 # If more than one color matches, leave the background white (default)
                 self.log_content_listbox.itemconfig(idx, {'bg': 'white'})

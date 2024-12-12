@@ -45,11 +45,15 @@ class MainMenu:
 
         start_button = self.create_modern_button(self.frame, "Start Game", width=23, height=1, font=20)
         start_button.config(command=self.start_game)
-        start_button.pack(padx=65, pady=20, anchor="w")
+        start_button.pack(padx=65, pady=(0,5), anchor="w")
 
-        player_list_label = tk.Label(self.frame, text="Players List ", font=("Arial", 20, "bold"), fg="#ae2907",
+        quit_button = self.create_modern_button(self.frame, "Quit Game", width=23, height=1, font=20)
+        quit_button.config(command=self.quit)
+        quit_button.pack(padx=65, pady=(0,5), anchor="w")
+
+        player_list_label = tk.Label(self.frame, text="Players List ", font=("Arial", 15, "bold"), fg="#ae2907",
                                      bg="#d5b570")
-        player_list_label.pack(padx=65, pady=10, anchor="w")
+        player_list_label.pack(padx=65, pady=5, anchor="w")
         # Oyuncuları listelemek için bir liste alanı ekleyin
         self.player_listbox = tk.Listbox(self.frame, font=("Arial", 14, "bold"),  # Modern font
                                          bg="#d5b570",
@@ -105,16 +109,12 @@ class MainMenu:
         add_player_button = self.create_modern_button(player_edit_frame, "Add Player", width=11, height=1, font=20)
         add_player_button.config(command=self.add_player)
         player_edit_frame.pack(padx=65, pady=10, anchor="w")
-        add_player_button.pack(side="left", padx=(0,6))
+        add_player_button.pack(side="left", padx=(0,5))
 
         reset_players_list_button = self.create_modern_button(player_edit_frame, "Reset List", width=11, height=1, font=20)
         reset_players_list_button.config(command=self.reset_list)
         reset_players_list_button.pack(side="left")
 
-        quit_button = self.create_modern_button(player_edit_frame, "Quit Game", width=11, height=1,
-                                                              font=20)
-        quit_button.config(command=self.quit)
-        quit_button.pack(side="left")
 
 
 
