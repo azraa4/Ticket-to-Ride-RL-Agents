@@ -4,7 +4,7 @@ import time
 import global_vars
 
 
-class Agent:
+class RandomAgent:
     def __init__(self, color, game_service):
         self.color = color
         self.game_service = game_service

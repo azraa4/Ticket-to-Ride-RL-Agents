@@ -9,6 +9,8 @@ class Player:
         self.train_cars = 45
         self.first_turn = True
         self.has_longest_road = False
+        self.total_turn_played = 0
+        self.total_time_played = 0
 
     def add_train_card(self, train_card):
         self.train_cards.append(train_card)

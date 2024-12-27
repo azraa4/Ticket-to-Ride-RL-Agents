@@ -1,7 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import multiprocessing
 import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 import signal
 from multiprocessing import Queue
 
@@ -13,6 +15,8 @@ class ControlPanel:
         self.root = tk.Tk()
         self.root.title("Tournament Panel")
         self.root.geometry("1280x720")
+
+        self.agents = []
 
         # Create a frame to hold the two columns
         self.main_frame = tk.Frame(self.root, bg="black")
@@ -47,6 +51,29 @@ class ControlPanel:
         self.number_of_AI_entry = tk.Entry(self.frame2)
         self.number_of_AI_entry.pack(side=tk.LEFT, padx=5)
 
+        # Label ve Agent Type Dropdown
+        self.label_agent = tk.Label(self.frame2, text="Select Agent Type: ")
+        self.label_agent.pack(side=tk.LEFT, padx=5)
+
+        self.agent_type_var = tk.StringVar()
+        agent_dropdown = ttk.Combobox(self.frame2, textvariable=self.agent_type_var, state="readonly")
+        agent_dropdown["values"] = ["RandomAgent", "AgentX"]
+        agent_dropdown.pack(side=tk.LEFT, padx=5)
+
+        # Label, Color Dropdown and Button
+        self.available_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
+        label_color = tk.Label(self.frame2, text="Select Color: ")
+        label_color.pack(side=tk.LEFT, padx=5)
+
+        self.color_var = tk.StringVar()
+        self.color_dropdown = ttk.Combobox(self.frame2, textvariable=self.color_var, state="readonly")
+        self.color_dropdown["values"] = self.available_colors
+        self.color_dropdown.pack(side=tk.LEFT, padx=5)
+
+        add_player_button = tk.Button(self.frame2, text="Add Player", command=self.add_player)
+        add_player_button.pack(side=tk.LEFT, padx=5)
+
+        #Time Settings Frame
         self.frame3 = tk.Frame(self.left_column)
         self.frame3.pack(fill=tk.X, pady=5)
 
@@ -88,10 +115,38 @@ class ControlPanel:
                                               command=self.stop_selected_process)
         self.stop_selected_button.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
+        # Treeview widget for agents general performance
+
+        self.general_agents_info_frame = tk.Frame(self.left_column)
+        self.general_agents_info_frame.pack(fill=tk.X, pady=10)
+
+        self.agent_status_label = tk.Label(self.general_agents_info_frame, text="Agents' Status")
+        self.agent_status_label.pack()
+
+        columns = ("Agent Type", "Total Points", "Total Longest Road", "Total Cars Spend", "Total Turn Played", "Total Time Played")
+        self.tree_general_players_info = ttk.Treeview(self.general_agents_info_frame, columns=columns, show="headings", height=5)
+
+        self.tree_general_players_info.heading("Agent Type", text="Agent Type")
+        self.tree_general_players_info.heading("Total Points", text="Total Points")
+        self.tree_general_players_info.heading("Total Longest Road", text="Total Longest Road")
+        self.tree_general_players_info.heading("Total Cars Spend", text="Total Cars Spend")
+        self.tree_general_players_info.heading("Total Turn Played", text="Total Turn Played")
+        self.tree_general_players_info.heading("Total Time Played", text="Total Time Played")
+
+        self.tree_general_players_info.column("Agent Type", width=70)
+        self.tree_general_players_info.column("Total Points", width=70)
+        self.tree_general_players_info.column("Total Longest Road", width=100)
+        self.tree_general_players_info.column("Total Cars Spend", width=100)
+        self.tree_general_players_info.column("Total Turn Played", width=100)
+        self.tree_general_players_info.column("Total Time Played", width=100)
+
+        self.tree_general_players_info.pack(side=tk.TOP, fill=tk.X, padx=5)
+
+        #Listbox Frames
         self.listbox_frame1 = tk.Frame(self.left_column)
         self.listbox_frame1.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
 
-        self.processes_label = tk.Label(self.listbox_frame1, text="Processes")
+        self.processes_label = tk.Label(self.listbox_frame1, text="Game Processes")
         self.processes_label.pack(side=tk.TOP, fill=tk.X, padx=5)
 
         self.refresh_processes_button = tk.Button(self.listbox_frame1, text="Refresh", command=self.update_process_listbox)
@@ -117,17 +172,15 @@ class ControlPanel:
         self.right_label = tk.Label(self.right_column, text="Game Output Area")
         self.right_label.pack(pady=5)
 
-        # Treeview widget'ı
+        # Treeview Widged
         columns = ("Name", "Color", "Points", "Cars")
         self.tree_players_info = ttk.Treeview(self.right_column, columns=columns, show="headings", height=5)
 
-        # Sütun başlıklarını ayarla
         self.tree_players_info.heading("Name", text="Player Name")
         self.tree_players_info.heading("Color", text="Player Color")
         self.tree_players_info.heading("Points", text="Player Points")
         self.tree_players_info.heading("Cars", text="Player Cars")
 
-        # Sütun genişliklerini ayarla
         self.tree_players_info.column("Name", width=100)
         self.tree_players_info.column("Color", width=100)
         self.tree_players_info.column("Points", width=100)
@@ -135,7 +188,6 @@ class ControlPanel:
 
         self.tree_players_info.pack(fill=tk.X, padx=10, pady=10)
 
-        # Add scrollable text widget
         self.text_frame = tk.Frame(self.right_column)
         self.text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
@@ -155,6 +207,22 @@ class ControlPanel:
 
         self.populate_log_files("logs")
         self.update_display_timer()
+
+    def add_player(self):
+        agent_type = self.agent_type_var.get()
+        color = self.color_var.get()
+
+        if not agent_type or not color:
+            messagebox.showwarning("Warning", "Please select both an agent type and a color.")
+            return
+
+        self.agents.append((agent_type, color))
+
+        self.available_colors.remove(color)
+        self.color_dropdown["values"] = self.available_colors
+        self.color_var.set("")
+
+        messagebox.showinfo("Success", f"Added {agent_type} with color {color}.")
 
     def start_games(self):
         try:
@@ -187,6 +255,10 @@ class ControlPanel:
 
     @staticmethod
     def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn):
+        import os
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        os.chdir(project_root)
+
         print(f"Starting game {game_id}...")
         from main_view import main, MainGameApp
         main_view.main(queue, game_id, True, console, number_of_ai, visualize, test_name, time_action, time_turn)
@@ -215,8 +287,7 @@ class ControlPanel:
             return
 
         selected_id = self.processes_listbox.get(selected_index)  # Fazladan boşlukları temizle
-        selected_process = next((process for game_id, process in self.game_processes if int(game_id) == int(selected_id)),
-                                None)
+        selected_process = next((process for game_id, process in self.game_processes if int(game_id) == int(selected_id)), None)
 
         if selected_process and selected_process.is_alive():
             try:
@@ -264,7 +335,7 @@ class ControlPanel:
         selected_file = self.log_files_listbox.get(selected_index)
 
         try:
-            with open(f"logs/{selected_file}", "r", encoding="utf-8") as file:
+            with open(f"../logs/{selected_file}", "r", encoding="utf-8") as file:
                 content = file.readlines()
         except Exception as e:
             content = [f"Error reading file: {e}"]
@@ -306,7 +377,7 @@ class ControlPanel:
         selected_file = self.log_files_listbox.get(selected_index)
 
         try:
-            with open(f"logs/{selected_file}", "r", encoding="utf-8") as file:
+            with open(f"../logs/{selected_file}", "r", encoding="utf-8") as file:
                 content = file.readlines()
         except Exception as e:
             content = [f"Error reading file: {e}"]

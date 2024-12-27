@@ -1,5 +1,5 @@
 import global_vars
-
+import time
 
 class GameController:
     def __init__(self, view, game_manager, game_service, ai_manager, test_name):
@@ -20,8 +20,15 @@ class GameController:
 
         self.visualize = True
 
-    def start_game(self):
+        self.start_time = None
+        self.end_time = None
+        self.elapsed_time = None
 
+        self.start_turn_time = None
+        self.end_turn_time = None
+
+    def start_game(self):
+        self.start_time = time.time()
         #cleans the log file
         if self.test_name is not None:
             with open(f"logs/log_{self.test_name}_{self.view.game_id}.txt", "w") as log_file:
@@ -46,6 +53,8 @@ class GameController:
         self.view.destination_tickets.update_destination_tickets_frame()
 
         self.game_service.on_change_of_turn()
+
+        self.start_turn_time = time.time()
 
 
     def update_turn_text(self):
@@ -224,6 +233,12 @@ class GameController:
             self.view.root.after(global_vars.time_turn*1000, self._go_to_next_turn)
     def _go_to_next_turn(self):
         # Before going next turn
+        self.end_turn_time = time.time()
+        self.get_current_player().total_turn_played += 1
+        self.get_current_player().total_time_played += self.end_turn_time - self.start_turn_time
+        self.end_turn_time = None
+        self.start_turn_time = None
+
         self.get_current_player().first_turn = False
 
         self.calculate_current_player_points()
@@ -252,6 +267,7 @@ class GameController:
         self.game_manager.next_turn()
 
         # After going next turn
+        self.start_turn_time = time.time()
         log_this = f"GAMESTATE: Turn: {((self.game_manager.current_turn) // len(self.game_manager.players) + 1)} | "
         for i in range(len(self.game_manager.players)):
             player = self.game_manager.players[i]
@@ -470,6 +486,7 @@ class GameController:
         if self.last_turn is not None and not self.game_end:
             if (((self.game_manager.current_turn) // len(self.game_manager.players)+1)) == self.last_turn+1:
                 print("---GAME END---")
+                self.get_current_player().total_turn_played -= 1
 
                 self.game_end = True
                 self.reward_the_longest_route()
@@ -499,6 +516,7 @@ class GameController:
             player.has_longest_road = True
 
     def show_game_end_frame(self):
+        self.end_time = time.time()
 
         #find the winner
         winner_player = None
@@ -512,13 +530,24 @@ class GameController:
         turn_played = ((self.game_manager.current_turn) // len(self.game_manager.players)+1)
         info = {"winner": winner_player, "players": self.game_manager.players, "turn played": turn_played}
 
-        self.log(f"Turn:{((self.game_manager.current_turn) // len(self.game_manager.players) + 1)}, GAME END")
-        self.log(f"Winner: {winner_player.name}({winner_player.color})")
+        total_time_played=self.end_time - self.start_time
+        longest_route_player = None
         for player in self.game_manager.players:
             if player.has_longest_road:
                 self.log(f"{player.color} has {player.points} with longest road.")
+                longest_route_player = player
             else:
                 self.log(f"{player.color} has {player.points}")
+
+        self.log(f"Turn:{((self.game_manager.current_turn) // len(self.game_manager.players) + 1)}, GAME END")
+        self.log(f"Winner: {winner_player.name}({winner_player.color})")
+
+        send_this = f"PLAYERS:"
+        for player in self.game_manager.players:
+            send_this+=f"{player.color}, {player.points}, {player.has_longest_road}, {45-player.train_cars}, {player.total_turn_played}, {player.total_time_played:.2f};"
+
+        self.log(send_this)
+        self.log(f"RESULTS: {len(self.game_manager.players)}, {winner_player.color}, {longest_route_player.color}, {turn_played}, {total_time_played:.2f}")
 
         self.view.game_end_frame.create_game_end_frame(info)
 

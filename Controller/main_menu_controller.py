@@ -16,8 +16,8 @@ class MainMenuController:
         self.game_manager.reset_players_list()
         self.ai_manager.reset_ai_list()
 
-    def add_ai(self, ai_color):
-        self.ai_manager.add_ai(ai_color)
+    def add_ai(self, ai_color, ai_type):
+        self.ai_manager.add_ai(ai_color, ai_type)
 
     def force_start_game(self):
         self.view.force_start_game()

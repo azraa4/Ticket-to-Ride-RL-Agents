@@ -102,7 +102,7 @@ class MainGameApp:
         self.game_controller.visualize = False
 
 
-def main(queue=None, game_id=None, panel=None, console=None, number_of_ai=None, visualize=None, test_name=None, time_action=None, time_turn=None):
+def main(queue=None, game_id=None, panel=None, console=None, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None):
     # Define Models
     game_manager = GameManager()
     ai_manager = AIManager(None)
@@ -137,12 +137,13 @@ def main(queue=None, game_id=None, panel=None, console=None, number_of_ai=None, 
         if not visualize:
             app.withdraw_window()
 
-        number_of_ai = int(number_of_ai)
-        list_of_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
-        for i in range(number_of_ai):
-            ai_color = list_of_colors[i]
-            main_menu_controller.add_player_button(f"AI{i}", ai_color)
-            main_menu_controller.add_ai(ai_color)
+        for agent in agents:
+            agent_type = agent["agent_type"]
+            color = agent["color"]
+
+            main_menu_controller.add_player_button(f"AI_{color}", color)
+            main_menu_controller.add_ai(color, agent_type)
+
         main_menu_controller.force_start_game()
 
     app.run()
