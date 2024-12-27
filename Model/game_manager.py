@@ -78,6 +78,7 @@ class GameManager:
     def draw_train_card(self, train_card):
         print("CARDS ON THE TABLE: ", self.cards_on_the_table)
         print("TRAIN CARD COLOR: ", train_card.color)
+        print("DECK LENGTH:", self.train_cards_deck.get_length())
         self.cards_on_the_table.remove(train_card)
         self.current_player.train_cards.append(train_card)
         self.deal_train_cards_on_the_table()

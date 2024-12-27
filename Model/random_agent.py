@@ -73,7 +73,7 @@ class RandomAgent:
         else:
             game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
-            selected_card = train_cards_on_the_table[random_number]
+            selected_card = random.choice(train_cards_on_the_table)
             action_params = {"selected_card": selected_card}
             print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
             print("AI: SELECTED CARD BY AI:", selected_card.color)
@@ -83,14 +83,14 @@ class RandomAgent:
             self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {selected_card.color}")
             self.game_service.wait_for_it(global_vars.time_action*1000)
 
+            game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
             print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:
                     print("card amount:",len(train_cards_on_the_table))
-                    second_random_number = random.randint(0, len(train_cards_on_the_table)-1)
-                    selected_second_card = train_cards_on_the_table[second_random_number]
+                    selected_second_card = random.choice(train_cards_on_the_table)
                     if selected_second_card.color == "joker":
                         continue
                     else:
