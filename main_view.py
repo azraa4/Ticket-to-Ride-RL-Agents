@@ -141,7 +141,7 @@ def main(queue=None, game_id=None, panel=None, console=None, agents=None, visual
             agent_type = agent["agent_type"]
             color = agent["color"]
 
-            main_menu_controller.add_player_button(f"AI_{color}", color)
+            main_menu_controller.add_player_button(f"AI_{color}", color, True)
             main_menu_controller.add_ai(color, agent_type)
 
         main_menu_controller.force_start_game()

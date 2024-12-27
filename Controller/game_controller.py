@@ -230,13 +230,11 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available and not self.game_end:
-
             if(self.get_current_player().ai):
                 self.view.root.after(global_vars.time_turn * 1000, self._go_to_next_turn)
             else:
                 self.view.root.after(global_vars.time_turn_for_human*1000, self._go_to_next_turn)
                 self.change_status_text("TURN CHANGED.")
-
 
 
     def _go_to_next_turn(self):

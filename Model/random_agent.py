@@ -30,7 +30,8 @@ class RandomAgent:
             log_message = log_message.rstrip(',')
             self.game_service.log(log_message)
             self.game_service.change_status_text(f"{self.color} drawed destination ticket card.")
-
+            self.game_service.wait_for_it(global_vars.time_action * 1000)
+            self.game_service.change_status_text("TURN CHANGED.")
             return
 
         available_actions = self.game_service.get_available_actions(self.color)
