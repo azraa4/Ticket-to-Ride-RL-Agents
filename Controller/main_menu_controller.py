@@ -9,8 +9,8 @@ class MainMenuController:
         global_vars.time_turn = 5
         return
 
-    def add_player_button(self, player_name, player_color):
-        self.game_manager.add_player(player_name, player_color)
+    def add_player_button(self, player_name, player_color, ai):
+        self.game_manager.add_player(player_name, player_color, ai)
 
     def reset_player_list_button(self):
         self.game_manager.reset_players_list()

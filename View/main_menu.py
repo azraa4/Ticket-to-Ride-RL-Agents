@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from View.modern_option_menu import ModernOptionMenu
+from View.modern_slider import ModernSlider
 
 class MainMenu:
     def create_modern_button(self, parent, text, width=10, height=2, font=12):
@@ -43,17 +44,44 @@ class MainMenu:
         # Bütün öğeleri sola dayamak için anchor ve side kullanarak pack fonksiyonlarını düzenledik
         self.create_add_player_section()
 
-        start_button = self.create_modern_button(self.frame, "Start Game", width=23, height=1, font=20)
-        start_button.config(command=self.start_game)
-        start_button.pack(padx=65, pady=(0,5), anchor="w")
+        sliders_frame = tk.Frame(self.frame, bg="#d5b570")
+        sliders_frame.pack(padx=65, pady=0, anchor="w")
 
-        quit_button = self.create_modern_button(self.frame, "Quit Game", width=23, height=1, font=20)
+        turn_slider_frame = tk.Frame(sliders_frame, bg="#d5b570")
+        turn_slider_frame.pack(side="left", padx=(0,5))
+        turn_label = tk.Label(turn_slider_frame, text="Agent\n Turn Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
+        turn_label.pack(side="top")
+        turn_slider = ModernSlider(turn_slider_frame, from_=0, to=20, length=100, default_value=2)
+        turn_slider.pack()
+
+        actions_slider_frame = tk.Frame(sliders_frame, bg="#d5b570")
+        actions_slider_frame.pack(side="left", padx=(0,5))
+        actions_label = tk.Label(actions_slider_frame, text="Agent\n Actions Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
+        actions_label.pack(side="top")
+        actions_slider = ModernSlider(actions_slider_frame, from_=0, to=20, length=100, default_value=5)
+        actions_slider.pack()
+
+        human_turn_slider_frame = tk.Frame(sliders_frame, bg="#d5b570")
+        human_turn_slider_frame.pack(side="left", padx=(0, 5))
+        human_turn_label = tk.Label(human_turn_slider_frame, text="Human\n Turn Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
+        human_turn_label.pack(side="top")
+        human_turn_slider = ModernSlider(human_turn_slider_frame, from_=0, to=20, length=100, default_value=2)
+        human_turn_slider.pack()
+
+        start_quit_frame = tk.Frame(self.frame, bg="#d5b570")
+        start_quit_frame.pack(padx=65, pady=5, anchor="w")
+
+        start_button = self.create_modern_button(start_quit_frame, "Start Game", width=11, height=1, font=20)
+        start_button.config(command=self.start_game)
+        start_button.pack(side="left", padx=(0,5))
+
+        quit_button = self.create_modern_button(start_quit_frame, "Quit Game", width=11, height=1, font=20)
         quit_button.config(command=self.quit)
-        quit_button.pack(padx=65, pady=(0,5), anchor="w")
+        quit_button.pack(side="left", padx=(0,5))
 
         player_list_label = tk.Label(self.frame, text="Players List ", font=("Arial", 15, "bold"), fg="#ae2907",
                                      bg="#d5b570")
-        player_list_label.pack(padx=65, pady=5, anchor="w")
+        player_list_label.pack(padx=65, pady=(0,5), anchor="w")
         # Oyuncuları listelemek için bir liste alanı ekleyin
         self.player_listbox = tk.Listbox(self.frame, font=("Arial", 14, "bold"),  # Modern font
                                          bg="#d5b570",
@@ -66,12 +94,12 @@ class MainMenu:
                                          width=40,
                                          height=5
                                          )
-        self.player_listbox.pack(padx=65, pady=10, anchor="w")
+        self.player_listbox.pack(padx=65, pady=0, anchor="w")
 
     def create_add_player_section(self):
         self.player_name_var = tk.StringVar()
         player_name_frame = tk.Frame(self.frame, bg="#d5b570")
-        player_name_frame.pack(padx=65, pady=(195, 0), anchor="w")
+        player_name_frame.pack(padx=65, pady=(180, 0), anchor="w")
         player_name_label = tk.Label(player_name_frame, text="Player Name: ", font=("Arial", 20, "bold"), fg="#ae2907", bg="#d5b570")
         player_name_label.pack(side="left")
         player_name_entry = tk.Entry(
@@ -108,12 +136,14 @@ class MainMenu:
 
         add_player_button = self.create_modern_button(player_edit_frame, "Add Player", width=11, height=1, font=20)
         add_player_button.config(command=self.add_player)
-        player_edit_frame.pack(padx=65, pady=10, anchor="w")
         add_player_button.pack(side="left", padx=(0,5))
 
         reset_players_list_button = self.create_modern_button(player_edit_frame, "Reset List", width=11, height=1, font=20)
         reset_players_list_button.config(command=self.reset_list)
         reset_players_list_button.pack(side="left")
+        player_edit_frame.pack(padx=65, pady=5, anchor="w")
+
+
 
 
 
@@ -131,13 +161,16 @@ class MainMenu:
             self.player_listbox.insert(tk.END, f"Player {self.list_item_number}: {player_name} ({selected_color}) | {player_type}")
 
             print(f"GAME MENU: Player Added: {player_name} with color {selected_color}")
-            self.controller.add_player_button(player_name, selected_color)
             if player_type == "RandomAgent":
                 self.controller.add_ai(selected_color, player_type)
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
+                self.controller.add_player_button(player_name, selected_color, True)
             elif player_type == "AgentX":
                 self.controller.add_ai(selected_color, player_type)
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
+                self.controller.add_player_button(player_name, selected_color, True)
+            else:
+                self.controller.add_player_button(player_name, selected_color, False)
 
             self.available_colors.remove(selected_color)
             self.update_color_dropdown()

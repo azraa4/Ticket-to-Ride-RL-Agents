@@ -120,8 +120,8 @@ class GameManager:
         card_colors = [card.color for card in current_player.train_cards]
         return {color: card_colors.count(color) for color in set(card_colors)}
 
-    def add_player(self, player_name, player_color):
-        self.players.append(Player(player_name, player_color))
+    def add_player(self, player_name, player_color, ai = False):
+        self.players.append(Player(player_name, player_color, ai))
 
     def reset_players_list(self):
         self.players.clear()

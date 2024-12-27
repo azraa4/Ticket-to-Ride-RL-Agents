@@ -146,6 +146,8 @@ class GameService:
         Bu metodu kullanarak ai turn değişti mi sıra bana geldi mi kontrolünü yaptırabilirsin.
         Sonuç olarak ai'ın sırası geldiğini bilmesi ve sırası geldiğinde burdaki işlemleri gerçekleştirmesi lazım.
         '''
+
+
         ai_list = self.controller.get_ai_list()
         current_color = self.controller.get_current_player().color
         for agent in ai_list:
@@ -161,6 +163,11 @@ class GameService:
     def log(self, text):
         self.controller.log(text)
 
-    def wait_for_it(self, time):
-        self.controller.view.root.after(time, lambda: None)
+    def wait_for_it(self, time_ms):
+        """Simulate waiting for a specified time in milliseconds."""
+        import time
+        end_time = time.time() + (time_ms / 1000)
+        while time.time() < end_time:
+            self.controller.view.root.update_idletasks()
+            self.controller.view.root.update()
 

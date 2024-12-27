@@ -230,7 +230,15 @@ class GameController:
 
     def go_to_next_turn(self):
         if self.turns_available and not self.game_end:
-            self.view.root.after(global_vars.time_turn*1000, self._go_to_next_turn)
+
+            if(self.get_current_player().ai):
+                self.view.root.after(global_vars.time_turn * 1000, self._go_to_next_turn)
+            else:
+                self.view.root.after(global_vars.time_turn_for_human*1000, self._go_to_next_turn)
+                self.change_status_text("TURN CHANGED.")
+
+
+
     def _go_to_next_turn(self):
         # Before going next turn
         self.end_turn_time = time.time()
@@ -526,6 +534,9 @@ class GameController:
                 winner_player = player
                 temp_max_points = player.points
 
+        for player in self.game_manager.players:
+            if player == winner_player:
+                player.winner = True
 
         turn_played = ((self.game_manager.current_turn) // len(self.game_manager.players)+1)
         info = {"winner": winner_player, "players": self.game_manager.players, "turn played": turn_played}
@@ -544,7 +555,7 @@ class GameController:
 
         send_this = f"PLAYERS:"
         for player in self.game_manager.players:
-            send_this+=f"{player.color}, {player.points}, {player.has_longest_road}, {45-player.train_cars}, {player.total_turn_played}, {player.total_time_played:.2f};"
+            send_this+=f"{player.color}, {player.points}, {player.has_longest_road}, {45-player.train_cars}, {player.total_turn_played}, {player.total_time_played:.2f}, {player.winner};"
 
         self.log(send_this)
         self.log(f"RESULTS: {len(self.game_manager.players)}, {winner_player.color}, {longest_route_player.color}, {turn_played}, {total_time_played:.2f}")

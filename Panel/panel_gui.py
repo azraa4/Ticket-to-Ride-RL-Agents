@@ -23,8 +23,17 @@ class PanelGUI:
 
         self.create_left_column()
         self.create_right_column()
-        self.populate_treeview_with_dummy_data()
 
+        # LEFT COLUMN (Log dosyası listesine tıklama işlevi)
+        self.log_files_listbox.bind("<<ListboxSelect>>",
+                                    lambda event: self.controller.update_log_content_listbox(event, listbox_type="log"))
+        self.history_listbox.bind("<<ListboxSelect>>", lambda event: self.controller.update_log_content_listbox(event,listbox_type="history"))
+
+        self.game_processes = []
+        self.queues = {}
+
+        self.controller.populate_log_files("../logs")
+        self.update_display_timer()
 
     def create_left_column(self):
         # LEFT COLUMN
@@ -171,32 +180,37 @@ class PanelGUI:
         self.refresh_general_info = tk.Button(text_and_refresh_button_frame, text="Refresh", command=self.controller.refresh_game_summaries)
         self.refresh_general_info.pack(side=tk.LEFT, padx=5, pady=5)
 
-        columns = ("Agent Type", "Agent Color", "Total Points", "Total Longest Route", "Total Cars Spend", "Total Turn Played", "Total Time Played")
+        columns = ("Agent Type", "Agent Color", "Total Points", "Total Wins", "Total Longest Route", "Total Cars Spent", "Total Turn Played", "Total Time Played")
         self.tree_general_players_info = ttk.Treeview(self.general_info_frame, columns=columns, show="headings", height=5)
 
         self.tree_general_players_info.heading("Agent Type", text="Agent Type")
         self.tree_general_players_info.heading("Agent Color", text="Agent Color")
         self.tree_general_players_info.heading("Total Points", text="Total Points")
+        self.tree_general_players_info.heading("Total Wins", text="Total Wins")
         self.tree_general_players_info.heading("Total Longest Route", text="Total Longest Route")
-        self.tree_general_players_info.heading("Total Cars Spend", text="Total Cars Spend")
+        self.tree_general_players_info.heading("Total Cars Spent", text="Total Cars Spend")
         self.tree_general_players_info.heading("Total Turn Played", text="Total Turn Played")
         self.tree_general_players_info.heading("Total Time Played", text="Total Time Played")
 
         self.tree_general_players_info.column("Agent Type", width=70)
         self.tree_general_players_info.column("Agent Color", width=70)
         self.tree_general_players_info.column("Total Points", width=70)
+        self.tree_general_players_info.column("Total Wins", width=70)
         self.tree_general_players_info.column("Total Longest Route", width=100)
-        self.tree_general_players_info.column("Total Cars Spend", width=100)
+        self.tree_general_players_info.column("Total Cars Spent", width=100)
         self.tree_general_players_info.column("Total Turn Played", width=100)
         self.tree_general_players_info.column("Total Time Played", width=100)
 
         self.tree_general_players_info.pack(side=tk.TOP, fill=tk.X, padx=5)
 
         # Treeview widget for game summaries
-        self.summaries_label = tk.Label(self.general_info_frame, text="Summaries of the Games")
+        self.summaries_frame = tk.Frame(self.general_info_frame)
+        self.summaries_frame.pack(fill=tk.X)
+
+        self.summaries_label = tk.Label(self.summaries_frame, text="Summaries of the Games")
         self.summaries_label.pack()
         columns = ("Game Name","Player Amount", "Winner", "Longest Route", "Turns Played", "Time Played")
-        self.tree_game_summaries = ttk.Treeview(self.general_info_frame, columns=columns, show="headings", height=8)
+        self.tree_game_summaries = ttk.Treeview(self.summaries_frame, columns=columns, show="headings", height=8)
         self.tree_game_summaries.heading("Game Name", text="Game Name")
         self.tree_game_summaries.heading("Player Amount", text="Player Amount")
         self.tree_game_summaries.heading("Winner", text="Winner")
@@ -212,10 +226,24 @@ class PanelGUI:
         self.tree_game_summaries.column("Time Played", width=100)
 
         self.tree_game_summaries.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=(0,5))
-        self.tree_scrollbar = ttk.Scrollbar(self.general_info_frame, orient="vertical",command=self.tree_game_summaries.yview)
+        self.tree_scrollbar = ttk.Scrollbar(self.summaries_frame, orient="vertical",command=self.tree_game_summaries.yview)
         self.tree_scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=(0,5))
         self.tree_game_summaries.configure(yscrollcommand=self.tree_scrollbar.set)
 
+        self.analysis_frame = tk.Frame(self.general_info_frame)
+        self.analysis_frame.pack()
+
+        self.mean_of_points_label = tk.Label(self.analysis_frame, text="Mean of Points:")
+        self.mean_of_points_label.pack(side=tk.LEFT, padx=5)
+
+        self.std_dev_of_points_label = tk.Label(self.analysis_frame, text="Standard Deviation of Points:")
+        self.std_dev_of_points_label.pack(side=tk.LEFT, padx=5)
+
+        self.most_winner_label = tk.Label(self.analysis_frame, text="Most Winner:")
+        self.most_winner_label.pack(side=tk.LEFT, padx=5)
+
+        self.most_longest_route_label = tk.Label(self.analysis_frame, text="Most Longest Route Achiever:")
+        self.most_longest_route_label.pack(side=tk.LEFT, padx=5)
 
         # Placeholder for right column content
         self.details_frame = tk.Frame(self.right_column, bd=4, relief="groove")
@@ -251,15 +279,9 @@ class PanelGUI:
 
         self.scrollbar.config(command=self.log_content_listbox.yview)
 
-        # LEFT COLUMN (Log dosyası listesine tıklama işlevi)
-        self.log_files_listbox.bind("<<ListboxSelect>>", lambda event: self.controller.update_log_content_listbox(event, listbox_type="log"))
-        self.history_listbox.bind("<<ListboxSelect>>", lambda event: self.controller.update_log_content_listbox(event, listbox_type="history"))
 
-        self.game_processes = []
-        self.queues = {}
 
-        self.controller.populate_log_files("../logs")
-        self.update_display_timer()
+
 
     def update_display_timer(self):
         """Call display_log_file_content every 2 seconds if an item is selected."""
@@ -270,28 +292,9 @@ class PanelGUI:
             # Çağrı yapılması gereken item varsa
             self.controller.update_tree_players_info()
 
-    def populate_treeview_with_dummy_data(self):
-        """Populate the TreeView with dummy data."""
-        dummy_data = [
-            {
-                "Player Amount": random.randint(2, 6),
-                "Winner": f"Player{random.randint(1, 6)}",
-                "Longest Route": f"Route {random.choice(['A', 'B', 'C', 'D'])}",
-                "Turns Played": random.randint(10, 50),
-                "Time Played": time.strftime('%H:%M:%S', time.gmtime(random.randint(300, 3600)))
-            }
-            for _ in range(20)  # Generate 20 dummy rows
-        ]
-
-        for row in dummy_data:
-            self.tree_game_summaries.insert(
-                "",  # Parent node ("" for root)
-                tk.END,  # Position (add to the end)
-                values=(
-                    row["Player Amount"],
-                    row["Winner"],
-                    row["Longest Route"],
-                    row["Turns Played"],
-                    row["Time Played"]
-                )
-            )
+    def update_analysis_labels(self, mean_points, std_dev_points, most_winner, most_longest_route):
+        """Update the analysis labels with the provided data."""
+        self.mean_of_points_label.config(text=f"Mean of Points: {mean_points:.2f}")
+        self.std_dev_of_points_label.config(text=f"Standard Deviation of Points: {std_dev_points:.2f}")
+        self.most_winner_label.config(text=f"Most Winner: {most_winner}")
+        self.most_longest_route_label.config(text=f"Most Longest Route Achiever: {most_longest_route}")

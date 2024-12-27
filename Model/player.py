@@ -1,7 +1,8 @@
 class Player:
-    def __init__(self, name, color):
+    def __init__(self, name, color, ai):
         self.name = name
         self.color = color
+        self.ai = ai
         self.points = 0
         self.train_cards = []
         self.destination_tickets = []
@@ -11,6 +12,7 @@ class Player:
         self.has_longest_road = False
         self.total_turn_played = 0
         self.total_time_played = 0
+        self.winner = False
 
     def add_train_card(self, train_card):
         self.train_cards.append(train_card)

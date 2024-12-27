@@ -123,11 +123,12 @@ class ControlPanel:
         self.agent_status_label = tk.Label(self.general_agents_info_frame, text="Agents' Status")
         self.agent_status_label.pack()
 
-        columns = ("Agent Type", "Total Points", "Total Longest Road", "Total Cars Spend", "Total Turn Played", "Total Time Played")
+        columns = ("Agent Type", "Total Points", "Total Wins", "Total Longest Road", "Total Cars Spend", "Total Turn Played", "Total Time Played")
         self.tree_general_players_info = ttk.Treeview(self.general_agents_info_frame, columns=columns, show="headings", height=5)
 
         self.tree_general_players_info.heading("Agent Type", text="Agent Type")
         self.tree_general_players_info.heading("Total Points", text="Total Points")
+        self.tree_general_players_info.heading("Total Wins", text="Total Wins")
         self.tree_general_players_info.heading("Total Longest Road", text="Total Longest Road")
         self.tree_general_players_info.heading("Total Cars Spend", text="Total Cars Spend")
         self.tree_general_players_info.heading("Total Turn Played", text="Total Turn Played")
@@ -135,6 +136,7 @@ class ControlPanel:
 
         self.tree_general_players_info.column("Agent Type", width=70)
         self.tree_general_players_info.column("Total Points", width=70)
+        self.tree_general_players_info.column("Total Wins", width=70)
         self.tree_general_players_info.column("Total Longest Road", width=100)
         self.tree_general_players_info.column("Total Cars Spend", width=100)
         self.tree_general_players_info.column("Total Turn Played", width=100)

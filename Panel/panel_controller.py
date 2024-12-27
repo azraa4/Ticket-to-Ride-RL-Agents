@@ -36,6 +36,7 @@ class PanelController:
             'total_cars_spent': 0,
             'total_turn_played': 0,
             'total_time_played': 0.0,
+            'total_wins':0,
         })
         self.gui.tree_general_players_info.insert(
             "",
@@ -72,6 +73,7 @@ class PanelController:
             self.game_processes.append((game_id, process))  # Store ID and process together
             self.gui.processes_listbox.insert(tk.END, game_id)
 
+        self.move_logs_to_history()
         self.update_process_listbox()
         self.populate_log_files("../logs")
 
@@ -101,8 +103,7 @@ class PanelController:
 
         self.gui.start_button.config(state=tk.NORMAL)
         self.gui.stop_button.config(state=tk.DISABLED)
-        self.move_logs_to_history()
-        self.populate_log_files("../logs")
+
 
     def stop_selected_process(self):
         selected_index = self.gui.processes_listbox.curselection()
@@ -329,6 +330,7 @@ class PanelController:
             agent['total_cars_spent'] = 0
             agent['total_turn_played'] = 0
             agent['total_time_played'] = 0
+            agent['total_wins']=0
 
         # Process each log file
         for log_file in os.listdir(logs_directory):
@@ -347,7 +349,7 @@ class PanelController:
 
                             # Update existing agents in the agents list
                             for player in player_tuples:
-                                color, points, longest_route, cars_spent, turns_played, time_played = player
+                                color, points, longest_route, cars_spent, turns_played, time_played, winner = player
 
                                 # Find the matching agent in the self.agents list
                                 for agent in self.agents:
@@ -358,6 +360,7 @@ class PanelController:
                                         agent["total_cars_spent"] += cars_spent
                                         agent["total_turn_played"] += turns_played
                                         agent["total_time_played"] += time_played
+                                        agent["total_wins"] += 1 if winner else 0
                                         break
                 except Exception as e:
                     print(f"Error reading {log_file}: {e}")
@@ -365,8 +368,6 @@ class PanelController:
     def refresh_general_agent_status_treeview(self):
         """Refresh the TreeView with the updated agents list."""
         self.update_agents_list()
-        print("AGENNNTTTSSS: " , self.agents)
-
 
         # Clear the TreeView
         self.gui.tree_general_players_info.delete(*self.gui.tree_general_players_info.get_children())
@@ -379,12 +380,19 @@ class PanelController:
                     agent["agent_type"],
                     agent["color"],
                     agent["total_points"],
+                    agent["total_wins"],
                     agent["total_longest_route"],
                     agent["total_cars_spent"],
                     agent["total_turn_played"],
                     round(agent["total_time_played"], 2)
                 )
             )
+
+        mean_points = self.calculate_points_mean(self.agents)
+        std_dev_points = self.calculate_points_std_dev(self.agents)
+        most_winner = max(self.agents, key=lambda agent: agent["total_wins"])["color"]
+        most_longest_route = max(self.agents, key=lambda agent: agent["total_longest_route"])["color"]
+        self.gui.update_analysis_labels(mean_points, std_dev_points, most_winner, most_longest_route)
 
     def parse_players_line(self, players_line):
         """Parse the PLAYERS line into a list of tuples."""
@@ -399,10 +407,25 @@ class PanelController:
                     parts[2] == "True",  # Longest Route Achieved
                     int(parts[3]),  # Cars Spent
                     int(parts[4]),  # Turns Played
-                    float(parts[5])  # Time Played
+                    float(parts[5]),  # Time Played
+                    parts[6] == "True"  # Winner
                 ))
         return player_tuples
 
+    def calculate_standard_deviation(self, data):
+        if len(data) == 0:
+            return 0
+        mean = sum(data) / len(data)
+        variance = sum((x - mean) ** 2 for x in data) / len(data)
+        return variance ** 0.5
+
+    def calculate_points_std_dev(self, agents):
+        total_points = [agent["total_points"] for agent in agents]
+        return self.calculate_standard_deviation(total_points)
+
+    def calculate_points_mean(self, agents):
+        total_points = [agent["total_points"] for agent in agents]
+        return sum(total_points) / len(total_points)
 
 if __name__ == "__main__":
     root = tk.Tk()
