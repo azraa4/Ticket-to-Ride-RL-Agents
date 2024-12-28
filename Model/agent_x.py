@@ -29,7 +29,9 @@ class AgentX:
                 log_message += f" {ticket.city1} to {ticket.city2},"
             log_message = log_message.rstrip(',')
             self.game_service.log(log_message)
-
+            self.game_service.change_status_text(f"{self.color} drawed destination ticket card.")
+            self.game_service.wait_for_it(global_vars.time_action * 1000)
+            self.game_service.change_status_text("TURN CHANGED.")
             return
 
         available_actions = self.game_service.get_available_actions(self.color)
@@ -37,7 +39,7 @@ class AgentX:
         self.game_service.log(f"{self.color}, Available Actions: {available_actions}")
 
         random_action = random.choice(available_actions)
-        #random_action = 'claim_route'
+        # random_action = 'claim_route'
 
         print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {random_action}")
 
@@ -64,31 +66,31 @@ class AgentX:
                 self.draw_train_card()
                 return
 
-            self.game_service.change_status_text("AI drawed from blind pick")
+            self.game_service.change_status_text(f"{self.color} drawed from blind pick.")
             self.game_service.log(f"{self.color}, Action: DRAW BLIND CARD")
-            self.game_service.wait_for_it(global_vars.time_action*1000)
+            self.game_service.wait_for_it(global_vars.time_action * 1000)
 
         else:
             game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
-            selected_card = train_cards_on_the_table[random_number]
+            selected_card = random.choice(train_cards_on_the_table)
             action_params = {"selected_card": selected_card}
             print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
             print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
 
-            self.game_service.change_status_text(f"AI drawed {selected_card.color} colored train card.")
+            self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
             self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {selected_card.color}")
-            self.game_service.wait_for_it(global_vars.time_action*1000)
+            self.game_service.wait_for_it(global_vars.time_action * 1000)
 
+            game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
             print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:
-                    print("card amount:",len(train_cards_on_the_table))
-                    second_random_number = random.randint(0, len(train_cards_on_the_table)-1)
-                    selected_second_card = train_cards_on_the_table[second_random_number]
+                    print("card amount:", len(train_cards_on_the_table))
+                    selected_second_card = random.choice(train_cards_on_the_table)
                     if selected_second_card.color == "joker":
                         continue
                     else:
@@ -97,13 +99,19 @@ class AgentX:
                         self.game_service.perform_action("draw_train_card", action_params)
                         check = False
 
-                    self.game_service.change_status_text(f"AI drawed {selected_second_card.color} colored train card as second train card.")
-                    self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD (Second), {selected_second_card.color}")
+                    self.game_service.change_status_text(
+                        f"{self.color} drawed {selected_second_card.color} colored train card as second train card.")
+                    self.game_service.log(
+                        f"{self.color}, Action: DRAW TRAIN CARD (Second), {selected_second_card.color}")
 
-                self.game_service.wait_for_it(global_vars.time_action*1000)
+                self.game_service.wait_for_it(global_vars.time_action * 1000)
+                self.game_service.change_status_text("TURN CHANGED.")
 
     def draw_destination_ticket(self):
         draw_destination_card_list = self.game_service.perform_action("draw_destination_ticket", None)
+
+        self.game_service.change_status_text(f"{self.color} drawing destination ticket card.")
+        self.game_service.wait_for_it(global_vars.time_action * 1000)
 
         destination_card_list_without_none = []
         for card in draw_destination_card_list:
@@ -116,7 +124,7 @@ class AgentX:
         action_params = {"selected_destination_tickets": selected_cards}
         self.game_service.perform_action("draw_destination_ticket", action_params)
 
-        self.game_service.change_status_text(f"AI drawed destination ticket card.")
+        self.game_service.change_status_text(f"{self.color} drawed destination ticket card.")
 
         log_message = f"{self.color}, Action: DESTINATION TICKET,"
         for ticket in action_params['selected_destination_tickets']:
@@ -124,7 +132,8 @@ class AgentX:
         log_message = log_message.rstrip(',')
         self.game_service.log(log_message)
 
-        self.game_service.wait_for_it(global_vars.time_action*1000)
+        self.game_service.wait_for_it(global_vars.time_action * 1000)
+        self.game_service.change_status_text("TURN CHANGED.")
 
     def claim_route(self):
         current_state = self.game_service.get_current_player_state()
@@ -137,26 +146,30 @@ class AgentX:
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
 
-                self.game_service.change_status_text(f"AI claiming a gray route.")
-                self.game_service.wait_for_it(global_vars.time_action*1000)
+                self.game_service.change_status_text(f"{self.color} claiming a gray route.")
+                self.game_service.wait_for_it(global_vars.time_action * 1000)
 
                 use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
                 action_params = {"selected_route": random_route, "use_this_color": use_random_color}
                 self.game_service.perform_action("claim_route", action_params)
 
-                self.game_service.change_status_text(f"AI claimed a gray route with {use_random_color}")
-                self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
+                self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
+                self.game_service.log(
+                    f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
 
-                self.game_service.wait_for_it(global_vars.time_action*1000)
+                self.game_service.wait_for_it(global_vars.time_action * 1000)
 
             else:
                 print("AI: A COLORED ROUTE SELECTED")
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 self.game_service.perform_action("claim_route", action_params)
 
-                self.game_service.change_status_text(f"AI claimed a colored route.")
-                self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {random_route.city1} to {random_route.city2}")
-                self.game_service.wait_for_it(global_vars.time_action*1000)
+                self.game_service.change_status_text(f"{self.color} claimed a colored route.")
+                self.game_service.log(
+                    f"{self.color}, Action: CLAIM COLORED ROUTE, {random_route.city1} to {random_route.city2}")
+                self.game_service.wait_for_it(global_vars.time_action * 1000)
+
+        self.game_service.change_status_text("TURN CHANGED.")
 
 
 
