@@ -29,6 +29,7 @@ class GameController:
 
     def start_game(self):
         self.start_time = time.time()
+        self.start_turn_time = time.time()
         #cleans the log file
         if self.test_name is not None:
             with open(f"logs/log_{self.test_name}_{self.view.game_id}.txt", "w") as log_file:
@@ -54,7 +55,7 @@ class GameController:
 
         self.game_service.on_change_of_turn()
 
-        self.start_turn_time = time.time()
+
 
 
     def update_turn_text(self):

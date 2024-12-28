@@ -102,7 +102,7 @@ class MainGameApp:
         self.game_controller.visualize = False
 
 
-def main(queue=None, game_id=None, panel=None, console=None, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None):
+def main(queue=None, game_id=None, panel=None, console=True, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None):
     # Define Models
     game_manager = GameManager()
     ai_manager = AIManager(None)

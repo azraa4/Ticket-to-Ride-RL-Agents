@@ -1,5 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+
+import global_vars
 from View.modern_option_menu import ModernOptionMenu
 from View.modern_slider import ModernSlider
 
@@ -51,22 +53,22 @@ class MainMenu:
         turn_slider_frame.pack(side="left", padx=(0,5))
         turn_label = tk.Label(turn_slider_frame, text="Agent\n Turn Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
         turn_label.pack(side="top")
-        turn_slider = ModernSlider(turn_slider_frame, from_=0, to=20, length=100, default_value=2)
-        turn_slider.pack()
+        self.turn_slider = ModernSlider(turn_slider_frame, from_=0, to=20, length=100, default_value=2)
+        self.turn_slider.pack()
 
         actions_slider_frame = tk.Frame(sliders_frame, bg="#d5b570")
         actions_slider_frame.pack(side="left", padx=(0,5))
         actions_label = tk.Label(actions_slider_frame, text="Agent\n Actions Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
         actions_label.pack(side="top")
-        actions_slider = ModernSlider(actions_slider_frame, from_=0, to=20, length=100, default_value=5)
-        actions_slider.pack()
+        self.actions_slider = ModernSlider(actions_slider_frame, from_=0, to=20, length=100, default_value=5)
+        self.actions_slider.pack()
 
         human_turn_slider_frame = tk.Frame(sliders_frame, bg="#d5b570")
         human_turn_slider_frame.pack(side="left", padx=(0, 5))
         human_turn_label = tk.Label(human_turn_slider_frame, text="Human\n Turn Delay", font=("Arial", 15, "bold"), fg="#ae2907", bg="#d5b570")
         human_turn_label.pack(side="top")
-        human_turn_slider = ModernSlider(human_turn_slider_frame, from_=0, to=20, length=100, default_value=2)
-        human_turn_slider.pack()
+        self.human_turn_slider = ModernSlider(human_turn_slider_frame, from_=0, to=20, length=100, default_value=2)
+        self.human_turn_slider.pack()
 
         start_quit_frame = tk.Frame(self.frame, bg="#d5b570")
         start_quit_frame.pack(padx=65, pady=5, anchor="w")
@@ -193,6 +195,9 @@ class MainMenu:
 
     def start_game(self):
         if len(self.players)>0:
+            global_vars.time_turn = self.turn_slider.get()
+            global_vars.time_action = self.actions_slider.get()
+            global_vars.time_turn_for_human = self.human_turn_slider.get()
             self.frame.pack_forget()
             self.start_game_callback()
         else:
