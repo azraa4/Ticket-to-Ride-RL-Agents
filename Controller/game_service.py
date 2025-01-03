@@ -140,6 +140,9 @@ class GameService:
                 self.controller.draw_destination_ticket(action_params["selected_destination_tickets"])
                 self.controller.destroy_select_destination_tickets_canvas_for_ai()
 
+    def pass_the_turn(self):
+        self.controller.go_to_next_turn()
+
     def on_change_of_turn(self):
         '''
         Bu method her turn değiştiğinde çağrılacak.

@@ -38,6 +38,10 @@ class RandomAgent:
         print(f"AI: {self.color} available actions: {available_actions}")
         self.game_service.log(f"{self.color}, Available Actions: {available_actions}")
 
+        if not available_actions:
+            self.game_service.pass_the_turn()
+            return
+
         random_action = random.choice(available_actions)
         #random_action = 'claim_route'
 
