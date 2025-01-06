@@ -42,6 +42,8 @@ class TrainCardSelectionFrame:
 
         self.blind_pick_text_id = None
 
+        self.overlay_canvas = None;
+
 
     def create_train_card_selection_frame(self):
         # Create the main frame
@@ -185,6 +187,7 @@ class TrainCardSelectionFrame:
             setattr(self, button_name, None)
 
     def destroy_all_train_cards(self):
+        '''
         if self.train_card_pick_button1 is not None:
             self.train_card_pick_button1.destroy()
         if self.train_card_pick_button2 is not None:
@@ -203,7 +206,20 @@ class TrainCardSelectionFrame:
         self.canvas_for_text.place(x=0, y=0)
         self.canvas_for_text.create_text(5, 5, anchor="nw", text="All cards are in the hands of players.", fill="black",
                                          font=("Helvetica", 10, "bold"))
+        '''
 
+        if self.overlay_canvas is None:
+            self.overlay_canvas = tk.Canvas(self.canvas.master, width=843.5, height=150, bg="#fdf8ed", highlightthickness=0)
+            self.overlay_canvas.place(x=0, y=0)
+
+            # Add text on the overlay canvas
+            self.overlay_canvas.create_text(5, 5, anchor="nw", text="All cards are in the hands of players.", fill="black",
+                                            font=("Helvetica", 10, "bold"))
+
+    def destroy_overlay_canvas(self):
+        if self.overlay_canvas is not None:
+            self.overlay_canvas.destroy()
+            self.overlay_canvas = None;
 
     def update_train_card_selection_frame(self):
         if not self.controller.visualize:  # optimization

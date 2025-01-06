@@ -24,6 +24,8 @@ class GameManager:
 
         self.all_cards_on_the_players_hands = False
 
+        self.claiming_second_card = False;
+
     def start_game(self):
         self.current_player = self.players[0]
         self.train_cards_deck.shuffle()
@@ -41,7 +43,43 @@ class GameManager:
             player.train_cards.append(train_card_3)
             player.train_cards.append(train_card_4)
 
+    def deal_train_cards_on_the_table(self):
+        for i in range(0, 5 - len(self.cards_on_the_table)):
+            train_card = self.train_cards_deck.draw_card()
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",self.train_cards_deck.get_length())
+            if self.train_cards_deck.get_length()>2:
+                self.cards_on_the_table.append(train_card)
+            elif self.train_cards_deck.get_length()==2 and not self.claiming_second_card:
+                self.cards_on_the_table.append(train_card)
+            else:
+                # Recreate the train card deck based on the colors and total count
+                all_colors = ["blue", "red", "green", "orange", "yellow", "white", "black", "pink", "joker"]
+                card_count_per_color = 12
 
+                # Count how many cards of each color are currently with players
+                color_counts = {color: card_count_per_color for color in all_colors}
+                for player in self.players:
+                    for card in player.train_cards:
+                        color_counts[card.color] -= 1  # Decrease based on player's current cards
+
+                # Recreate the deck with the remaining card counts
+                new_deck = []
+                for color, count in color_counts.items():
+                    new_deck.extend([TrainCard(color) for _ in range(count)])
+
+                if len(new_deck) > 7:
+                    self.train_cards_deck = Deck(new_deck)
+                    self.train_cards_deck.shuffle()
+
+                    self.cards_on_the_table = []
+                    self.deal_train_cards_on_the_table()
+                else:
+                    print(
+                        "!        ERROR:All cards are in players' hands. No more cards to draw until players discard or play cards.")
+                    self.all_cards_on_the_players_hands = True
+                    return
+        self.all_cards_on_the_players_hands = False
+    '''
     def deal_train_cards_on_the_table(self):
         for i in range(0, 5-len(self.cards_on_the_table)):
             train_card = self.train_cards_deck.draw_card()
@@ -63,7 +101,7 @@ class GameManager:
                 for color, count in color_counts.items():
                     new_deck.extend([TrainCard(color) for _ in range(count)])
 
-                if len(new_deck) >= 5:
+                if len(new_deck) >= 7:
                     self.train_cards_deck = Deck(new_deck)
                     self.train_cards_deck.shuffle()
 
@@ -73,8 +111,8 @@ class GameManager:
                     print("!        ERROR:All cards are in players' hands. No more cards to draw until players discard or play cards.")
                     self.all_cards_on_the_players_hands = True
                     return
-
-
+        self.all_cards_on_the_players_hands = False
+    '''
     def draw_train_card(self, train_card):
         print("CARDS ON THE TABLE: ", self.cards_on_the_table)
         print("TRAIN CARD COLOR: ", train_card.color)

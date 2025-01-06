@@ -390,8 +390,17 @@ class PanelController:
 
         mean_points = self.calculate_points_mean(self.agents)
         std_dev_points = self.calculate_points_std_dev(self.agents)
-        most_winner = max(self.agents, key=lambda agent: agent["total_wins"])["color"]
-        most_longest_route = max(self.agents, key=lambda agent: agent["total_longest_route"])["color"]
+
+        try:
+            most_winner = max(self.agents, key=lambda agent: agent.get("total_wins", 0))["color"]
+        except ValueError:
+            most_winner = "No winner available"  # Or handle this appropriately if no max is found
+
+            # Get the agent with the longest route
+        try:
+            most_longest_route = max(self.agents, key=lambda agent: agent.get("total_longest_route", 0))["color"]
+        except ValueError:
+            most_longest_route = "No longest route available"  # Or handle this appropriately if no max is found
         self.gui.update_analysis_labels(mean_points, std_dev_points, most_winner, most_longest_route)
 
     def parse_players_line(self, players_line):
@@ -425,7 +434,14 @@ class PanelController:
 
     def calculate_points_mean(self, agents):
         total_points = [agent["total_points"] for agent in agents]
+        if(len(total_points)==0):
+            return 0
         return sum(total_points) / len(total_points)
+
+    def reset_agents(self):
+        self.agents=[]
+        self.refresh_general_agent_status_treeview()
+        self.gui.reset_dropdown()
 
 if __name__ == "__main__":
     root = tk.Tk()

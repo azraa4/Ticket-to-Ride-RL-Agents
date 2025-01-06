@@ -133,6 +133,7 @@ class GameController:
         if self.game_manager.all_cards_on_the_players_hands:
             self.view.train_cards.destroy_all_train_cards()
             return
+        self.view.train_cards.destroy_overlay_canvas()
         self.view.train_cards.card_1 = self.game_manager.cards_on_the_table[0]
         self.view.train_cards.card_1_img_path = self.game_manager.cards_on_the_table[0].image_path
         self.view.train_cards.card_2 = self.game_manager.cards_on_the_table[1]
@@ -165,6 +166,7 @@ class GameController:
             self.set_inventory()
             self.update_claimable_routes_frame()
             self.draw_train_card_limit -= 1
+            self.game_manager.claiming_second_card = True
             self.view.destination_tickets.destroy_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
             self.view.train_cards.update_train_card_pick_buttons(True)
@@ -172,6 +174,7 @@ class GameController:
             if self.draw_train_card_limit == 0:
                 self.view.destination_tickets.create_draw_ticket_button()
                 self.selecting_second_train_card = False
+                self.game_manager.claiming_second_card = False
                 self.view.claimable_routes.update_routes_frame()
                 self.view.train_cards.update_train_card_pick_buttons(False)
                 self.go_to_next_turn()
@@ -185,7 +188,7 @@ class GameController:
             return self.draw_train_card(train_card)
 
     def draw_cards_from_blind_deck(self):
-        if self.game_manager.train_cards_deck.get_length()<=2:
+        if self.game_manager.train_cards_deck.get_length()<=4:
             print("!        ERROR: can't draw blind cards since there is less than two cards in the deck.")
             return 0
         if self.draw_train_card_limit == 1:
@@ -252,7 +255,7 @@ class GameController:
         self.update_players_info_text()
         self.check_last_turn()
 
-        if self.game_manager.train_cards_deck.get_length() <= 2:
+        if self.game_manager.train_cards_deck.get_length() <= 4:
             print("!        ERROR:Blind card deleted since there is less than two cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
@@ -270,10 +273,17 @@ class GameController:
         if check:
             return
 
+        self.game_manager.claiming_second_card = False
+
         # Going next turn
         self.game_manager.next_turn()
 
         # After going next turn
+        if(self.game_manager.all_cards_on_the_players_hands):
+
+            self.game_manager.deal_train_cards_on_the_table()
+            self.deal_the_cards_to_train_card_selection_frame()
+
         self.start_turn_time = time.time()
         log_this = f"GAMESTATE: Turn: {((self.game_manager.current_turn) // len(self.game_manager.players) + 1)} | "
         for i in range(len(self.game_manager.players)):
@@ -311,8 +321,8 @@ class GameController:
         self.update_players_info_text()
         self.check_last_turn()
 
-        if self.game_manager.train_cards_deck.get_length() <= 2:
-            print("!        IMPORTANT INFO: Blind card deleted since there is less than two cards on the deck.")
+        if self.game_manager.train_cards_deck.get_length() <= 4:
+            print("!        IMPORTANT INFO: Blind card deleted since there is less than four cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()

@@ -78,6 +78,9 @@ class PanelGUI:
         add_player_button = tk.Button(self.frame2, text="Add Player", command=self.controller.add_player)
         add_player_button.pack(side=tk.LEFT, padx=5)
 
+        reset_players_button = tk.Button(self.frame2, text="Reset Player", command=self.controller.reset_agents)
+        reset_players_button.pack(side=tk.LEFT, padx=5)
+
         # Time Settings Frame
         self.frame3 = tk.Frame(self.upper_frame)
         self.frame3.pack(fill=tk.X, pady=5)
@@ -298,3 +301,17 @@ class PanelGUI:
         self.std_dev_of_points_label.config(text=f"Standard Deviation of Points: {std_dev_points:.2f}")
         self.most_winner_label.config(text=f"Most Winner: {most_winner}")
         self.most_longest_route_label.config(text=f"Most Longest Route Achiever: {most_longest_route}")
+
+    def reset_dropdown(self):
+        print("Resetting dropdown...")  # Debugging statement
+        # Reset available colors to the original list
+        self.available_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
+
+        # Update the dropdown values to reflect the reset
+        self.color_dropdown["values"] = self.available_colors
+
+        # Reset the selected value in the dropdown (set to None or empty if you prefer)
+        self.color_var.set("")  # This clears the current selection
+
+        # Force the dropdown to update
+        self.color_dropdown.update_idletasks()
