@@ -39,7 +39,7 @@ class GameEndFrame:
             players_label = tk.Label(
                 self.game_end_frame,
                 text=f"Players:",
-                font=("Arial", 20, "bold"),
+                font=("Arial", 15, "bold"),
                 fg="#ae2907",
                 bg="#d5b570"
             )
@@ -55,7 +55,7 @@ class GameEndFrame:
 
                     player_label = tk.Label(self.game_end_frame,
                         text=text,
-                        font=("Arial", 20, "bold"),
+                        font=("Arial", 15, "bold"),
                         fg="#ae2907",
                         bg="#d5b570"
                     )
@@ -65,7 +65,7 @@ class GameEndFrame:
             turn_played_label = tk.Label(
                 self.game_end_frame,
                 text=f"Turn Played: {turn_played}",
-                font=("Arial", 20, "bold"),
+                font=("Arial", 15, "bold"),
                 fg="#ae2907",
                 bg="#d5b570"
             )
@@ -76,12 +76,12 @@ class GameEndFrame:
                 self.game_end_frame,
                 text="Quit",
                 command=self.quit_game,
-                font_size=20
+                font_size=15
             )
             quit_button.pack(pady=20)
 
         self.game_end_frame.place(x=0, y=0, relwidth=1, relheight=1)
 
     def quit_game(self):
-        #self.root.quit()
+        self.root.quit()
         print("this will quit the game")

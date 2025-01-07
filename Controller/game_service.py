@@ -155,7 +155,8 @@ class GameService:
         current_color = self.controller.get_current_player().color
         for agent in ai_list:
             if agent.color == current_color:
-                agent.perform_action()
+                if not self.controller.get_game_end():
+                    agent.perform_action()
 
         print("AI: AI informed about turn change.")
         return

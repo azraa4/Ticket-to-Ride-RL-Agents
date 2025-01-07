@@ -19,6 +19,8 @@ class AgentX:
         if self.game_service.get_game_state()["game_ended"]:
             return
 
+        print("GAME ENDED OR NOT ::::::::" , self.game_service.get_game_state()["game_ended"])
+
         print(f"------------{self.color} COLORED AI PERFORMING ACTION---------------")
 
         # Oyunun Başlangıcında Hedef Biletleri Seçme
@@ -40,6 +42,7 @@ class AgentX:
             self.game_service.log(log_message)
 
             # İlk turun sonunda turnu kapatıyoruz
+            self.game_service.change_status_text(f"{self.color} drawed destination ticket card.")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
             self.game_service.change_status_text("TURN CHANGED.")
             return
@@ -143,7 +146,7 @@ class AgentX:
             print("AI: SELECTED CARD BY AI: JOKER")
             returned_item = self.game_service.perform_action("draw_train_card", action_params)
 
-            self.game_service.change_status_text(f"AI drawed {selected_card.color} colored train card.")
+            self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
             self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {selected_card.color}")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
@@ -174,7 +177,7 @@ class AgentX:
             print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
 
-            self.game_service.change_status_text(f"AI drawed {selected_card.color} colored train card.")
+            self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
             self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {selected_card.color}")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
@@ -189,7 +192,7 @@ class AgentX:
             print("AI: SELECTED CARD BY AI: BLIND PICK")
             self.game_service.perform_action("draw_train_card", action_params)
 
-            self.game_service.change_status_text("AI drawed from blind pick")
+            self.game_service.change_status_text(f"{self.color} drawed from blind pick")
             self.game_service.log(f"{self.color}, Action: DRAW BLIND CARD")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
@@ -208,7 +211,7 @@ class AgentX:
                 self.game_service.perform_action("draw_train_card", action_params)
 
                 self.game_service.change_status_text(
-                    f"AI drawed {selected_card.color} colored train card as an alternative action."
+                    f"{self.color} drawed {selected_card.color} colored train card as an alternative action."
                 )
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD (Alternative), {selected_card.color}")
                 self.game_service.wait_for_it(global_vars.time_action * 1000)
@@ -273,7 +276,7 @@ class AgentX:
             self.game_service.perform_action("draw_train_card", action_params)
 
             self.game_service.change_status_text(
-                f"AI drawed {selected_card.color} colored train card as second train card."
+                f"{self.color} drawed {selected_card.color} colored train card as second train card."
             )
             self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD (Second), {selected_card.color}")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
@@ -306,7 +309,7 @@ class AgentX:
                 self.game_service.perform_action("draw_train_card", action_params)
 
                 self.game_service.change_status_text(
-                    f"AI drawed {selected_card.color} colored train card as alternative second card."
+                    f"{self.color} drawed {selected_card.color} colored train card as alternative second card."
                 )
                 self.game_service.log(
                     f"{self.color}, Action: DRAW TRAIN CARD (Alternative Second), {selected_card.color}"
@@ -342,7 +345,7 @@ class AgentX:
         action_params = {"selected_destination_tickets": selected_cards}
         self.game_service.perform_action("draw_destination_ticket", action_params)
 
-        self.game_service.change_status_text(f"AI drawed destination ticket card.")
+        self.game_service.change_status_text(f"{self.color} drawed destination ticket card.")
 
         log_message = f"{self.color}, Action: DESTINATION TICKET,"
         for ticket in action_params['selected_destination_tickets']:
@@ -376,12 +379,12 @@ class AgentX:
 
             # Eğer buradan 0 dönerse rota talebi tamamen başarısız olabilir.
             # Yine de game_service hangi bilgileri dönüyor bakın. Örneğin "cards_can_be_used" = []
-            self.game_service.change_status_text(f"AI claiming a gray route.")
+            self.game_service.change_status_text(f"{self.color} claiming a gray route.")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
             # Eğer hiç kullanılabilir renk dönmezse => kart yetersizliği vb. durumdan dolayı talep edilemedi
             if not cards_can_be_used:
-                self.game_service.change_status_text(f"AI can't claim gray route - insufficient cards maybe.")
+                self.game_service.change_status_text(f"{self.color} can't claim gray route - insufficient cards maybe.")
                 self.game_service.log(f"{self.color}, Action: CAN'T CLAIM GRAY ROUTE, insufficient cards.")
                 return  # Turn bitecek
 
@@ -402,7 +405,7 @@ class AgentX:
 
             if not possible_colors:
                 # Yeterli kart yoksa, eylem başarısız
-                self.game_service.change_status_text(f"AI can't claim gray route due to insufficient cards.")
+                self.game_service.change_status_text(f"{self.color} can't claim gray route due to insufficient cards.")
                 self.game_service.log(f"{self.color}, Action: CAN'T CLAIM GRAY ROUTE, insufficient cards.")
                 return
 
@@ -417,7 +420,7 @@ class AgentX:
             action_params = {"selected_route": route, "use_this_color": use_random_color_with_jokers}
             self.game_service.perform_action("claim_route", action_params)
 
-            self.game_service.change_status_text(f"AI claimed a gray route with {use_random_color_with_jokers}")
+            self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color_with_jokers}")
             self.game_service.log(
                 f"{self.color}, Action: CLAIM GRAY ROUTE, {route.city1} to {route.city2}, {use_random_color_with_jokers}"
             )
@@ -429,6 +432,6 @@ class AgentX:
             action_params = {"selected_route": route, "use_this_color": None}
             result = self.game_service.perform_action("claim_route", action_params)
 
-            self.game_service.change_status_text(f"AI claimed a colored route.")
+            self.game_service.change_status_text(f"{self.color} claimed a colored route.")
             self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
             self.game_service.wait_for_it(global_vars.time_action * 1000)

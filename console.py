@@ -15,7 +15,7 @@ class Console:
         self.console_root.attributes("-topmost", True)
 
         # Create a Text widget to act like a console at the top
-        self.console_output = tk.Text(self.console_root, height=20, state='disabled', bg='black', fg='green')
+        self.console_output = tk.Text(self.console_root, height=20, state='disabled', bg='white', fg='black')
         self.console_output.pack(side="top", fill="both", expand=True, padx=5, pady=5)
 
         # Frame for method entry and call button at the bottom

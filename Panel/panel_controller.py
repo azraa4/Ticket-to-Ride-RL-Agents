@@ -73,7 +73,7 @@ class PanelController:
             self.game_processes.append((game_id, process))  # Store ID and process together
             self.gui.processes_listbox.insert(tk.END, game_id)
 
-        self.move_logs_to_history()
+        self.move_logs_to_history() #history'e göndermek için commenti kaldır, history'e göndermemek için comment ekle
         self.update_process_listbox()
         self.populate_log_files("../logs")
 
@@ -156,11 +156,13 @@ class PanelController:
             print(f"ERROR: {e}")
 
     def update_process_listbox(self):
-        for idx, (game_id, process) in enumerate(self.game_processes):
+        self.gui.processes_listbox.delete(0, tk.END)
+        for game_id, process in self.game_processes:
             if process.is_alive():
-                self.gui.processes_listbox.itemconfig(idx, bg="green")  # Çalışıyorsa yeşil
+                status = " (running)"
             else:
-                self.gui.processes_listbox.itemconfig(idx, bg="red")  # Durdurulduysa kırmızı
+                status = " (stopped)"
+            self.gui.processes_listbox.insert(tk.END, f"Process {game_id}{status}")
 
     def update_log_content_listbox(self, event, listbox_type=None):
         """Update the log content listbox with the provided content."""
@@ -191,11 +193,11 @@ class PanelController:
 
         # Define color mappings
         color_keywords = {
-            "Red": "red",
-            "Blue": "blue",
-            "Green": "green",
-            "Yellow": "yellow",
-            "Black": "black"
+            "Red": "lightcoral",
+            "Blue": "lightblue",
+            "Green": "lightgreen",
+            "Yellow": "lightyellow",
+            "Black": "lightgray"
         }
 
         # Add all lines to the listbox
