@@ -122,7 +122,7 @@ class MainMenu:
         player_type_frame.pack(padx=65, pady=5, anchor="w")
         player_type_label = tk.Label(player_type_frame, text="Player Type: ", font=("Arial", 20, "bold"), fg="#ae2907", bg="#d5b570")
         player_type_label.pack(side="left")
-        player_type_options = ["Human", "RandomAgent", "AgentX"]
+        player_type_options = ["Human", "RandomAgent", "AgentX", "RLAgent"]
         player_type_dropdown = ModernOptionMenu(player_type_frame, self.player_type_var, *player_type_options)
         player_type_dropdown.pack(padx=11, side="left")
 
@@ -168,6 +168,10 @@ class MainMenu:
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
                 self.controller.add_player_button(player_name, selected_color, True)
             elif player_type == "AgentX":
+                self.controller.add_ai(selected_color, player_type)
+                print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
+                self.controller.add_player_button(player_name, selected_color, True)
+            elif player_type == "RLAgent":
                 self.controller.add_ai(selected_color, player_type)
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
                 self.controller.add_player_button(player_name, selected_color, True)

@@ -175,3 +175,29 @@ class GameService:
             self.controller.view.root.update_idletasks()
             self.controller.view.root.update()
 
+    #EKLEMEEE
+
+    def is_ticket_completed_by_route(self, player_color, route):
+        """ Oyuncunun sahip olduğu destination ticket'ların tamamlanıp tamamlanmadığını kontrol eder. """
+        player = self.controller.get_player_by_color(player_color)
+        if not player:
+            return False  # Oyuncu bulunamazsa False döndür
+
+        for ticket in player.destination_tickets:
+            if (ticket.city1 == route.city1 and ticket.city2 == route.city2) or \
+                    (ticket.city1 == route.city2 and ticket.city2 == route.city1):
+                return True
+        return False
+
+    def is_ticket_partially_completed_by_route(self, player_color, route):
+        """ Eğer rota, oyuncunun mevcut yollarının bir parçasıysa ama tamamlanmamışsa True döndürür. """
+        player = self.controller.get_player_by_color(player_color)
+        if not player:
+            return False
+
+        for ticket in player.destination_tickets:
+            if (ticket.city1 == route.city1 or ticket.city2 == route.city2 or
+                    ticket.city1 == route.city2 or ticket.city2 == route.city1):
+                return True  # Rota bilete kısmen uyuyorsa True döndür
+        return False
+
