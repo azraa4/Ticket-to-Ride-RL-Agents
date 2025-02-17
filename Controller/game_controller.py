@@ -507,7 +507,11 @@ class GameController:
 
                 self.game_end = True
                 self.reward_the_longest_route()
+                self.add_points_of_destinations()
+
                 self.show_game_end_frame()
+
+                self.game_service.run_at_game_end()
 
                 if self.stop_process_end_game:
                     self.quit_game()
@@ -532,12 +536,18 @@ class GameController:
             player.points += 10
             player.has_longest_road = True
 
+    def add_points_of_destinations(self):
+        for player in self.game_manager.players:
+            player.points += player.calculate_destination_gains()
+
+            print(f"PLAYER {player.color} CURRENT POINTS: {player.points} gained {player.calculate_destination_gains()} from destination tickets.")
+
     def show_game_end_frame(self):
         self.end_time = time.time()
 
         #find the winner
         winner_player = None
-        temp_max_points = 0
+        temp_max_points = -2000
         for player in self.game_manager.players:
             if player.points>=temp_max_points:
                 winner_player = player

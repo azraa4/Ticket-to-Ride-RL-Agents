@@ -26,6 +26,15 @@ class Player:
     def calculate_points(self):
         total_points = 0
 
+        for route in self.claimed_routes:
+            total_points += route.get_points_of_the_route()
+
+        # Update player points
+        self.points = total_points
+        print(f"POINTS STATUS: {self.name} with color {self.color} has now {self.points} points.")
+
+    def calculate_destination_gains(self):
+        total_points = 0
         # Create adjacency list from claimed routes
         adjacency_list = {}
         for route in self.claimed_routes:
@@ -53,12 +62,11 @@ class Player:
                 ticket.mark_as_completed()
                 total_points += ticket.points
 
-        for route in self.claimed_routes:
-            total_points += route.get_points_of_the_route()
+        for ticket in self.destination_tickets:
+            if not ticket.is_completed:
+                total_points -= ticket.points
 
-        # Update player points
-        self.points = total_points
-        print(f"POINTS STATUS: {self.name} with color {self.color} has now {self.points} points.")
+        return total_points
 
     def get_number_of_cards(self, color):
         num = 0

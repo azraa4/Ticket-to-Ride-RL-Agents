@@ -3,6 +3,7 @@ class DestinationTicket:
         self.city1 = city1
         self.city2 = city2
         self.points = points
+        self.id = ticket_id
         self.is_completed = False  # Biletin tamamlanıp tamamlanmadığını izlemek için bir bayrak
         self.image_path = f"Assets/DestinationTickets/{ticket_id}.png"  # Görsel yolu
 

@@ -1,3 +1,5 @@
+from Model.DQNModel.dqn_agent import DQNAgent
+from Model.agent_qlearning_basic import QLearningAgent
 class GameService:
     def __init__(self, controller):
         self.controller = controller
@@ -39,11 +41,17 @@ class GameService:
         claimable_routes = self.controller.get_claimable_routes()
         train_cards = self.controller.get_current_player().train_cards
         destination_cards = self.controller.get_current_player().destination_tickets
+        current_score = self.controller.get_current_player().points
+        remaining_cars = self.controller.get_current_player().train_cars
+        claimed_routes = self.controller.get_current_player().claimed_routes
 
         current_player_state = {
             "claimable_routes": claimable_routes,
             "train_cards": train_cards,
             "destination_cards": destination_cards,
+            "current score": current_score,
+            "remaining cars": remaining_cars,
+            "claimed routes": claimed_routes,
         }
 
         print("CURRENT PLAYER STATE: ", current_player_state)
@@ -175,3 +183,26 @@ class GameService:
             self.controller.view.root.update_idletasks()
             self.controller.view.root.update()
 
+    def run_at_game_end(self):
+        for ai in self.controller.get_ai_list():
+            if isinstance(ai, QLearningAgent):
+                ai.save_q_table()
+
+        for ai in self.controller.get_ai_list():
+            if isinstance(ai, DQNAgent):
+                for player in self.controller.get_players():
+                    if player.color == ai.color:
+                        if player.has_longest_road:
+                            ai.apply_final_reward(player.calculate_destination_gains()+10)
+                        else:
+                            ai.apply_final_reward(player.calculate_destination_gains())
+
+                # 1) Update the target model
+                ai.update_target_model()
+                # 2) Save the model (weights, optimizer, replay buffer)
+                ai.save_model()
+
+    def get_availability_of_blind_pick(self):
+        if self.controller.game_manager.train_cards_deck.get_length() <= 4:
+            return False
+        return True

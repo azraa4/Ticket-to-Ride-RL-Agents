@@ -62,7 +62,7 @@ class PanelGUI:
 
         self.agent_type_var = tk.StringVar()
         agent_dropdown = ttk.Combobox(self.frame2, textvariable=self.agent_type_var, state="readonly", width=15)
-        agent_dropdown["values"] = ["RandomAgent", "AgentX"]
+        agent_dropdown["values"] = ["RandomAgent", "AgentX", "QLearningAgent", "DeepQNetworkAgent"]
         agent_dropdown.pack(side=tk.LEFT, padx=5)
 
         # Label, Color Dropdown and Button
@@ -123,7 +123,15 @@ class PanelGUI:
                                               command=self.controller.stop_selected_process)
         self.stop_selected_button.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
+        # Loop Başlat/Durdur Butonları
+        self.loop_running = False  # Loop durumu takibi için
 
+        self.loop_button = tk.Button(self.start_buttons_frame, text="Start Loop", command=self.start_loop_games)
+        self.loop_button.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+
+        self.stop_loop_button = tk.Button(self.start_buttons_frame, text="Stop Loop", command=self.stop_loop_games,
+                                          state=tk.DISABLED)
+        self.stop_loop_button.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
         # Listbox Frames
         self.lower_frame = tk.Frame(self.left_column, bd=4, relief="groove")
@@ -315,3 +323,23 @@ class PanelGUI:
 
         # Force the dropdown to update
         self.color_dropdown.update_idletasks()
+
+    def start_loop_games(self):
+        """Oyunları sürekli olarak başlatan loop fonksiyonu."""
+        if not self.loop_running:
+            self.loop_running = True
+            self.loop_button.config(state=tk.DISABLED)
+            self.stop_loop_button.config(state=tk.NORMAL)
+            self.run_game_loop()
+
+    def stop_loop_games(self):
+        """Loop'u durduran fonksiyon."""
+        self.loop_running = False
+        self.loop_button.config(state=tk.NORMAL)
+        self.stop_loop_button.config(state=tk.DISABLED)
+
+    def run_game_loop(self):
+        """Loop aktifken sürekli oyun başlatır."""
+        if self.loop_running:
+            self.controller.start_games()  # Yeni bir oyun başlat
+            self.root.after(10000, self.run_game_loop)  # 2 saniye sonra tekrar çalıştır (gereksinime göre ayarlanabilir)
