@@ -18,7 +18,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_vs_x.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_test.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -189,7 +189,9 @@ class DQNAgent:
         reward, next_state, done = self.execute_action(action)
 
         # Store experience in replay memory
-        self.memory.push(state, action, reward, next_state, done)
+        # NEW - store action as an integer index
+        action_idx = self.action_space.index(action)
+        self.memory.push(state, action_idx, reward, next_state, done)
 
         # Train the model
         self.replay()
@@ -243,38 +245,58 @@ class DQNAgent:
         return reward, next_state, done
 
     def replay(self):
-        """
-        Train the DQN model using experience replay.
-        """
         if len(self.memory) < self.batch_size:
             return
 
         batch = self.memory.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
 
-        states = torch.cat(states)
-        next_states = torch.cat(next_states)
-        rewards = torch.tensor(rewards, dtype=torch.float32)
-        dones = torch.tensor(dones, dtype=torch.float32)
+        # Concatenate states and next_states. E.g. each is a single Tensor [1, 24], so we do:
+        states = torch.cat(states)  # shape: [batch_size, 24]
+        next_states = torch.cat(next_states)  # shape: [batch_size, 24]
+        actions = torch.tensor(actions, dtype=torch.long)  # shape: [batch_size]
+        rewards = torch.tensor(rewards, dtype=torch.float32)  # shape: [batch_size]
+        dones = torch.tensor(dones, dtype=torch.float32)  # shape: [batch_size]
 
-        # Compute current Q-values
-        q_values = self.model(states)
+        #masking
+        # 1) Create a mask that selects only transitions with a real action index
+        valid_mask = (actions >= 0)
 
-        # Compute target Q-values
+        # 2) Filter out invalid transitions
+        states = states[valid_mask]
+        next_states = next_states[valid_mask]
+        actions = actions[valid_mask]
+        rewards = rewards[valid_mask]
+        dones = dones[valid_mask]
+
+        # If after filtering you have zero valid transitions, just return
+        if len(states) == 0:
+            return
+
+        # 1) Current Q-values
+        q_values = self.model(states)  # shape: [batch_size, num_actions]
+
+        # ***GATHER only the Q-values corresponding to the chosen actions***
+        # actions.unsqueeze(1) has shape [batch_size, 1], so gather returns shape [batch_size, 1]
+        q_values_for_actions = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
+        # Now q_values_for_actions has shape [batch_size]
+
+        # 2) Target Q-values
         with torch.no_grad():
-            target_q_values = self.target_model(next_states)
-            max_next_q = target_q_values.max(1)[0]
+            target_q_values = self.target_model(next_states)  # shape: [batch_size, num_actions]
+            max_next_q = target_q_values.max(dim=1)[0]  # shape: [batch_size]
             target = rewards + (1 - dones) * self.gamma * max_next_q
+            # shape: [batch_size]
 
-        # Compute loss
-        loss = F.mse_loss(q_values, target.unsqueeze(1))
+        # 3) Loss only for the chosen actions
+        loss = F.mse_loss(q_values_for_actions, target)
 
-        # Optimize the model
+        # 4) Backprop
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        # Update epsilon for exploration-exploitation balance
+        # 5) Epsilon decay
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -391,14 +413,9 @@ class DQNAgent:
         done = True
         print("Final Reward Applied ", done)
 
+        action_idx = -1
 
-        self.memory.push(
-            last_state,
-            final_action,
-            final_reward,
-            last_state,  # next_state, can be anything. The game is over, so done=True
-            done
-        )
+        self.memory.push(last_state, action_idx, final_reward, last_state, True)
         self.replay()
 
         self.total_episode_reward += final_reward
