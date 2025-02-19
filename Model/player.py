@@ -31,7 +31,7 @@ class Player:
 
         # Update player points
         self.points = total_points
-        print(f"POINTS STATUS: {self.name} with color {self.color} has now {self.points} points.")
+        #console print(f"POINTS STATUS: {self.name} with color {self.color} has now {self.points} points.")
 
     def calculate_destination_gains(self):
         total_points = 0
@@ -83,9 +83,15 @@ class Player:
                 self.train_cards.remove(train_card)
                 num -=1
 
+        if num!=0:
+            for train_card in copy_of_train_cards_list:
+                if "joker" == train_card.color and num != 0:
+                    self.train_cards.remove(train_card)
+                    num -= 1
+
     def decrease_train_cars(self, num):
         self.train_cars -= num
-        print(f"{self.name} with {self.color} has now {self.train_cars} train cars.")
+        #console print(f"{self.name} with {self.color} has now {self.train_cars} train cars.")
 
     def calculate_longest_route(self):
         # Create adjacency list with route lengths from claimed routes

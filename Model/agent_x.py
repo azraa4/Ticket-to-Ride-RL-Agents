@@ -19,13 +19,11 @@ class AgentX:
         if self.game_service.get_game_state()["game_ended"]:
             return
 
-        print("GAME ENDED OR NOT ::::::::" , self.game_service.get_game_state()["game_ended"])
-
-        print(f"------------{self.color} COLORED AI PERFORMING ACTION---------------")
+        #console print(f"------------{self.color} COLORED AI PERFORMING ACTION---------------")
 
         # Oyunun Başlangıcında Hedef Biletleri Seçme
         if self.first_time_bool:
-            print(f"AI: {self.color} 'S FIRST ROUND SO PICKING A DESTINATION TICKET")
+            #console print(f"AI: {self.color} 'S FIRST ROUND SO PICKING A DESTINATION TICKET")
             self.first_time_bool = False
 
             # Oyunun başında en az 2, en fazla 3 bilet seç (rastgele)
@@ -49,12 +47,12 @@ class AgentX:
 
         # Mevcut turda yapılabilecek eylemleri al
         available_actions = self.game_service.get_available_actions(self.color)
-        print(f"AI: {self.color} available actions: {available_actions}")
+        #console print(f"AI: {self.color} available actions: {available_actions}")
         self.game_service.log(f"{self.color}, Available Actions: {available_actions}")
 
         # Eğer hiçbir aksiyon yapılamıyorsa, pas geç
         if not available_actions:
-            print(f"AI: No available actions for {self.color}, passing turn.")
+            #console print(f"AI: No available actions for {self.color}, passing turn.")
             self.game_service.log(f"{self.color}, Action: PASS_TURN")
             self.game_service.pass_the_turn()
             return
@@ -99,24 +97,24 @@ class AgentX:
                 chosen_action = random.choice(available_actions)
 
         self.game_service.log(f"{chosen_action}")
-        print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {chosen_action}")
+        #console print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {chosen_action}")
 
         # Seçilen eylemi gerçekleştir
         if chosen_action == 'draw_train_card':
             self.draw_train_card()
-            print(f"AI: {self.color} COLORED AI has completed DRAWING TRAIN CARD successfully")
+            #console print(f"AI: {self.color} COLORED AI has completed DRAWING TRAIN CARD successfully")
             self.game_service.change_status_text("TURN CHANGED.")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
         elif chosen_action == 'draw_destination_ticket':
             self.draw_destination_ticket()
-            print(f"AI: {self.color} COLORED AI has completed DRAWING DESTINATION TICKET CARD successfully")
+            #console print(f"AI: {self.color} COLORED AI has completed DRAWING DESTINATION TICKET CARD successfully")
             self.game_service.change_status_text("TURN CHANGED.")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
         elif chosen_action == 'claim_route':
             self.claim_route(route)
-            print(f"AI: {self.color} COLORED AI has completed CLAIMING ROUTE (or attempted)")
+            #console print(f"AI: {self.color} COLORED AI has completed CLAIMING ROUTE (or attempted)")
 
             # Turnu kapat
             self.game_service.change_status_text("TURN CHANGED.")
@@ -143,7 +141,7 @@ class AgentX:
         if joker_cards:
             selected_card = joker_cards[0]
             action_params = {"selected_card": selected_card}
-            print("AI: SELECTED CARD BY AI: JOKER")
+            #console print("AI: SELECTED CARD BY AI: JOKER")
             returned_item = self.game_service.perform_action("draw_train_card", action_params)
 
             self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
@@ -173,8 +171,8 @@ class AgentX:
         if needed_cards:
             selected_card = random.choice(needed_cards)
             action_params = {"selected_card": selected_card}
-            print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
-            print("AI: SELECTED CARD BY AI:", selected_card.color)
+            #console print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
+            #console print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
 
             self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
@@ -189,7 +187,7 @@ class AgentX:
         # Kural 3: Destede 4 veya daha fazla kart varsa blind pick yap.
         if self.game_service.controller.game_manager.train_cards_deck.get_length() > 4:
             action_params = {"selected_card": "select_blind"}
-            print("AI: SELECTED CARD BY AI: BLIND PICK")
+            #console print("AI: SELECTED CARD BY AI: BLIND PICK")
             self.game_service.perform_action("draw_train_card", action_params)
 
             self.game_service.change_status_text(f"{self.color} drawed from blind pick")
@@ -206,7 +204,7 @@ class AgentX:
             if train_cards_on_the_table:
                 selected_card = random.choice(train_cards_on_the_table)
                 action_params = {"selected_card": selected_card}
-                print("AI: SELECTED CARD BY AI:", selected_card.color)
+                #console print("AI: SELECTED CARD BY AI:", selected_card.color)
 
                 self.game_service.perform_action("draw_train_card", action_params)
 
@@ -270,8 +268,8 @@ class AgentX:
         if non_joker_needed_cards:
             selected_card = random.choice(non_joker_needed_cards)
             action_params = {"selected_card": selected_card}
-            print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
-            print("AI: SELECTED SECOND CARD BY AI:", selected_card.color)
+            #console print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
+            #console print("AI: SELECTED SECOND CARD BY AI:", selected_card.color)
 
             self.game_service.perform_action("draw_train_card", action_params)
 
@@ -297,14 +295,14 @@ class AgentX:
 
         # Kural 3: Destede 2 veya daha az kart varsa ve masada kart varsa, masadan joker olmayan rastgele kart
         if self.game_service.controller.game_manager.train_cards_deck.get_length() <= 2 and train_cards_on_the_table:
-            print("AI: Not enough cards in deck for blind pick, taking a train card from table.")
+            #console print("AI: Not enough cards in deck for blind pick, taking a train card from table.")
             self.game_service.log(f"{self.color}, Action: BLIND PICK NOT AVAILABLE, taking a train card from table")
 
             non_joker_cards = [card for card in train_cards_on_the_table if card.color != "joker"]
             if non_joker_cards:
                 selected_card = random.choice(non_joker_cards)
                 action_params = {"selected_card": selected_card}
-                print("AI: SELECTED SECOND CARD BY AI:", selected_card.color)
+                #console print("AI: SELECTED SECOND CARD BY AI:", selected_card.color)
 
                 self.game_service.perform_action("draw_train_card", action_params)
 
@@ -316,7 +314,7 @@ class AgentX:
                 )
                 self.game_service.wait_for_it(global_vars.time_action * 1000)
             else:
-                print("AI: No valid second card options available.")
+                #console print("AI: No valid second card options available.")
                 self.game_service.log(f"{self.color}, Action: NO VALID SECOND CARD OPTION.")
 
     # -----------------------------------------------------------------------
@@ -334,7 +332,7 @@ class AgentX:
         ]
 
         if not destination_card_list_without_none:
-            print("AI: No valid destination tickets drawn.")
+            #console print("AI: No valid destination tickets drawn.")
             self.game_service.log(f"{self.color}, Action: DRAW DESTINATION TICKET - NO CARDS")
             return
 
@@ -366,13 +364,13 @@ class AgentX:
        - Eğer rota renkli ise doğrudan talep ediyoruz.
         """
         if not route:
-            print("AI: No route provided to claim.")
+            #console print("AI: No route provided to claim.")
             self.game_service.log(f"{self.color}, Action: CLAIM ROUTE - NO ROUTE")
             return
 
         # Gri rota
         if route.color == "gray":
-            print("AI: A GRAY ROUTE SELECTED")
+            #console print("AI: A GRAY ROUTE SELECTED")
             # 1) İlk önce "use_this_color": None ile aksiyon yapıp, servisin hangi renkleri kullanabileceğini öğreniyoruz
             action_params = {"selected_route": route, "use_this_color": None}
             cards_can_be_used = self.game_service.perform_action("claim_route", action_params)
@@ -417,18 +415,21 @@ class AgentX:
             else:
                 use_random_color_with_jokers = use_random_color
 
-            action_params = {"selected_route": route, "use_this_color": use_random_color_with_jokers}
+            action_params = {"selected_route": route, "use_this_color": None}
+            cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
+            use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
+            action_params = {"selected_route": route, "use_this_color": use_random_color}
             self.game_service.perform_action("claim_route", action_params)
 
-            self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color_with_jokers}")
+            self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
             self.game_service.log(
-                f"{self.color}, Action: CLAIM GRAY ROUTE, {route.city1} to {route.city2}, {use_random_color_with_jokers}"
+                f"{self.color}, Action: CLAIM GRAY ROUTE, {route.city1} to {route.city2}, {use_random_color}"
             )
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
         else:
             # Renkli rota
-            print("AI: A COLORED ROUTE SELECTED")
+            #console print("AI: A COLORED ROUTE SELECTED")
             action_params = {"selected_route": route, "use_this_color": None}
             result = self.game_service.perform_action("claim_route", action_params)
 

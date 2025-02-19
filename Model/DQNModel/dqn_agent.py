@@ -9,7 +9,7 @@ import random
 
 class DQNAgent:
     def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=10000, batch_size=64):
+                 memory_size=50000, batch_size=64):
         self.color = color
         self.game_service = game_service
 
@@ -172,7 +172,7 @@ class DQNAgent:
         """
 
         if self.first_turn:
-            print(f"It is the first turn of {self.color}ed DeepQNetworkAgent")
+            #console print(f"It is the first turn of {self.color}ed DeepQNetworkAgent")
             self.first_turn = False
             action_params = {
                 "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()}
@@ -399,7 +399,7 @@ class DQNAgent:
         if "draw_destination_ticket" in available_actions:
             available_actions_in_detail.append("draw_destination_ticket")
 
-        print("AVAILABLE ACTIONS CALLED: ", list(set(available_actions_in_detail)))
+        #console print("AVAILABLE ACTIONS CALLED: ", list(set(available_actions_in_detail)))
         return list(set(available_actions_in_detail))
 
     def apply_final_reward(self, final_reward):
@@ -457,8 +457,7 @@ class DQNAgent:
 
         current_state = self.game_service.get_current_player_state()
         train_cards_list = current_state["train_cards"]
-        self.game_service.log(
-            f"Having these train cards: {train_cards_list}")
+        self.game_service.log(f"Having these train cards: {train_cards_list}")
 
         return 2  # Reward for drawing blind train cards
 
@@ -474,6 +473,7 @@ class DQNAgent:
 
         game_state = self.game_service.get_game_state()
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
+        print(train_cards_on_the_table)
         for card in train_cards_on_the_table:
             if card.color != "joker":
                 action_params = {"selected_card": card}

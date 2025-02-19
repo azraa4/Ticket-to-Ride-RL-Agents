@@ -54,7 +54,7 @@ class GameService:
             "claimed routes": claimed_routes,
         }
 
-        print("CURRENT PLAYER STATE: ", current_player_state)
+        #console print("CURRENT PLAYER STATE: ", current_player_state)
         return current_player_state
 
     def get_available_actions(self, player_color):
@@ -77,7 +77,7 @@ class GameService:
             available_actions.append("draw_train_card")
 
 
-        print("AVAILABLE ACTIONS CALLED: ", available_actions)
+        #console print("AVAILABLE ACTIONS CALLED: ", available_actions)
         return available_actions
 
     def get_destination_tickets_list_at_the_start_of_the_game(self):
@@ -166,7 +166,7 @@ class GameService:
                 if not self.controller.get_game_end():
                     agent.perform_action()
 
-        print("AI: AI informed about turn change.")
+        #console print("AI: AI informed about turn change.")
         return
 
     def change_status_text(self, text):

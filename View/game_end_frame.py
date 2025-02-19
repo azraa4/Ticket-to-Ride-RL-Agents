@@ -84,4 +84,3 @@ class GameEndFrame:
 
     def quit_game(self):
         self.root.quit()
-        print("this will quit the game")

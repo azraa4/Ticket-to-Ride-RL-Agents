@@ -204,7 +204,7 @@ class GameController:
         return not self.game_manager.destination_tickets_deck.is_empty()
     def open_draw_destination_ticket_frame(self):
         if not self.can_draw_destination_ticket():
-            print("!        IMPORTANT INFO: destination tickets deck is empty")
+            #console print("!        IMPORTANT INFO: destination tickets deck is empty")
             return
 
         self.game_manager.destination_tickets_deck.shuffle()
@@ -256,7 +256,7 @@ class GameController:
         self.check_last_turn()
 
         if self.game_manager.train_cards_deck.get_length() <= 4:
-            print("!        ERROR:Blind card deleted since there is less than two cards on the deck.")
+            #console print("!        INFO:Blind card deleted since there is less than two cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
@@ -297,7 +297,7 @@ class GameController:
 
 
         if self.get_current_player().first_turn:
-            print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
+            #console print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
 
 
@@ -322,7 +322,7 @@ class GameController:
         self.check_last_turn()
 
         if self.game_manager.train_cards_deck.get_length() <= 4:
-            print("!        IMPORTANT INFO: Blind card deleted since there is less than four cards on the deck.")
+            #console print("!        IMPORTANT INFO: Blind card deleted since there is less than four cards on the deck.")
             self.view.train_cards.destroy_train_card_pick_button("train_card_pick_button6")
             self.view.destination_tickets.create_draw_ticket_button()
             self.view.claimable_routes.update_routes_frame()
@@ -335,7 +335,7 @@ class GameController:
 
         # After going next turn
         if self.get_current_player().first_turn:
-            print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
+            #console print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
             self.get_current_player().first_turn = False
 
@@ -350,7 +350,6 @@ class GameController:
 
         self.game_service.on_change_of_turn()
 
-        #print(f"Draw Train Card Limit: {self.draw_train_card_limit}")
 
     def change_turn_availability(self, bool):
         self.turns_available = bool
@@ -435,7 +434,8 @@ class GameController:
         elif using == "Claim using joker cards.":
             self.game_manager.current_player.remove_card_according_to_color("joker", selected_route.length)
         else:
-            print("!        ERROR: there is an error about claim gray route using color")
+            print("!        ERROR: there is an error about claim gray route using color", using, selected_route)
+            raise ValueError(f"! ERROR: Invalid claim attempt for gray route using color '{using}' for route {selected_route}")
 
         self.view.main_frame.create_roads()
         self.view.claimable_routes.update_routes_frame()
@@ -446,7 +446,7 @@ class GameController:
         self.go_to_next_turn()
 
     def claim_route_force(self, id, player):
-        print("forced claim")
+        #console print("forced claim")
         unclaimed_routes = self.game_manager.board.get_unclaimed_routes()
         for route in unclaimed_routes:
             if route.id == id:
@@ -492,7 +492,7 @@ class GameController:
         for player in self.game_manager.players:
             if player.train_cars <= 2:
                 self.last_turn = ((self.game_manager.current_turn) // len(self.game_manager.players)+1) + 1
-                print("GAME INFO: Entered to last turn!")
+                #console print("GAME INFO: Entered to last turn!")
 
     def get_last_turn_info(self):
         if self.last_turn is not None:
@@ -502,7 +502,7 @@ class GameController:
     def check_if_game_ended(self):
         if self.last_turn is not None and not self.game_end:
             if (((self.game_manager.current_turn) // len(self.game_manager.players)+1)) == self.last_turn+1:
-                print("---GAME END---")
+                #console print("---GAME END---")
                 self.get_current_player().total_turn_played -= 1
 
                 self.game_end = True
@@ -532,7 +532,7 @@ class GameController:
                 players_have_longest_route.append(player)
 
         for player in players_have_longest_route:
-            print(f"POINT STATUS: {player.color} has rewarded with longest route extra points.")
+            #console print(f"POINT STATUS: {player.color} has rewarded with longest route extra points.")
             player.points += 10
             player.has_longest_road = True
 
@@ -540,7 +540,7 @@ class GameController:
         for player in self.game_manager.players:
             player.points += player.calculate_destination_gains()
 
-            print(f"PLAYER {player.color} CURRENT POINTS: {player.points} gained {player.calculate_destination_gains()} from destination tickets.")
+            #console print(f"PLAYER {player.color} CURRENT POINTS: {player.points} gained {player.calculate_destination_gains()} from destination tickets.")
 
     def show_game_end_frame(self):
         self.end_time = time.time()

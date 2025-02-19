@@ -445,6 +445,10 @@ class PanelController:
         self.refresh_general_agent_status_treeview()
         self.gui.reset_dropdown()
 
+    def are_games_running(self):
+        """Check if any game processes are currently running."""
+        return any(process.is_alive() for _, process in self.game_processes)
+
 if __name__ == "__main__":
     root = tk.Tk()
 

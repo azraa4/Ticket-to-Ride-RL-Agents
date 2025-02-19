@@ -258,11 +258,11 @@ class MainFrame:
         sum = self.check_var1.get() + self.check_var2.get() + self.check_var3.get()
         if self.controller.game_manager.current_player.first_turn:
             if sum < 2:
-                print("You must select at least two destination card!")
+                #console print("You must select at least two destination card!")
                 return
         else:
             if sum == 0:
-                print("You must select at least one destination card!")
+                #console print("You must select at least one destination card!")
                 return
 
         if self.check_var1.get() == 1 and card1 is not None:

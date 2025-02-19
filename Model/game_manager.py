@@ -46,7 +46,7 @@ class GameManager:
     def deal_train_cards_on_the_table(self):
         for i in range(0, 5 - len(self.cards_on_the_table)):
             train_card = self.train_cards_deck.draw_card()
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",self.train_cards_deck.get_length())
+            #console print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",self.train_cards_deck.get_length())
             if self.train_cards_deck.get_length()>2:
                 self.cards_on_the_table.append(train_card)
             elif self.train_cards_deck.get_length()==2 and not self.claiming_second_card:
@@ -74,8 +74,7 @@ class GameManager:
                     self.cards_on_the_table = []
                     self.deal_train_cards_on_the_table()
                 else:
-                    print(
-                        "!        ERROR:All cards are in players' hands. No more cards to draw until players discard or play cards.")
+                    print("!        ERROR:All cards are in players' hands. No more cards to draw until players discard or play cards.")
                     self.all_cards_on_the_players_hands = True
                     return
         self.all_cards_on_the_players_hands = False
@@ -114,9 +113,9 @@ class GameManager:
         self.all_cards_on_the_players_hands = False
     '''
     def draw_train_card(self, train_card):
-        print("CARDS ON THE TABLE: ", self.cards_on_the_table)
-        print("TRAIN CARD COLOR: ", train_card.color)
-        print("DECK LENGTH:", self.train_cards_deck.get_length())
+        #console print("CARDS ON THE TABLE: ", self.cards_on_the_table)
+        #console print("TRAIN CARD COLOR: ", train_card.color)
+        #console print("DECK LENGTH:", self.train_cards_deck.get_length())
         self.cards_on_the_table.remove(train_card)
         self.current_player.train_cards.append(train_card)
         self.deal_train_cards_on_the_table()
@@ -230,7 +229,7 @@ class GameManager:
             for double_route in double_routes_list:
                 for routes_id_without in claimed_routes_ids_without_1_2:
                     if routes_id_without in double_route.id:
-                        print("DOUBLE ROUTE FOUNDED IT WILL BE REMOVED")
+                        #print("DOUBLE ROUTE FOUNDED IT WILL BE REMOVED")
                         routes_will_be_removed.append(double_route)
 
             claimable_routes = [route for route in claimable_routes if route not in routes_will_be_removed]

@@ -72,7 +72,7 @@ class PPOAgent:
         if self.game_service.get_game_state()["game_ended"]:
             return
 
-        print(f"------------{self.color} COLORED PPO AGENT PERFORMING ACTION---------------")
+        #console print(f"------------{self.color} COLORED PPO AGENT PERFORMING ACTION---------------")
 
         state = self.get_state_representation()
         action_index = self.select_action(state)
@@ -84,7 +84,7 @@ class PPOAgent:
 
         action = available_actions[action_index % len(available_actions)]  # Ensure valid action index
 
-        print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {action}")
+        #console print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {action}")
 
         # Perform the chosen action
         if action == 'draw_train_card':

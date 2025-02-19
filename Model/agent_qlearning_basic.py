@@ -73,7 +73,7 @@ class QLearningAgent:
         """
         if self.first_turn:
             self.load_q_table()
-            print(f"It is the first turn of {self.color}ed QLearningAgent")
+            #console print(f"It is the first turn of {self.color}ed QLearningAgent")
             self.first_turn = False
             action_params = {
                 "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()}

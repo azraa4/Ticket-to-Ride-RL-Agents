@@ -341,5 +341,7 @@ class PanelGUI:
     def run_game_loop(self):
         """Loop aktifken sürekli oyun başlatır."""
         if self.loop_running:
-            self.controller.start_games()  # Yeni bir oyun başlat
-            self.root.after(10000, self.run_game_loop)  # 2 saniye sonra tekrar çalıştır (gereksinime göre ayarlanabilir)
+            print("Games are running: ", self.controller.are_games_running())
+            if not self.controller.are_games_running():
+                self.controller.start_games()
+            self.root.after(2000, self.run_game_loop)

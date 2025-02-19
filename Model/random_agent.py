@@ -14,10 +14,10 @@ class RandomAgent:
         if self.game_service.get_game_state()["game_ended"]:
             return
 
-        print(f"------------{self.color} COLORED AI PERFORMING ACTION---------------")
+        #console print(f"------------{self.color} COLORED AI PERFORMING ACTION---------------")
 
         if self.first_time_bool:
-            print("AI: ", self.color, "'S FIRST ROUND SO PICKING A DESTINATION TICKET")
+            #console print("AI: ", self.color, "'S FIRST ROUND SO PICKING A DESTINATION TICKET")
 
             self.first_time_bool = False
             action_params = {
@@ -35,7 +35,7 @@ class RandomAgent:
             return
 
         available_actions = self.game_service.get_available_actions(self.color)
-        print(f"AI: {self.color} available actions: {available_actions}")
+        #console print(f"AI: {self.color} available actions: {available_actions}")
         self.game_service.log(f"{self.color}, Available Actions: {available_actions}")
 
         if not available_actions:
@@ -45,26 +45,26 @@ class RandomAgent:
         random_action = random.choice(available_actions)
         #random_action = 'claim_route'
 
-        print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {random_action}")
+        #console print(f"AI: {self.color} COLORED AGENT SELECTED THIS ACTION: {random_action}")
 
         if random_action == 'draw_train_card':
             self.draw_train_card()
-            print(f"AI: {self.color} COLORED AI has competed DRAWING TRAIN CARD successfully")
+            #console print(f"AI: {self.color} COLORED AI has competed DRAWING TRAIN CARD successfully")
         elif random_action == 'draw_destination_ticket':
             self.draw_destination_ticket()
-            print(f"AI: {self.color} COLORED AI has competed DRAWING DESTINATION TICKET CARD successfully")
+            #console print(f"AI: {self.color} COLORED AI has competed DRAWING DESTINATION TICKET CARD successfully")
         elif random_action == 'claim_route':
             self.claim_route()
-            print(f"AI: {self.color} COLORED AI has competed CLAIMING ROUTE successfully")
+            #console print(f"AI: {self.color} COLORED AI has competed CLAIMING ROUTE successfully")
 
     def draw_train_card(self):
         # draw colored or joker train card
         random_number = random.randint(0, 5)
-        print("AI: DRAW TRAIN CARD RANDOM NUMBER THAT AI SELECTED:", random_number)
+        #console print("AI: DRAW TRAIN CARD RANDOM NUMBER THAT AI SELECTED:", random_number)
 
         if random_number == 5:
             action_params = {"selected_card": "select_blind"}
-            print("AI: SELECTED CARD BY AI: BLIND PICK")
+            #console print("AI: SELECTED CARD BY AI: BLIND PICK")
             returned_item = self.game_service.perform_action("draw_train_card", action_params)
             if returned_item == 0:
                 self.draw_train_card()
@@ -79,8 +79,8 @@ class RandomAgent:
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
             selected_card = random.choice(train_cards_on_the_table)
             action_params = {"selected_card": selected_card}
-            print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
-            print("AI: SELECTED CARD BY AI:", selected_card.color)
+            #console print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
+            #console print("AI: SELECTED CARD BY AI:", selected_card.color)
             self.game_service.perform_action("draw_train_card", action_params)
 
             self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
@@ -89,17 +89,17 @@ class RandomAgent:
 
             game_state = self.game_service.get_game_state()
             train_cards_on_the_table = game_state["train_cards_on_the_table"]
-            print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
+            #console print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
             if self.game_service.check_if_second_train_card_needed():
                 check = True
                 while check:
-                    print("card amount:",len(train_cards_on_the_table))
+                    #console print("card amount:",len(train_cards_on_the_table))
                     selected_second_card = random.choice(train_cards_on_the_table)
                     if selected_second_card.color == "joker":
                         continue
                     else:
                         action_params = {"selected_card": selected_second_card}
-                        print("AI: SELECTED SECOND CARD BY AI:", selected_second_card.color)
+                        #console print("AI: SELECTED SECOND CARD BY AI:", selected_second_card.color)
                         self.game_service.perform_action("draw_train_card", action_params)
                         check = False
 
@@ -145,7 +145,7 @@ class RandomAgent:
             random_route = random.choice(claimable_routes)
 
             if random_route.color == "gray":
-                print("AI: A GRAY ROUTE SELECTED")
+                #console print("AI: A GRAY ROUTE SELECTED")
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
 
@@ -162,7 +162,7 @@ class RandomAgent:
                 self.game_service.wait_for_it(global_vars.time_action*1000)
 
             else:
-                print("AI: A COLORED ROUTE SELECTED")
+                #console print("AI: A COLORED ROUTE SELECTED")
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 self.game_service.perform_action("claim_route", action_params)
 

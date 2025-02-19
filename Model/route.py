@@ -14,6 +14,7 @@ class Route:
             self.claimed_by = player
         else:
             print("!        ERROR: it is already claimed")
+            raise ValueError(f"! ERROR: Invalid claim attempt")
 
     def get_image_path(self):
         return f"Assets/MapRoads/{self.id}.png"
