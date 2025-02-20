@@ -206,3 +206,6 @@ class GameService:
         if self.controller.game_manager.train_cards_deck.get_length() <= 4:
             return False
         return True
+    
+    def pass_draw_second_train_card(self):
+        self.controller.pass_draw_second_train_card()

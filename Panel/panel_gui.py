@@ -35,6 +35,8 @@ class PanelGUI:
         self.controller.populate_log_files("../logs")
         self.update_display_timer()
 
+        self.loop_count = 0
+
     def create_left_column(self):
         # LEFT COLUMN
         self.upper_frame = tk.Frame(self.left_column, bd=4, relief="groove")
@@ -338,10 +340,16 @@ class PanelGUI:
         self.loop_button.config(state=tk.NORMAL)
         self.stop_loop_button.config(state=tk.DISABLED)
 
+
+    
     def run_game_loop(self):
         """Loop aktifken sürekli oyun başlatır."""
         if self.loop_running:
-            print("Games are running: ", self.controller.are_games_running())
-            if not self.controller.are_games_running():
+            self.loop_count+=1
+            print(f"Games are running: {self.loop_count} times this func called -", self.controller.are_games_running())
+            if self.loop_count==40:
+                self.controller.stop_games()
+            elif not self.controller.are_games_running():
+                self.loop_count=0
                 self.controller.start_games()
-            self.root.after(2000, self.run_game_loop)
+            self.root.after(1000, self.run_game_loop)

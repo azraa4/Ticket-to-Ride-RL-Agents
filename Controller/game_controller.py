@@ -149,6 +149,25 @@ class GameController:
     def get_train_cards_on_the_table(self):
         return self.game_manager.cards_on_the_table
 
+    def pass_draw_second_train_card(self):
+        self.selecting_second_train_card = True
+        self.deal_the_cards_to_train_card_selection_frame()
+        self.set_inventory()
+        self.update_claimable_routes_frame()
+        self.draw_train_card_limit -= 1
+        self.game_manager.claiming_second_card = True
+        self.view.destination_tickets.destroy_draw_ticket_button()
+        self.view.claimable_routes.update_routes_frame()
+        self.view.train_cards.update_train_card_pick_buttons(True)
+
+        if self.draw_train_card_limit == 0:
+            self.view.destination_tickets.create_draw_ticket_button()
+            self.selecting_second_train_card = False
+            self.game_manager.claiming_second_card = False
+            self.view.claimable_routes.update_routes_frame()
+            self.view.train_cards.update_train_card_pick_buttons(False)
+            self.go_to_next_turn()
+
     def draw_train_card(self, train_card):
         if train_card.color == "joker":
             if self.draw_train_card_limit == 1:

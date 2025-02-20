@@ -140,6 +140,9 @@ class Console:
         action_params = {"selected_destination_tickets": [list_of_available_destination_tickets[0]]}
         self.view.game_service.perform_action("draw_destination_ticket", action_params)
 
+    def pass_draw_train_card(self):
+        self.view.game_controller.pass_draw_second_train_card()
+
     def call_method(self):
         """Dynamically calls a method by name with arguments inside parentheses and logs to console."""
         full_input = self.method_entry.get()  # Full input in the format: method_name(arg1, arg2)

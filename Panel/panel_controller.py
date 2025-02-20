@@ -2,6 +2,9 @@ import os
 import multiprocessing
 from multiprocessing import Queue
 
+import sys
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + "/.."))
+
 import main_view
 
 from panel_gui import PanelGUI

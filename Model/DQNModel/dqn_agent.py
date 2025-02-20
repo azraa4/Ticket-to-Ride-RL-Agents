@@ -18,7 +18,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_test.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_vs_x_model.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -323,6 +323,8 @@ class DQNAgent:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.epsilon = checkpoint['epsilon']
 
+            print(self.epsilon)
+
             # Rebuild replay buffer from saved transitions
             saved_memory = checkpoint.get('memory', [])
             self.memory.memory = deque(saved_memory, maxlen=self.memory.memory.maxlen)
@@ -474,12 +476,19 @@ class DQNAgent:
         game_state = self.game_service.get_game_state()
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
         print(train_cards_on_the_table)
+        
+        pass_bool = True
         for card in train_cards_on_the_table:
             if card.color != "joker":
                 action_params = {"selected_card": card}
                 self.game_service.perform_action("draw_train_card", action_params)
                 self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
+                pass_bool = False
                 break
+
+        if pass_bool:
+            self.game_service.pass_draw_second_train_card()
+            print("PASSED SECOND TRAIN CARD")
 
         return 2
 
