@@ -193,9 +193,11 @@ class GameService:
                 for player in self.controller.get_players():
                     if player.color == ai.color:
                         if player.has_longest_road:
-                            ai.apply_final_reward(player.calculate_destination_gains()+20)
+                            #ai.apply_final_reward(player.calculate_destination_gains()+20)
+                            ai.apply_final_reward(0)
                         else:
-                            ai.apply_final_reward(player.calculate_destination_gains())
+                            #ai.apply_final_reward(player.calculate_destination_gains())
+                            ai.apply_final_reward(0)
 
                 # 1) Update the target model
                 ai.update_target_model()

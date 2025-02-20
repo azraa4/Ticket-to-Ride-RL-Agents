@@ -8,7 +8,7 @@ from Model.DQNModel.replay_memory import ReplayMemory
 import random
 
 class DQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.999, lr=0.001,
                  memory_size=50000, batch_size=64):
         self.color = color
         self.game_service = game_service
@@ -18,7 +18,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_with_negative_rewards_to_dest_tickets.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_with_no_final_reward.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -502,7 +502,7 @@ class DQNAgent:
             self.game_service.pass_draw_second_train_card()
             print("PASSED SECOND TRAIN CARD")
 
-        return 2
+        return 3
 
     def draw_joker(self):
         game_state = self.game_service.get_game_state()
@@ -514,7 +514,7 @@ class DQNAgent:
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
                 break
 
-        return 4
+        return 6
 
     def draw_destination_ticket(self):
         """
@@ -538,4 +538,4 @@ class DQNAgent:
         log_message = log_message.rstrip(',')
         self.game_service.log(log_message)
 
-        return -10  # Reward for drawing destination tickets
+        return -15  # Reward for drawing destination tickets
