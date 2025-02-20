@@ -18,7 +18,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_vs_x_model.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_with_negative_rewards_to_dest_tickets.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -323,7 +323,6 @@ class DQNAgent:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.epsilon = checkpoint['epsilon']
 
-            print(self.epsilon)
 
             # Rebuild replay buffer from saved transitions
             saved_memory = checkpoint.get('memory', [])
@@ -331,6 +330,8 @@ class DQNAgent:
 
             print(f"✅ Model {self.model_filename} loaded successfully.")
             print(f"Replay buffer size after load: {len(self.memory)}")
+            print("Epsilon: ", self.epsilon)
+
         except Exception as e:
             print(f"⚠️ Could not load {self.model_filename}: {e}")
 
@@ -502,7 +503,7 @@ class DQNAgent:
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
                 break
 
-        return 3
+        return 4
 
     def draw_destination_ticket(self):
         """
@@ -526,4 +527,4 @@ class DQNAgent:
         log_message = log_message.rstrip(',')
         self.game_service.log(log_message)
 
-        return 1  # Reward for drawing destination tickets
+        return -10  # Reward for drawing destination tickets
