@@ -161,9 +161,18 @@ class DQNAgent:
 
             # Convert action names to indices (action space mapping)
             action_indices = [self.action_space.index(action) for action in available_actions]
+            print(action_indices)
 
             # Get the best Q-value action among the available ones
             best_action_index = max(action_indices, key=lambda idx: q_values[0, idx].item())
+
+            for idx in action_indices:
+                print(f"Q[{idx}] = {q_values[0, idx].item()}")
+
+            print(f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {q_values[0, best_action_index].item()}")
+            print(q_values)
+
+
             return self.action_space[best_action_index]
 
     def perform_action(self):
@@ -183,6 +192,8 @@ class DQNAgent:
         if not available_actions:
             self.game_service.pass_the_turn()
             return
+        
+        print("AVAILABLE ACTIONS:", available_actions)
 
         action = self.choose_action()
         state = self.get_state()
