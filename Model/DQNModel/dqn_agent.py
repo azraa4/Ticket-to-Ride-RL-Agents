@@ -11,7 +11,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.999, lr=0.001,
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.999, lr=0.001,
                  memory_size=50000, batch_size=64):
         self.color = color
         self.game_service = game_service
@@ -21,7 +21,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_1_0.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_1_1_2.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -145,7 +145,7 @@ class DQNAgent:
             table_joker
         ]
 
-        return torch.tensor(state_vector, dtype=torch.float32).unsqueeze(0)
+        return torch.tensor(state_vector, dtype=torch.float32, device=device).unsqueeze(0)
 
     def _count_train_cards_by_color(self, train_cards):
         """
@@ -362,12 +362,23 @@ class DQNAgent:
             # Convert replay buffer (deque) to a list so it’s easily serializable
             'memory': list(self.memory.memory)
         }
-        torch.save(checkpoint, self.model_filename)
+
+        # Create a temporary filename
+        temp_filename = self.model_filename + ".tmp"
+
+        # Write the checkpoint to the temp file
+        with open(temp_filename, 'wb') as f:
+            torch.save(checkpoint, f)
+            f.flush()               # Flush Python-level buffers
+            os.fsync(f.fileno())    # Force the OS to flush to disk
+
+        # Atomically replace the old file with the new one
+        os.replace(temp_filename, self.model_filename)
+
         print(f"✅ Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
 
         with open("scores.txt", "a") as file:
             file.write(str(self.total_episode_reward) + ",")
-
 
     def get_available_actions_for_dqn(self):
         available_actions = self.game_service.get_available_actions(self.color)
@@ -461,7 +472,7 @@ class DQNAgent:
         self.game_service.log(
             f"{self.color}, Action: CLAIM COLORED ROUTE, {selected_route.city1} to {selected_route.city2}")
 
-        return length * 2
+        return length * 3
 
     def draw_blind(self):
         """
@@ -540,4 +551,4 @@ class DQNAgent:
         log_message = log_message.rstrip(',')
         self.game_service.log(log_message)
 
-        return -15  # Reward for drawing destination tickets
+        return -40  # Reward for drawing destination tickets

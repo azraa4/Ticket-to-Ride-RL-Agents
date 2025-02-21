@@ -273,7 +273,8 @@ class PanelController:
                     self.gui.tree_players_info.insert("", tk.END, values=(name, color, points, cars))
 
     def move_logs_to_history(self):
-        logs_directory = os.path.join(os.getcwd(), "../logs")
+        
+        logs_directory = os.path.join(os.getcwd(), "logs")
         history_directory = os.path.join(logs_directory, "history")
 
         # Ensure the history directory exists
@@ -285,6 +286,10 @@ class PanelController:
             if file.endswith(".txt"):
                 source = os.path.join(logs_directory, file)
                 destination = os.path.join(history_directory, file)
+
+                print(f"Source: {source}")
+                print(f"Destination: {destination}")
+
                 try:
                     shutil.move(source, destination)  # Move the file
                     print(f"Moved {file} to history directory.")

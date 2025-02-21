@@ -32,7 +32,7 @@ class PanelGUI:
         self.game_processes = []
         self.queues = {}
 
-        self.controller.populate_log_files("../logs")
+        self.controller.populate_log_files("logs")
         self.update_display_timer()
 
         self.loop_count = 0
@@ -160,7 +160,7 @@ class PanelGUI:
         self.log_files_label = tk.Label(self.listbox_frame2, text="Current Games Logs")
         self.log_files_label.pack(side=tk.TOP, fill=tk.X, padx=5)
 
-        self.refresh_log_files_button = tk.Button(self.listbox_frame2, text="Refresh", command=lambda: self.controller.populate_log_files("../logs"))
+        self.refresh_log_files_button = tk.Button(self.listbox_frame2, text="Refresh", command=lambda: self.controller.populate_log_files("logs"))
         self.refresh_log_files_button.pack(side=tk.TOP, padx=10, fill=tk.X)
 
         self.log_files_listbox = tk.Listbox(self.listbox_frame2, height=15)
@@ -171,7 +171,7 @@ class PanelGUI:
         self.history_label = tk.Label(self.listbox_frame3, text="History")
         self.history_label.pack(side=tk.TOP, fill=tk.BOTH, padx=5)
 
-        self.refresh_history_button = tk.Button(self.listbox_frame3, text="Refresh", command=lambda: self.controller.populate_history_files("../logs/history"))
+        self.refresh_history_button = tk.Button(self.listbox_frame3, text="Refresh", command=lambda: self.controller.populate_history_files("logs/history"))
         self.refresh_history_button.pack(side=tk.TOP, padx=10, fill=tk.X)
 
         self.history_listbox = tk.Listbox(self.listbox_frame3)
