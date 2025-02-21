@@ -8,7 +8,7 @@ class ReplayMemory:
         Initialize replay buffer.
         :param capacity: Maximum size of the memory.
         """
-        self.memory = deque(maxlen=capacity)
+        self.memory = deque([], maxlen=capacity)
 
     def push(self, state, action, reward, next_state, done):
         """

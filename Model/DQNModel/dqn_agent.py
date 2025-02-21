@@ -21,7 +21,7 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_1_1_2.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_2_0_0.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
@@ -212,6 +212,8 @@ class DQNAgent:
         state = self.get_state()
         reward, next_state, done = self.execute_action(action)
 
+        print("THIS IS THE REWARD: ", reward)
+
         # Store experience in replay memory
         # NEW - store action as an integer index
         action_idx = self.action_space.index(action)
@@ -309,16 +311,30 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
+        self.soft_update_target(tau=0.005)
+
         print("States device:", states.device)
         print("Next states device:", next_states.device)
         print("Actions device:", actions.device)
 
+    #HARD UPDATE
     def update_target_model(self):
         """
         Periodically update target network, for example at the end of each game.
         """
         self.target_model.load_state_dict(self.model.state_dict())
         print("✅ Target model updated.")
+
+    #SOFT UPDATE
+    def soft_update_target(self, tau=0.005):
+        """Soft update target network parameters.
+
+        Args:
+            tau (float): interpolation parameter, with 0 < tau < 1.
+        """
+        for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
+            target_param.data.copy_(tau * local_param.data + (1 - tau) * target_param.data)
+
 
     def load_model(self):
         """
@@ -551,4 +567,4 @@ class DQNAgent:
         log_message = log_message.rstrip(',')
         self.game_service.log(log_message)
 
-        return -40  # Reward for drawing destination tickets
+        return -15  # Reward for drawing destination tickets
