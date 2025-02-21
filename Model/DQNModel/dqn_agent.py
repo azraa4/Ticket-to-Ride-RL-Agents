@@ -347,6 +347,7 @@ class DQNAgent:
 
         except Exception as e:
             print(f"⚠️ Could not load {self.model_filename}: {e}")
+            raise
 
     def save_model(self):
         """
