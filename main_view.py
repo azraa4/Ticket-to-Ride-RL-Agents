@@ -59,6 +59,10 @@ class MainGameApp:
             self.message_thread.daemon = True  # Programla birlikte kapanacak
             self.message_thread.start()
 
+        self.agents = None
+        self.test_name = None
+
+
     def listen_to_queue(self):
         """Queue'den gelen mesajları dinler ve işler."""
         while True:
@@ -96,6 +100,12 @@ class MainGameApp:
 
     def stop_game(self):
         self.root.destroy()
+        if global_vars.test_count != 0:
+            global_vars.test_count -= 1
+            global_vars.game_id += 1
+            main(None, global_vars.game_id, True, False, self.agents, False, self.test_name, 0, 0)
+        elif global_vars.test_count == 0:
+            global_vars.test_count = 50
 
     def withdraw_window(self):
         self.root.withdraw()
@@ -143,6 +153,9 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
 
             main_menu_controller.add_player_button(f"AI_{color}", color, True)
             main_menu_controller.add_ai(color, agent_type)
+
+        app.agents = agents
+        app.test_name = test_name
 
         main_menu_controller.force_start_game()
 

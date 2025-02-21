@@ -7,6 +7,9 @@ from Model.DQNModel.dqn import DQN
 from Model.DQNModel.replay_memory import ReplayMemory
 import random
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
+
+
 class DQNAgent:
     def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.999, lr=0.001,
                  memory_size=50000, batch_size=64):
@@ -18,18 +21,18 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_with_no_final_reward.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_1_0.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 24  # Fixed number of state features
         self.action_space = ["claim_route_1", "claim_route_2", "claim_route_3", "claim_route_4", "claim_route_5",
                              "claim_route_6", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
                              "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
-                             "draw_black_card", "draw_joker_card", "draw_destination_ticket"]  # Fixed action space
+                             "draw_black_card", "draw_joker_card", "draw_destination_ticket", "end_of_game"]  # Fixed action space
 
         # Neural Networks
-        self.model = DQN(self.state_size, len(self.action_space))
-        self.target_model = DQN(self.state_size, len(self.action_space))
+        self.model = DQN(self.state_size, len(self.action_space)).to(device)
+        self.target_model = DQN(self.state_size, len(self.action_space)).to(device)
         self.target_model.load_state_dict(self.model.state_dict())  # Copy weights
         self.target_model.eval()
 
@@ -43,6 +46,16 @@ class DQNAgent:
         self.first_turn = True
 
         self.total_episode_reward = 0
+
+        print("Model is on device:", next(self.model.parameters()).device)
+
+        print("PyTorch version:", torch.__version__)
+        print("CUDA available:", torch.cuda.is_available())
+        if torch.cuda.is_available():
+            print("Number of GPUs:", torch.cuda.device_count())
+            print("Current device index:", torch.cuda.current_device())
+            print("Device name:", torch.cuda.get_device_name(0))
+
 
     def get_state(self):
         """
@@ -263,26 +276,11 @@ class DQNAgent:
         states, actions, rewards, next_states, dones = zip(*batch)
 
         # Concatenate states and next_states. E.g. each is a single Tensor [1, 24], so we do:
-        states = torch.cat(states)  # shape: [batch_size, 24]
-        next_states = torch.cat(next_states)  # shape: [batch_size, 24]
-        actions = torch.tensor(actions, dtype=torch.long)  # shape: [batch_size]
-        rewards = torch.tensor(rewards, dtype=torch.float32)  # shape: [batch_size]
-        dones = torch.tensor(dones, dtype=torch.float32)  # shape: [batch_size]
-
-        #masking
-        # 1) Create a mask that selects only transitions with a real action index
-        valid_mask = (actions >= 0)
-
-        # 2) Filter out invalid transitions
-        states = states[valid_mask]
-        next_states = next_states[valid_mask]
-        actions = actions[valid_mask]
-        rewards = rewards[valid_mask]
-        dones = dones[valid_mask]
-
-        # If after filtering you have zero valid transitions, just return
-        if len(states) == 0:
-            return
+        states = torch.cat(states).to(device)  # shape: [batch_size, 24]
+        next_states = torch.cat(next_states).to(device)  # shape: [batch_size, 24]
+        actions = torch.tensor(actions, dtype=torch.long, device=device)  # shape: [batch_size]
+        rewards = torch.tensor(rewards, dtype=torch.float32, device =device)  # shape: [batch_size]
+        dones = torch.tensor(dones, dtype=torch.float32, device=device)  # shape: [batch_size]
 
         # 1) Current Q-values
         q_values = self.model(states)  # shape: [batch_size, num_actions]
@@ -294,10 +292,10 @@ class DQNAgent:
 
         # 2) Target Q-values
         with torch.no_grad():
-            target_q_values = self.target_model(next_states)  # shape: [batch_size, num_actions]
-            max_next_q = target_q_values.max(dim=1)[0]  # shape: [batch_size]
+            target_q_values = self.target_model(next_states)
+            max_next_q = target_q_values.max(dim=1)[0]
             target = rewards + (1 - dones) * self.gamma * max_next_q
-            # shape: [batch_size]
+
 
         # 3) Loss only for the chosen actions
         loss = F.mse_loss(q_values_for_actions, target)
@@ -310,6 +308,10 @@ class DQNAgent:
         # 5) Epsilon decay
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+
+        print("States device:", states.device)
+        print("Next states device:", next_states.device)
+        print("Actions device:", actions.device)
 
     def update_target_model(self):
         """
@@ -328,7 +330,7 @@ class DQNAgent:
             return
 
         try:
-            checkpoint = torch.load(self.model_filename)
+            checkpoint = torch.load(self.model_filename, map_location=device)
             self.model.load_state_dict(checkpoint['model_state_dict'])
             self.target_model.load_state_dict(checkpoint['target_model_state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -423,11 +425,10 @@ class DQNAgent:
         penalty for uncompleted tickets, etc.
         """
         last_state = self.get_state()
-        final_action = "end_of_game"
         done = True
         print("Final Reward Applied ", done)
 
-        action_idx = -1
+        action_idx = self.action_space.index("end_of_game")
 
         self.memory.push(last_state, action_idx, final_reward, last_state, True)
         self.replay()
@@ -514,7 +515,7 @@ class DQNAgent:
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
                 break
 
-        return 6
+        return 5
 
     def draw_destination_ticket(self):
         """
