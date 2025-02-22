@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DDQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.98, lr=0.001,
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.999, lr=0.001,
                  memory_size=150000, batch_size=128):
         self.color = color
         self.game_service = game_service
@@ -294,6 +294,9 @@ class DDQNAgent:
         Save model weights, optimizer state, epsilon, and replay buffer
         so training can continue seamlessly next game.
         """
+        with open("scores.txt", "a") as file:
+            file.write(str(self.total_episode_reward) + ",")
+
         checkpoint = {
             'model_state_dict': self.model.state_dict(),
             'target_model_state_dict': self.target_model.state_dict(),
@@ -318,8 +321,6 @@ class DDQNAgent:
 
         print(f"✅ Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
 
-        with open("scores.txt", "a") as file:
-            file.write(str(self.total_episode_reward) + ",")
 
     def get_available_actions_for_dqn(self):
         available_actions = self.game_service.get_available_actions(self.color)
@@ -523,6 +524,23 @@ class DDQNAgent:
         for route in self.routes_needed_to_claim:
             if route.color!="gray":
                 needed_colors[route.color] += route.length
+
+        inventory = {
+            "red": 0,
+            "blue": 0,
+            "green": 0,
+            "yellow": 0,
+            "orange": 0,
+            "pink": 0,
+            "black": 0,
+            "white": 0,
+            "joker": 0
+        }
+        for card in current_player_state["train_cards"]:
+            inventory[card.color] += 1
+
+        for color in ["red", "blue", "green", "yellow", "orange", "pink", "black", "white"]:
+            needed_colors[color] = max(0, needed_colors[color] - inventory[color] - inventory["joker"])
 
         return needed_colors
 
