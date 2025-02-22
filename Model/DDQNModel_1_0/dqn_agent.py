@@ -12,8 +12,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DDQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.98, lr=0.001,
-                 memory_size=150000, batch_size=128):
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.08, epsilon_decay=0.999, lr=0.001,
+                 memory_size=100000, batch_size=128):
         self.color = color
         self.game_service = game_service
 
@@ -22,7 +22,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_1.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_0_2.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 9  # Fixed number of state features

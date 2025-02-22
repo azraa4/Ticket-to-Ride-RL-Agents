@@ -78,7 +78,7 @@ class PanelController:
 
         self.move_logs_to_history() #history'e göndermek için commenti kaldır, history'e göndermemek için comment ekle
         self.update_process_listbox()
-        self.populate_log_files("../logs")
+        self.populate_log_files("logs")
 
     @staticmethod
     def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn):
@@ -183,10 +183,10 @@ class PanelController:
 
         try:
             if(listbox_type=="log"):
-                with open(f"../logs/{selected_file}.txt", "r", encoding="utf-8") as file:
+                with open(f"logs/{selected_file}.txt", "r", encoding="utf-8") as file:
                     content = file.readlines()
             elif(listbox_type == "history"):
-                with open(f"../logs/history/{selected_file}.txt", "r", encoding="utf-8") as file:
+                with open(f"logs/history/{selected_file}.txt", "r", encoding="utf-8") as file:
                     content = file.readlines()
         except Exception as e:
             content = [f"Error reading file: {e}"]
@@ -239,10 +239,10 @@ class PanelController:
 
         try:
             if(listbox_type=="log"):
-                with open(f"../logs/{selected_file}", "r", encoding="utf-8") as file:
+                with open(f"logs/{selected_file}", "r", encoding="utf-8") as file:
                     content = file.readlines()
             elif(listbox_type == "history"):
-                with open(f"../logs/history/{selected_file}", "r", encoding="utf-8") as file:
+                with open(f"logs/history/{selected_file}", "r", encoding="utf-8") as file:
                     content = file.readlines()
         except Exception as e:
             content = [f"Error reading file: {e}"]
@@ -298,7 +298,7 @@ class PanelController:
 
     def refresh_game_summaries(self):
         """Refresh the TreeView with the latest log data."""
-        logs_directory = "../logs"
+        logs_directory = "logs"
 
         self.gui.tree_game_summaries.delete(*self.gui.tree_game_summaries.get_children())
 
@@ -332,7 +332,7 @@ class PanelController:
 
     def update_agents_list(self):
         """Update the agents list by reading all log files."""
-        logs_directory = "../logs"
+        logs_directory = "logs"
 
         for agent in self.agents:
             agent['total_points'] = 0
