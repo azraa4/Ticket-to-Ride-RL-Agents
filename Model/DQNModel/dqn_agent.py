@@ -11,8 +11,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.999, lr=0.001,
-                 memory_size=50000, batch_size=64):
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.99, lr=0.001,
+                 memory_size=10000, batch_size=128):
         self.color = color
         self.game_service = game_service
 
@@ -21,14 +21,11 @@ class DQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"dqn_model_2_0_0.pth"  # Model file for saving/loading
+        self.model_filename = f"dqn_model_very_simple_2.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
-        self.state_size = 24  # Fixed number of state features
-        self.action_space = ["claim_route_1", "claim_route_2", "claim_route_3", "claim_route_4", "claim_route_5",
-                             "claim_route_6", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
-                             "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
-                             "draw_black_card", "draw_joker_card", "draw_destination_ticket", "end_of_game"]  # Fixed action space
+        self.state_size = 1  # Fixed number of state features
+        self.action_space = ["claim_route_random", "draw_train_card_random", "draw_destination_ticket", "end_of_game"]  # Fixed action space
 
         # Neural Networks
         self.model = DQN(self.state_size, len(self.action_space)).to(device)
@@ -71,78 +68,17 @@ class DQNAgent:
         # 1. My current score
         my_score = current_player_state["current score"]
 
-        # 2. My remaining train cars
-        my_remaining_cars = current_player_state["remaining cars"]
-
         # 3. Number of routes I’ve claimed so far
         my_claimed_routes_count = len(current_player_state["claimed routes"])
-
-        # 4. How many of each color train card do I have?
-        #    We'll build a small dictionary or use a function to count them.
-        train_cards_list = current_player_state["train_cards"]
-        train_card_color_counts = self._count_train_cards_by_color(train_cards_list)
-        # Choose which colors you care about—this example has 9 "colors," including joker.
-        red_count    = train_card_color_counts.get("red", 0)
-        blue_count   = train_card_color_counts.get("blue", 0)
-        green_count  = train_card_color_counts.get("green", 0)
-        yellow_count = train_card_color_counts.get("yellow", 0)
-        black_count  = train_card_color_counts.get("black", 0)
-        white_count  = train_card_color_counts.get("white", 0)
-        pink_count   = train_card_color_counts.get("pink", 0)
-        orange_count = train_card_color_counts.get("orange", 0)
-        joker_count  = train_card_color_counts.get("joker", 0)
 
         # 5. How many destination tickets do I have in hand?
         my_destination_cards_count = len(current_player_state["destination_cards"])
 
-        # 6. How many routes can I currently claim?
-        current_claimable_routes_count = len(current_player_state["claimable_routes"])
-
-        # 7. Is the game in the "last turn" phase?
-        is_last_turn = 1 if game_state["is_the_next_turn_last_turn"] else 0
-
-        # --- Face-up cards on the table ---
-        table_cards = game_state["train_cards_on_the_table"]
-        table_color_counts = self._count_train_cards_by_color(table_cards)
-
-        table_red = table_color_counts.get("red", 0)
-        table_blue = table_color_counts.get("blue", 0)
-        table_green = table_color_counts.get("green", 0)
-        table_yellow = table_color_counts.get("yellow", 0)
-        table_black = table_color_counts.get("black", 0)
-        table_white = table_color_counts.get("white", 0)
-        table_pink = table_color_counts.get("pink", 0)
-        table_orange = table_color_counts.get("orange", 0)
-        table_joker = table_color_counts.get("joker", 0)
+        turn = game_state["turn"]
 
         # Assemble final feature vector
         state_vector = [
             my_score,
-            my_remaining_cars,
-            my_claimed_routes_count,
-            red_count,
-            blue_count,
-            green_count,
-            yellow_count,
-            black_count,
-            white_count,
-            pink_count,
-            orange_count,
-            joker_count,
-            my_destination_cards_count,
-            current_claimable_routes_count,
-            is_last_turn,
-
-            # Face-up cards on the table
-            table_red,
-            table_blue,
-            table_green,
-            table_yellow,
-            table_black,
-            table_white,
-            table_pink,
-            table_orange,
-            table_joker
         ]
 
         return torch.tensor(state_vector, dtype=torch.float32, device=device).unsqueeze(0)
@@ -226,6 +162,16 @@ class DQNAgent:
         """
         Executes the chosen action and returns (reward, next_state, done).
         """
+        if action == "claim_route_random":
+            reward = self.claim_route_random()
+        elif action == "draw_train_card_random":
+            reward = self.draw_train_card_random()
+        elif action == "draw_destination_ticket":
+            reward = self.draw_destination_ticket()
+        else:
+            reward = 0
+
+        '''        
         if action == "claim_route_1":
             reward = self.claim_route(1)
         elif action == "claim_route_2":
@@ -263,8 +209,10 @@ class DQNAgent:
         else:
             reward = 0
 
+        '''
+
         next_state = self.get_state()
-        done = self.game_service.get_game_state()["game_ended"]
+        done = False
 
         self.total_episode_reward += reward
 
@@ -286,11 +234,7 @@ class DQNAgent:
 
         # 1) Current Q-values
         q_values = self.model(states)  # shape: [batch_size, num_actions]
-
-        # ***GATHER only the Q-values corresponding to the chosen actions***
-        # actions.unsqueeze(1) has shape [batch_size, 1], so gather returns shape [batch_size, 1]
         q_values_for_actions = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
-        # Now q_values_for_actions has shape [batch_size]
 
         # 2) Target Q-values
         with torch.no_grad():
@@ -307,9 +251,6 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
 
-        # 5) Epsilon decay
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
 
         self.soft_update_target(tau=0.005)
 
@@ -357,9 +298,12 @@ class DQNAgent:
             saved_memory = checkpoint.get('memory', [])
             self.memory.memory = deque(saved_memory, maxlen=self.memory.memory.maxlen)
 
+            self.epsilon = 0
+
             print(f"✅ Model {self.model_filename} loaded successfully.")
             print(f"Replay buffer size after load: {len(self.memory)}")
             print("Epsilon: ", self.epsilon)
+
 
         except Exception as e:
             print(f"⚠️ Could not load {self.model_filename}: {e}")
@@ -375,9 +319,10 @@ class DQNAgent:
             'target_model_state_dict': self.target_model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'epsilon': self.epsilon,
-            # Convert replay buffer (deque) to a list so it’s easily serializable
             'memory': list(self.memory.memory)
         }
+
+        print("While saving epsilon: ", self.epsilon)
 
         # Create a temporary filename
         temp_filename = self.model_filename + ".tmp"
@@ -403,6 +348,8 @@ class DQNAgent:
         available_actions_in_detail = []
 
         if "claim_route" in available_actions:
+            available_actions_in_detail.append("claim_route_random")
+            '''
             for route in current_player_state["claimable_routes"]:
                 if route.length == 6:
                     available_actions_in_detail.append("claim_route_6")
@@ -416,8 +363,11 @@ class DQNAgent:
                     available_actions_in_detail.append("claim_route_2")
                 elif route.length == 1:
                     available_actions_in_detail.append("claim_route_1")
+            '''
 
         if "draw_train_card" in available_actions:
+            available_actions_in_detail.append("draw_train_card_random")
+            '''
             if self.game_service.get_availability_of_blind_pick():
                 available_actions_in_detail.append("draw_blind")
             for card in game_state["train_cards_on_the_table"]:
@@ -439,6 +389,7 @@ class DQNAgent:
                     available_actions_in_detail.append("draw_green_card")
                 elif card.color == "joker":
                     available_actions_in_detail.append("draw_joker_card")
+            '''
 
         if "draw_destination_ticket" in available_actions:
             available_actions_in_detail.append("draw_destination_ticket")
@@ -463,6 +414,9 @@ class DQNAgent:
 
         self.total_episode_reward += final_reward
 
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+            print("Epsilon decayed to:", self.epsilon)
 
     """ACTIONS PART"""
 
@@ -568,3 +522,92 @@ class DQNAgent:
         self.game_service.log(log_message)
 
         return -15  # Reward for drawing destination tickets
+
+    def claim_route_random(self):
+        current_state = self.game_service.get_current_player_state()
+        claimable_routes = current_state["claimable_routes"]
+        if claimable_routes:
+            random_route = random.choice(claimable_routes)
+
+            if random_route.color == "gray":
+                #console print("AI: A GRAY ROUTE SELECTED")
+                action_params = {"selected_route": random_route, "use_this_color": None}
+                cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"{self.color} claiming a gray route.")
+
+                use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
+                action_params = {"selected_route": random_route, "use_this_color": use_random_color}
+                self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
+                self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
+
+
+            else:
+                #console print("AI: A COLORED ROUTE SELECTED")
+                action_params = {"selected_route": random_route, "use_this_color": None}
+                self.game_service.perform_action("claim_route", action_params)
+
+                self.game_service.change_status_text(f"{self.color} claimed a colored route.")
+                self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {random_route.city1} to {random_route.city2}")
+
+        self.game_service.change_status_text("TURN CHANGED.")
+
+        return 5
+
+    def draw_train_card_random(self):
+        # draw colored or joker train card
+        game_state = self.game_service.get_game_state()
+        availables = []
+
+        if self.game_service.get_availability_of_blind_pick():
+            availables.append("draw_blind")
+        for card in game_state["train_cards_on_the_table"]:
+            if card.color == "yellow":
+                availables.append("draw_yellow_card")
+            elif card.color == "red":
+                availables.append("draw_red_card")
+            elif card.color == "blue":
+                availables.append("draw_blue_card")
+            elif card.color == "white":
+                availables.append("draw_white_card")
+            elif card.color == "orange":
+                availables.append("draw_orange_card")
+            elif card.color == "pink":
+                availables.append("draw_pink_card")
+            elif card.color == "black":
+                availables.append("draw_black_card")
+            elif card.color == "green":
+                availables.append("draw_green_card")
+            elif card.color == "joker":
+                availables.append("draw_joker_card")
+
+        if not availables:
+            return 0
+
+        action = random.choice(availables)
+
+        if action == "draw_blind":
+            reward = self.draw_blind()
+        elif action == "draw_red_card":
+            reward = self.draw_colored("red")
+        elif action == "draw_blue_card":
+            reward = self.draw_colored("blue")
+        elif action == "draw_yellow_card":
+            reward = self.draw_colored("yellow")
+        elif action == "draw_green_card":
+            reward = self.draw_colored("green")
+        elif action == "draw_pink_card":
+            reward = self.draw_colored("pink")
+        elif action == "draw_orange_card":
+            reward = self.draw_colored("orange")
+        elif action == "draw_white_card":
+            reward = self.draw_colored("white")
+        elif action == "draw_black_card":
+            reward = self.draw_colored("black")
+        elif action == "draw_joker_card":
+            reward = self.draw_joker()
+
+        return 1
+

@@ -64,7 +64,7 @@ class PanelGUI:
 
         self.agent_type_var = tk.StringVar()
         agent_dropdown = ttk.Combobox(self.frame2, textvariable=self.agent_type_var, state="readonly", width=15)
-        agent_dropdown["values"] = ["RandomAgent", "AgentX", "QLearningAgent", "DeepQNetworkAgent"]
+        agent_dropdown["values"] = ["RandomAgent", "AgentX", "QLearningAgent", "DeepQNetworkAgent","2DeepQNetworkAgent", "DDQNAgent", "2DDQNAgent"]
         agent_dropdown.pack(side=tk.LEFT, padx=5)
 
         # Label, Color Dropdown and Button
@@ -347,7 +347,7 @@ class PanelGUI:
         if self.loop_running:
             self.loop_count+=1
             print(f"Games are running: {self.loop_count} times this func called -", self.controller.are_games_running())
-            if self.loop_count==40:
+            if self.loop_count==200:
                 self.controller.stop_games()
             elif not self.controller.are_games_running():
                 self.loop_count=0

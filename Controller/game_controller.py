@@ -58,6 +58,7 @@ class GameController:
 
 
 
+
     def update_turn_text(self):
         self.view.header.update_turn_text(f"Turn: {((self.game_manager.current_turn) // len(self.game_manager.players)+1)}")
 

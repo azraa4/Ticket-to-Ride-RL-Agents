@@ -1,5 +1,10 @@
 from Model.DQNModel.dqn_agent import DQNAgent
+from Model.DQNModel2.dqn_agent import DQNAgent as DQNAgent2
 from Model.agent_qlearning_basic import QLearningAgent
+from Model.DDQNModel_1_0.dqn_agent import DDQNAgent
+
+import heapq
+
 class GameService:
     def __init__(self, controller):
         self.controller = controller
@@ -11,6 +16,8 @@ class GameService:
 
         claimed_routes = self.controller.get_claimed_routes()
         unclaimed_routes = self.controller.get_unclaimed_routes()
+
+        turn = ((self.controller.game_manager.current_turn) // len(self.controller.game_manager.players) + 1)
 
         players = [
             {
@@ -33,6 +40,7 @@ class GameService:
             "claimed_routes": claimed_routes,
             "unclaimed_routes": unclaimed_routes,
             "train_cards_on_the_table": train_cards_on_the_table,
+            "turn": turn
         }
 
         return game_state
@@ -189,15 +197,22 @@ class GameService:
                 ai.save_q_table()
 
         for ai in self.controller.get_ai_list():
-            if isinstance(ai, DQNAgent):
+            if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent):
                 for player in self.controller.get_players():
                     if player.color == ai.color:
                         if player.has_longest_road:
-                            #ai.apply_final_reward(player.calculate_destination_gains()+20)
-                            ai.apply_final_reward(0)
+                            if player.winner:
+                                ai.apply_final_reward(player.calculate_destination_gains()+10+20)
+                            else:
+                                ai.apply_final_reward(player.calculate_destination_gains()+10)
+                            #ai.apply_final_reward(player.points+20)
                         else:
-                            #ai.apply_final_reward(player.calculate_destination_gains())
-                            ai.apply_final_reward(0)
+                            if player.winner:
+                                ai.apply_final_reward(player.calculate_destination_gains()+20)
+                            else:
+                                ai.apply_final_reward(player.calculate_destination_gains())
+                            ai.apply_final_reward(player.calculate_destination_gains())
+                            #ai.apply_final_reward(player.points)
 
                 # 1) Update the target model
                 #ai.update_target_model() #hard update için commenti kaldır
@@ -211,3 +226,63 @@ class GameService:
     
     def pass_draw_second_train_card(self):
         self.controller.pass_draw_second_train_card()
+
+    def compute_shortest_path_between_cities(self, start_city, end_city, unclaimed_routes, claimed_routes):
+        all_routes = unclaimed_routes + claimed_routes
+
+        graph = {}
+        for route in all_routes:
+            for city in (route.city1, route.city2):
+                if city not in graph:
+                    graph[city] = []
+            graph[route.city1].append((route.city2, route.length, route.color))
+            graph[route.city2].append((route.city1, route.length, route.color))
+
+        distances = {city: float('inf') for city in graph}
+        previous = {city: None for city in graph}
+        distances[start_city] = 0
+        queue = [(0, start_city)]
+
+        while queue:
+            current_distance, current_city = heapq.heappop(queue)
+            if current_city == end_city:
+                break
+            if current_distance > distances[current_city]:
+                continue
+
+            for neighbor, weight, color in graph.get(current_city, []):
+                distance = current_distance + weight
+                if distance < distances[neighbor]:
+                    distances[neighbor] = distance
+                    previous[neighbor] = (current_city, color, weight)
+                    heapq.heappush(queue, (distance, neighbor))
+
+        if distances[end_city] == float('inf'):
+            return None
+
+        path_segments = []
+        city = end_city
+        while city != start_city:
+            prev_info = previous[city]
+            if prev_info is None:
+                break
+            parent_city, color, weight = prev_info
+            path_segments.append((parent_city, city, color, weight))
+            city = parent_city
+        path_segments.reverse()
+
+        path_routes = []
+        for (city1, city2, color, length) in path_segments:
+            matched_route = None
+            for route in all_routes:
+                if ((route.city1 == city1 and route.city2 == city2) or
+                        (route.city1 == city2 and route.city2 == city1)):
+                    if route.color == color and route.length == length:
+                        matched_route = route
+                        break
+
+            if matched_route is None:
+                return None
+            path_routes.append(matched_route)
+
+        return path_routes
