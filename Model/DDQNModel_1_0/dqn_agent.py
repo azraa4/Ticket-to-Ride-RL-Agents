@@ -86,7 +86,7 @@ class DDQNAgent:
 
         state_vector = [
             max_length_of_claimable_routes/6,
-            turn/10,
+            turn/15,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -402,78 +402,51 @@ class DDQNAgent:
         needed_color_count = needed_colors[color]
 
         game_state = self.game_service.get_game_state()
-
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
 
         for card in train_cards_on_the_table:
-
             if card.color == color:
                 action_params = {"selected_card": card}
-
                 self.game_service.perform_action("draw_train_card", action_params)
-
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
-
                 break
 
         game_state = self.game_service.get_game_state()
-
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
 
         print(train_cards_on_the_table)
 
         pass_bool = True
-
         needed_colors_list = [clr for clr, value in needed_colors.items() if value > 0]
-
         check_for_other_colors = True
-
         for clr in needed_colors_list:
-
             for card in train_cards_on_the_table:
-
                 if card.color == clr:
                     action_params = {"selected_card": card}
-
                     self.game_service.perform_action("draw_train_card", action_params)
-
                     self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
-
                     pass_bool = False
-
                     check_for_other_colors = False
-
                     break
-
             if not check_for_other_colors:
                 break
 
         if pass_bool:
-
             for card in train_cards_on_the_table:
-
                 if card.color != "joker":
                     action_params = {"selected_card": card}
-
                     self.game_service.perform_action("draw_train_card", action_params)
-
                     self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
-
                     pass_bool = False
-
                     break
 
         if pass_bool:
             self.game_service.pass_draw_second_train_card()
-
             print("PASSED SECOND TRAIN CARD")
 
         if 0 < needed_color_count:
-
             return 1
-
         else:
-
             return -2
 
     def draw_joker(self):

@@ -238,6 +238,10 @@ class GameService:
             graph[route.city1].append((route.city2, route.length, route.color))
             graph[route.city2].append((route.city1, route.length, route.color))
 
+
+        if start_city not in graph or end_city not in graph:
+            return None
+
         distances = {city: float('inf') for city in graph}
         previous = {city: None for city in graph}
         distances[start_city] = 0
