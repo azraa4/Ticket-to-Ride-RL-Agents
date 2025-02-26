@@ -347,7 +347,7 @@ class PanelGUI:
         if self.loop_running:
             self.loop_count+=1
             print(f"Games are running: {self.loop_count} times this func called -", self.controller.are_games_running())
-            if self.loop_count==500:
+            if self.loop_count==1000:
                 self.controller.stop_games()
             elif not self.controller.are_games_running():
                 self.loop_count=0

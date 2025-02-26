@@ -12,8 +12,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DDQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.999, lr=0.001,
-                 memory_size=150000, batch_size=128):
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.08, epsilon_decay=0.995, lr=0.001,
+                 memory_size=100000, batch_size=128):
         self.color = color
         self.game_service = game_service
 
@@ -22,10 +22,10 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_1.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_0_3.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
-        self.state_size = 9  # Fixed number of state features
+        self.state_size = 10  # Fixed number of state features
         self.action_space = ["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
                              "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
                              "draw_black_card", "draw_joker_card", "end_of_game"]  # Fixed action space
@@ -49,6 +49,7 @@ class DDQNAgent:
 
         self.total_episode_reward = 0
 
+        '''
         print("Model is on device:", next(self.model.parameters()).device)
 
         print("PyTorch version:", torch.__version__)
@@ -57,6 +58,7 @@ class DDQNAgent:
             print("Number of GPUs:", torch.cuda.device_count())
             print("Current device index:", torch.cuda.current_device())
             print("Device name:", torch.cuda.get_device_name(0))
+        '''
 
 
     def get_state(self):
@@ -68,6 +70,7 @@ class DDQNAgent:
         current_player_state = self.game_service.get_current_player_state()
 
         my_score = current_player_state["current score"]
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
         turn = game_state["turn"]
         needed_colors = self.needed_colors()
         needed_red = needed_colors["red"]
@@ -82,6 +85,7 @@ class DDQNAgent:
         turn = turn // 5
 
         state_vector = [
+            max_length_of_claimable_routes/6,
             turn/10,
             needed_red/6,
             needed_blue/6,
@@ -146,7 +150,7 @@ class DDQNAgent:
             self.game_service.pass_the_turn()
             return
         
-        print("AVAILABLE ACTIONS:", available_actions)
+        print("available actions:", available_actions)
 
         action = self.choose_action()
         state = self.get_state()
@@ -294,8 +298,6 @@ class DDQNAgent:
         Save model weights, optimizer state, epsilon, and replay buffer
         so training can continue seamlessly next game.
         """
-        with open("scores.txt", "a") as file:
-            file.write(str(self.total_episode_reward) + ",")
 
         checkpoint = {
             'model_state_dict': self.model.state_dict(),
@@ -320,6 +322,9 @@ class DDQNAgent:
         os.replace(temp_filename, self.model_filename)
 
         print(f"✅ Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
+
+        with open("scores.txt", "a") as file:
+            file.write(str(self.total_episode_reward) + ",")
 
 
     def get_available_actions_for_dqn(self):
@@ -354,8 +359,6 @@ class DDQNAgent:
                 elif card.color == "joker":
                     available_actions_in_detail.append("draw_joker_card")
 
-
-        print("AVAILABLE ACTIONS CALLED: ", list(set(available_actions_in_detail)))
         return list(set(available_actions_in_detail))
 
     def apply_final_reward(self, final_reward):
@@ -392,38 +395,85 @@ class DDQNAgent:
         train_cards_list = current_state["train_cards"]
         self.game_service.log(f"Having these train cards: {train_cards_list}")
 
-        return 0  # Reward for drawing blind train cards
+        return -1  # Reward for drawing blind train cards
 
     def draw_colored(self, color):
+        needed_colors = self.needed_colors()
+        needed_color_count = needed_colors[color]
+
         game_state = self.game_service.get_game_state()
+
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
+
         for card in train_cards_on_the_table:
+
             if card.color == color:
                 action_params = {"selected_card": card}
+
                 self.game_service.perform_action("draw_train_card", action_params)
+
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
+
                 break
 
         game_state = self.game_service.get_game_state()
+
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
+
         print(train_cards_on_the_table)
-        
+
         pass_bool = True
-        for card in train_cards_on_the_table:
-            if card.color != "joker":
-                action_params = {"selected_card": card}
-                self.game_service.perform_action("draw_train_card", action_params)
-                self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
-                pass_bool = False
+
+        needed_colors_list = [clr for clr, value in needed_colors.items() if value > 0]
+
+        check_for_other_colors = True
+
+        for clr in needed_colors_list:
+
+            for card in train_cards_on_the_table:
+
+                if card.color == clr:
+                    action_params = {"selected_card": card}
+
+                    self.game_service.perform_action("draw_train_card", action_params)
+
+                    self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
+
+                    pass_bool = False
+
+                    check_for_other_colors = False
+
+                    break
+
+            if not check_for_other_colors:
                 break
 
         if pass_bool:
+
+            for card in train_cards_on_the_table:
+
+                if card.color != "joker":
+                    action_params = {"selected_card": card}
+
+                    self.game_service.perform_action("draw_train_card", action_params)
+
+                    self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
+
+                    pass_bool = False
+
+                    break
+
+        if pass_bool:
             self.game_service.pass_draw_second_train_card()
+
             print("PASSED SECOND TRAIN CARD")
 
-        if color in self.needed_colors():
-            return 0
+        if 0 < needed_color_count:
+
+            return 1
+
         else:
+
             return -2
 
     def draw_joker(self):
@@ -444,8 +494,10 @@ class DDQNAgent:
         routes_available_to_claim = list(set(claimable_routes) & set(self.routes_needed_to_claim))
         routes_available_to_claim = sorted(routes_available_to_claim, key=lambda route: route.length)
 
+        length_to_points = {1: 1, 2: 2, 3: 4, 4: 7, 5: 10, 6: 15}
+
         if routes_available_to_claim:
-            route = routes_available_to_claim[0]
+            route = routes_available_to_claim[-1]
             if route.color == "gray":
                 action_params = {"selected_route": route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
@@ -462,15 +514,17 @@ class DDQNAgent:
                 self.game_service.perform_action("claim_route", action_params)
                 self.game_service.change_status_text(f"{self.color} claimed a colored route.")
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
-            return route.length
+            return length_to_points[route.length]
         else:
             return self.claim_route_random()
 
     def claim_route_random(self):
         current_state = self.game_service.get_current_player_state()
         claimable_routes = current_state["claimable_routes"]
+        max_length_route = sorted(claimable_routes, key=lambda route: route.length)
+
         if claimable_routes:
-            random_route = random.choice(claimable_routes)
+            random_route = max_length_route[-1]
 
             if random_route.color == "gray":
                 #console print("AI: A GRAY ROUTE SELECTED")
@@ -543,6 +597,12 @@ class DDQNAgent:
             needed_colors[color] = max(0, needed_colors[color] - inventory[color] - inventory["joker"])
 
         return needed_colors
+
+    def get_length_of_max_claimable_route(self):
+        claimable_routes = self.game_service.get_current_player_state()["claimable_routes"]
+        if not claimable_routes:
+            return 0
+        return max(route.length for route in claimable_routes)
 
     '''
     def _count_train_cards_by_color(self, train_cards):
