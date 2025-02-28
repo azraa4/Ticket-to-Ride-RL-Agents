@@ -3,6 +3,8 @@ from collections import deque
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+
+import global_vars
 from Model.DQNModel.dqn import DQN
 from Model.DQNModel.replay_memory import ReplayMemory
 import random
@@ -12,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class DDQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.08, epsilon_decay=0.995, lr=0.001,
+    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
                  memory_size=100000, batch_size=128):
         self.color = color
         self.game_service = game_service
@@ -22,7 +24,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_3.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_0_5.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 10  # Fixed number of state features
@@ -49,6 +51,16 @@ class DDQNAgent:
 
         self.total_episode_reward = 0
 
+        #print loss
+        self.log_file = "training_loss.txt"
+        # Optionally, clear or create a new file at the start
+        with open(self.log_file, "w") as f:
+            f.write("episode,batch,loss\n")  # CSV header line
+
+        self.episode_count = 0
+        self.batch_count = 0
+
+
         '''
         print("Model is on device:", next(self.model.parameters()).device)
 
@@ -70,9 +82,8 @@ class DDQNAgent:
         current_player_state = self.game_service.get_current_player_state()
 
         my_score = current_player_state["current score"]
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
-        turn = game_state["turn"]
         needed_colors = self.needed_colors()
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
         needed_red = needed_colors["red"]
         needed_blue = needed_colors["blue"]
         needed_green = needed_colors["green"]
@@ -82,11 +93,16 @@ class DDQNAgent:
         needed_white = needed_colors["white"]
         needed_black = needed_colors["black"]
 
-        turn = turn // 5
+        car_state = 0
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        if 6 < min_cars <= 12:
+            car_state = 0.5
+        elif min_cars <= 6:
+            car_state = 1
 
         state_vector = [
             max_length_of_claimable_routes/6,
-            turn/15,
+            car_state,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -206,6 +222,8 @@ class DDQNAgent:
         if len(self.memory) < self.batch_size:
             return
 
+        self.batch_count += 1
+
         batch = self.memory.sample(self.batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
 
@@ -240,6 +258,9 @@ class DDQNAgent:
         loss.backward()
         self.optimizer.step()
 
+        # Write loss to a file
+        with open(self.log_file, "a") as f:
+            f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
 
         self.soft_update_target(tau=0.005)
 
@@ -382,6 +403,8 @@ class DDQNAgent:
             self.epsilon *= self.epsilon_decay
             print("Epsilon decayed to:", self.epsilon)
 
+        self.episode_count += 1
+
     """ACTIONS PART"""
     def draw_blind(self):
         """
@@ -444,7 +467,7 @@ class DDQNAgent:
             self.game_service.pass_draw_second_train_card()
             print("PASSED SECOND TRAIN CARD")
 
-        if 0 < needed_color_count:
+        if 0 < needed_color_count or not self.routes_needed_to_claim:
             return 1
         else:
             return -2
@@ -495,6 +518,7 @@ class DDQNAgent:
         current_state = self.game_service.get_current_player_state()
         claimable_routes = current_state["claimable_routes"]
         max_length_route = sorted(claimable_routes, key=lambda route: route.length)
+        length_to_points = {1: 1, 2: 2, 3: 4, 4: 7, 5: 10, 6: 15}
 
         if claimable_routes:
             random_route = max_length_route[-1]
@@ -524,7 +548,12 @@ class DDQNAgent:
 
             self.game_service.change_status_text("TURN CHANGED.")
 
-        return -2
+            if self.routes_needed_to_claim:
+                return -3
+            else:
+                return length_to_points[random_route.length]
+        else:
+            raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
 
     def needed_colors(self):
         game_state = self.game_service.get_game_state()
@@ -548,6 +577,10 @@ class DDQNAgent:
             "black": 0,
             "white": 0,
         }
+        if not self.routes_needed_to_claim:
+            print("routes_needed_to_claim is empty!")
+            return needed_colors
+
         for route in self.routes_needed_to_claim:
             if route.color!="gray":
                 needed_colors[route.color] += route.length
@@ -572,6 +605,11 @@ class DDQNAgent:
         return needed_colors
 
     def get_length_of_max_claimable_route(self):
+        current_player_state = self.game_service.get_current_player_state()
+        if self.routes_needed_to_claim:
+            claimable_routes = set(self.routes_needed_to_claim) & set(current_player_state["claimable_routes"])
+            return max((route.length for route in claimable_routes), default = 0)
+
         claimable_routes = self.game_service.get_current_player_state()["claimable_routes"]
         if not claimable_routes:
             return 0

@@ -2,7 +2,7 @@ import random
 import time
 
 import global_vars
-
+random.seed(global_vars.random_seed)
 
 class AgentX:
     def __init__(self, color, game_service):

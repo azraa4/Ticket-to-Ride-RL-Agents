@@ -200,19 +200,37 @@ class GameService:
             if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent):
                 for player in self.controller.get_players():
                     if player.color == ai.color:
+
+                        ticket_fix_reward = 0
+                        for t in player.destination_tickets:
+                            if t.is_completed:
+                                ticket_fix_reward += 30
+                            else:
+                                ticket_fix_reward -= 30
+
+                        max_point_opponent = max((p.points for p in self.controller.get_players() if p.color != ai.color), default = 0)
+                        final_reward = player.points - max_point_opponent
+                        ai.apply_final_reward(ticket_fix_reward + final_reward)
+
+                        '''
                         if player.has_longest_road:
                             if player.winner:
-                                ai.apply_final_reward(player.calculate_destination_gains()+10+20)
+                                #ai.apply_final_reward(player.calculate_destination_gains()+10+50)
+                                ai.apply_final_reward(ticket_fix_reward+)
                             else:
-                                ai.apply_final_reward(player.calculate_destination_gains()+10)
+                                #ai.apply_final_reward(player.calculate_destination_gains()+10-50)
+                                ai.apply_final_reward(ticket_fix_reward)
                             #ai.apply_final_reward(player.points+20)
                         else:
+                            ai.apply_final_reward(ticket_fix_reward + max_point_opponent)
                             if player.winner:
-                                ai.apply_final_reward(player.calculate_destination_gains()+20)
+                                #ai.apply_final_reward(player.calculate_destination_gains()+50)
+                                ai.apply_final_reward(ticket_fix_reward + 40)
                             else:
-                                ai.apply_final_reward(player.calculate_destination_gains())
-                            ai.apply_final_reward(player.calculate_destination_gains())
+                                #ai.apply_final_reward(player.calculate_destination_gains()-50)
+                                ai.apply_final_reward(ticket_fix_reward)
                             #ai.apply_final_reward(player.points)
+                        '''
 
                 # 1) Update the target model
                 #ai.update_target_model() #hard update için commenti kaldır
@@ -228,65 +246,98 @@ class GameService:
         self.controller.pass_draw_second_train_card()
 
     def compute_shortest_path_between_cities(self, start_city, end_city, unclaimed_routes, claimed_routes):
-        all_routes = unclaimed_routes + claimed_routes
+        # 1) Combine routes but give claimed routes cost=0, unclaimed routes cost=their length
+        #    We'll store a tuple (route_object, cost)
+        all_edges = []
+        for route in claimed_routes:
+            all_edges.append((route, 0))  # already claimed, so cost=0
+        for route in unclaimed_routes:
+            all_edges.append((route, route.length))  # unclaimed, cost=route.length
 
+        # 2) Build a graph as an adjacency list:
+        #    graph[city] = list of (neighbor_city, cost, color, length)
         graph = {}
-        for route in all_routes:
-            for city in (route.city1, route.city2):
-                if city not in graph:
-                    graph[city] = []
-            graph[route.city1].append((route.city2, route.length, route.color))
-            graph[route.city2].append((route.city1, route.length, route.color))
+        for route_obj, cost in all_edges:
+            c1, c2 = route_obj.city1, route_obj.city2
+            color = route_obj.color
+            length = route_obj.length
 
+            if c1 not in graph:
+                graph[c1] = []
+            if c2 not in graph:
+                graph[c2] = []
 
+            graph[c1].append((c2, cost, color, length))
+            graph[c2].append((c1, cost, color, length))
+
+        # If either city isn't in the graph at all, no path is possible
         if start_city not in graph or end_city not in graph:
             return None
 
-        distances = {city: float('inf') for city in graph}
-        previous = {city: None for city in graph}
+        # 3) Dijkstra's algorithm setup
+        distances = {city: float('inf') for city in graph}  # cost to reach each city
+        previous = {city: None for city in graph}  # store (parent_city, cost, color, length)
         distances[start_city] = 0
-        queue = [(0, start_city)]
+        pq = [(0, start_city)]  # min-heap of (cost_so_far, city)
 
-        while queue:
-            current_distance, current_city = heapq.heappop(queue)
+        # 4) Run Dijkstra
+        while pq:
+            current_dist, current_city = heapq.heappop(pq)
             if current_city == end_city:
-                break
-            if current_distance > distances[current_city]:
+                break  # we found the shortest path to end_city
+
+            # If we already found a better path before, skip
+            if current_dist > distances[current_city]:
                 continue
 
-            for neighbor, weight, color in graph.get(current_city, []):
-                distance = current_distance + weight
-                if distance < distances[neighbor]:
-                    distances[neighbor] = distance
-                    previous[neighbor] = (current_city, color, weight)
-                    heapq.heappush(queue, (distance, neighbor))
+            # Explore neighbors
+            for (neighbor, edge_cost, edge_color, edge_length) in graph[current_city]:
+                new_dist = current_dist + edge_cost
+                if new_dist < distances[neighbor]:
+                    distances[neighbor] = new_dist
+                    previous[neighbor] = (current_city, edge_cost, edge_color, edge_length)
+                    heapq.heappush(pq, (new_dist, neighbor))
 
+        # 5) Check if we reached end_city at all
         if distances[end_city] == float('inf'):
             return None
 
+        # 6) Reconstruct the path of route objects by backtracking
         path_segments = []
         city = end_city
         while city != start_city:
             prev_info = previous[city]
             if prev_info is None:
-                break
-            parent_city, color, weight = prev_info
-            path_segments.append((parent_city, city, color, weight))
+                # This means we didn't find a path
+                return None
+            parent_city, cost_used, color_used, length_used = prev_info
+            path_segments.append((parent_city, city, color_used, length_used))
             city = parent_city
+
+        # The segments are in reverse order, so reverse them
         path_segments.reverse()
 
+        # 7) Convert each segment into the actual route object from claimed_routes or unclaimed_routes
         path_routes = []
-        for (city1, city2, color, length) in path_segments:
+        for (c1, c2, color, length) in path_segments:
             matched_route = None
-            for route in all_routes:
-                if ((route.city1 == city1 and route.city2 == city2) or
-                        (route.city1 == city2 and route.city2 == city1)):
-                    if route.color == color and route.length == length:
-                        matched_route = route
-                        break
+            # Search for the route in our original data
+            # Remember it could be in either claimed_routes or unclaimed_routes
+            for route_obj in (claimed_routes + unclaimed_routes):
+                # Make sure route matches city1-city2 (in any order), color, and length
+                if (
+                        ((route_obj.city1 == c1 and route_obj.city2 == c2) or
+                         (route_obj.city1 == c2 and route_obj.city2 == c1))
+                        and route_obj.color == color
+                        and route_obj.length == length
+                ):
+                    matched_route = route_obj
+                    break
 
             if matched_route is None:
+                # Should be rare if data is consistent
                 return None
+
             path_routes.append(matched_route)
 
         return path_routes

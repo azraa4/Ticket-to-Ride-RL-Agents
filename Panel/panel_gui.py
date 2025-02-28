@@ -313,17 +313,10 @@ class PanelGUI:
         self.most_longest_route_label.config(text=f"Most Longest Route Achiever: {most_longest_route}")
 
     def reset_dropdown(self):
-        print("Resetting dropdown...")  # Debugging statement
-        # Reset available colors to the original list
+        print("Resetting dropdown...")
         self.available_colors = ["Red", "Blue", "Green", "Yellow", "Black"]
-
-        # Update the dropdown values to reflect the reset
         self.color_dropdown["values"] = self.available_colors
-
-        # Reset the selected value in the dropdown (set to None or empty if you prefer)
-        self.color_var.set("")  # This clears the current selection
-
-        # Force the dropdown to update
+        self.color_var.set("")
         self.color_dropdown.update_idletasks()
 
     def start_loop_games(self):
@@ -339,8 +332,6 @@ class PanelGUI:
         self.loop_running = False
         self.loop_button.config(state=tk.NORMAL)
         self.stop_loop_button.config(state=tk.DISABLED)
-
-
     
     def run_game_loop(self):
         """Loop aktifken sürekli oyun başlatır."""

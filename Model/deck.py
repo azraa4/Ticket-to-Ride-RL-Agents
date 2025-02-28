@@ -1,5 +1,6 @@
 import random
-
+import global_vars
+random.seed(global_vars.random_seed)
 
 class Deck:
     def __init__(self, cards):

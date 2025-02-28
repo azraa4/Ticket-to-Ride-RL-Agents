@@ -32,7 +32,7 @@ class GameController:
         self.start_turn_time = time.time()
         #cleans the log file
         if self.test_name is not None:
-            with open(f"logs/log_{self.test_name}_{self.view.game_id}.txt", "w") as log_file:
+            with open(f"logs/log_{self.test_name}_{self.view.game_id}_{global_vars.game_id}.txt", "w") as log_file:
                 log_file.write("GAME LOGS:\n")
 
 
@@ -626,5 +626,5 @@ class GameController:
 
     def log(self, text):
         if self.test_name is not None:
-            with open(f"logs/log_{self.test_name}_{self.view.game_id}.txt", "a") as log_file:
+            with open(f"logs/log_{self.test_name}_{self.view.game_id}_{global_vars.game_id}.txt", "a") as log_file:
                 log_file.write(text + "\n")

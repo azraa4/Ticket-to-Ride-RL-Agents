@@ -103,7 +103,7 @@ class MainGameApp:
         if global_vars.test_count != 0:
             global_vars.test_count -= 1
             global_vars.game_id += 1
-            main(None, global_vars.game_id, True, False, self.agents, False, self.test_name, 0, 0)
+            main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0)
         elif global_vars.test_count == 0:
             global_vars.test_count = 50
 
