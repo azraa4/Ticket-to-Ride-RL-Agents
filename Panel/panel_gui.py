@@ -3,6 +3,9 @@ from tkinter import ttk
 import random
 import time
 
+import global_vars
+
+
 class PanelGUI:
     def __init__(self, root, controller):
         self.root = root
@@ -45,10 +48,10 @@ class PanelGUI:
         self.frame1 = tk.Frame(self.upper_frame)
         self.frame1.pack(fill=tk.X, pady=5)
 
-        self.number_of_games_entry_label = tk.Label(self.frame1, text="Number of Games: ")
-        self.number_of_games_entry_label.pack(side=tk.LEFT, padx=5)
-        self.number_of_games_entry = tk.Entry(self.frame1)
-        self.number_of_games_entry.pack(side=tk.LEFT, padx=5)
+        self.number_of_process_entry_label = tk.Label(self.frame1, text="Number of Process: ")
+        self.number_of_process_entry_label.pack(side=tk.LEFT, padx=5)
+        self.number_of_process_entry = tk.Entry(self.frame1)
+        self.number_of_process_entry.pack(side=tk.LEFT, padx=5)
 
         self.test_name_entry_label = tk.Label(self.frame1, text="Test Name: ")
         self.test_name_entry_label.pack(side=tk.LEFT, padx=5)
@@ -109,6 +112,12 @@ class PanelGUI:
         self.console_checkbox = tk.Checkbutton(self.frame4, text="Console",
                                                variable=self.console_checkbox_var)
         self.console_checkbox.pack(side=tk.LEFT, padx=5)
+
+        self.number_of_games_entry_label = tk.Label(self.frame4, text="Number of Games: ")
+        self.number_of_games_entry_label.pack(side=tk.LEFT, padx=5)
+        self.number_of_games_entry = tk.Entry(self.frame4, width=5)
+        self.number_of_games_entry.pack(side=tk.LEFT, padx=5)
+        self.number_of_games_entry.insert(0, "50")
 
         self.start_buttons_frame = tk.Frame(self.upper_frame)
         self.start_buttons_frame.pack(fill=tk.X, pady=5)
@@ -322,6 +331,7 @@ class PanelGUI:
     def start_loop_games(self):
         """Oyunları sürekli olarak başlatan loop fonksiyonu."""
         if not self.loop_running:
+            global_vars.test_count = int(self.number_of_games_entry.get()) - 1
             self.loop_running = True
             self.loop_button.config(state=tk.DISABLED)
             self.stop_loop_button.config(state=tk.NORMAL)

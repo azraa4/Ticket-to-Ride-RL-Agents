@@ -153,7 +153,29 @@ class AgentX:
                 self.draw_second_train_card()
             return
 
+
+
         # Kural 2: Görev biletleri (destination_tickets) için gerekli renkleri belirle.
+        if random.random() < 0.25:
+            game_state = self.game_service.get_game_state()
+            train_cards_on_the_table = game_state["train_cards_on_the_table"]
+            selected_card = random.choice(train_cards_on_the_table)
+            action_params = {"selected_card": selected_card}
+            # console print("AI: Train cards on the table for first pick: ", train_cards_on_the_table)
+            # console print("AI: SELECTED CARD BY AI:", selected_card.color)
+            self.game_service.perform_action("draw_train_card", action_params)
+
+            self.game_service.change_status_text(f"{self.color} drawed {selected_card.color} colored train card.")
+            self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {selected_card.color}")
+            self.game_service.wait_for_it(global_vars.time_action * 1000)
+
+            game_state = self.game_service.get_game_state()
+            train_cards_on_the_table = game_state["train_cards_on_the_table"]
+            # console print("AI: Train cards on the table for second pick: ", train_cards_on_the_table)
+            if self.game_service.check_if_second_train_card_needed():
+                self.draw_second_train_card()
+            return
+        '''
         needed_colors = set()
         for ticket in destination_tickets:
             for route in self.game_service.controller.game_manager.board.routes:
@@ -183,6 +205,7 @@ class AgentX:
             if self.game_service.check_if_second_train_card_needed():
                 self.draw_second_train_card(needed_colors)
             return
+        '''
 
         # Kural 3: Destede 4 veya daha fazla kart varsa blind pick yap.
         if self.game_service.controller.game_manager.train_cards_deck.get_length() > 4:
@@ -194,9 +217,6 @@ class AgentX:
             self.game_service.log(f"{self.color}, Action: DRAW BLIND CARD")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
 
-            # İkinci kart çekme kontrolü:
-            if self.game_service.check_if_second_train_card_needed():
-                self.draw_second_train_card(needed_colors)
             return
 
         # Kural 4: Destede 2 veya daha az kart varsa masadaki kartlardan rastgele birini seç.
@@ -436,3 +456,5 @@ class AgentX:
             self.game_service.change_status_text(f"{self.color} claimed a colored route.")
             self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
             self.game_service.wait_for_it(global_vars.time_action * 1000)
+
+

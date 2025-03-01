@@ -53,7 +53,7 @@ class PanelController:
 
     def start_games(self):
         try:
-            num_games = int(self.gui.number_of_games_entry.get())
+            num_games = int(self.gui.number_of_process_entry.get())
         except ValueError:
             print("Please enter a valid number of games.")
             return

@@ -24,10 +24,10 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_5.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_0_6.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
-        self.state_size = 10  # Fixed number of state features
+        self.state_size = 11  # Fixed number of state features
         self.action_space = ["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
                              "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
                              "draw_black_card", "draw_joker_card", "end_of_game"]  # Fixed action space
@@ -97,12 +97,20 @@ class DDQNAgent:
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
         if 6 < min_cars <= 12:
             car_state = 0.5
-        elif min_cars <= 6:
+        elif 2 < min_cars <= 6:
+            car_state = 0.8
+        elif min_cars <=2:
             car_state = 1
 
+        if self.routes_needed_to_claim:
+            destinations_completed = 0
+        else:
+            destinations_completed = 1
+
         state_vector = [
-            max_length_of_claimable_routes/6,
             car_state,
+            destinations_completed,
+            max_length_of_claimable_routes/6,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -113,8 +121,7 @@ class DDQNAgent:
             needed_black/6,
         ]
 
-        print(state_vector)
-        print("NEEDED COLORS: ",needed_colors)
+        print("STATE VECTOR: ", state_vector)
 
         return torch.tensor(state_vector, dtype=torch.float32, device=device).unsqueeze(0)
 
@@ -166,13 +173,17 @@ class DDQNAgent:
             self.game_service.pass_the_turn()
             return
         
-        print("available actions:", available_actions)
+
 
         action = self.choose_action()
         state = self.get_state()
         reward, next_state, done = self.execute_action(action)
 
-        print("THIS IS THE REWARD: ", reward)
+        print("################## ⚔ PLAYER INFO ######################")
+        print("#  AVAILABLE ACTIONS:", available_actions)
+        print("#  SELECTED ACTION: ", action)
+        print("#  THE REWARD: ", reward)
+        print("########################################################")
 
         # Store experience in replay memory
         # NEW - store action as an integer index
@@ -181,6 +192,8 @@ class DDQNAgent:
 
         # Train the model
         self.replay()
+
+        print("\n\n")
 
     def execute_action(self, action):
         """
@@ -211,6 +224,7 @@ class DDQNAgent:
         else:
             reward = 0
 
+        print("-> NEXT STATE ")
         next_state = self.get_state()
         done = False
 
@@ -577,9 +591,6 @@ class DDQNAgent:
             "black": 0,
             "white": 0,
         }
-        if not self.routes_needed_to_claim:
-            print("routes_needed_to_claim is empty!")
-            return needed_colors
 
         for route in self.routes_needed_to_claim:
             if route.color!="gray":
@@ -596,12 +607,25 @@ class DDQNAgent:
             "white": 0,
             "joker": 0
         }
+
         for card in current_player_state["train_cards"]:
             inventory[card.color] += 1
+
+        print("🎒 INVENTORY OF THE PLAYER:", inventory)
+
+        if not self.routes_needed_to_claim:
+            print("routes_needed_to_claim is empty! 6-inventory")
+            for color in ["red", "blue", "green", "yellow", "orange", "pink", "black", "white"]:
+                needed_colors[color] = max(0, 6 - inventory[color] - inventory["joker"])
+
+            print("🎨 NEEDED COLORS:", needed_colors)
+
+            return needed_colors
 
         for color in ["red", "blue", "green", "yellow", "orange", "pink", "black", "white"]:
             needed_colors[color] = max(0, needed_colors[color] - inventory[color] - inventory["joker"])
 
+        print("🎨 NEEDED COLORS:", needed_colors)
         return needed_colors
 
     def get_length_of_max_claimable_route(self):
