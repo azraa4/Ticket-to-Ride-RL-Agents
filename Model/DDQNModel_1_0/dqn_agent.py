@@ -24,7 +24,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_6.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_0_7.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 11  # Fixed number of state features
@@ -108,9 +108,9 @@ class DDQNAgent:
             destinations_completed = 1
 
         state_vector = [
-            car_state,
-            destinations_completed,
-            max_length_of_claimable_routes/6,
+            car_state * 3,
+            destinations_completed * 2,
+            max_length_of_claimable_routes/6 * 1.5,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
