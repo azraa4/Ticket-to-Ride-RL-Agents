@@ -5,8 +5,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 import global_vars
-from Model.DDQNModel_1_0.dqn import DQN
-from Model.DDQNModel_1_0.replay_memory import ReplayMemory
+from Model.DDQNModel_1_1.dqn import DQN
+from Model.DDQNModel_1_1.replay_memory import PrioritizedReplayMemory
 import random
 import heapq
 
@@ -24,7 +24,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_0_7.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_1_0.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 11  # Fixed number of state features
@@ -40,7 +40,7 @@ class DDQNAgent:
 
         # Optimizer and memory
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        self.memory = ReplayMemory(memory_size)
+        self.memory = PrioritizedReplayMemory(memory_size)
 
         # Try loading an existing model if available
         self.load_model()
@@ -109,8 +109,8 @@ class DDQNAgent:
 
         state_vector = [
             car_state * 3,
-            destinations_completed * 2,
-            max_length_of_claimable_routes/6 * 1.5,
+            destinations_completed * 1.5,
+            max_length_of_claimable_routes/6 * 2,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -238,7 +238,8 @@ class DDQNAgent:
 
         self.batch_count += 1
 
-        batch = self.memory.sample(self.batch_size)
+        batch, indices, is_weights = self.memory.sample(self.batch_size)
+        is_weights = torch.tensor(is_weights, dtype=torch.float32, device=device)
         states, actions, rewards, next_states, dones = zip(*batch)
 
         # Concatenate states and next_states. E.g. each is a single Tensor [1, 24], so we do:
@@ -265,7 +266,14 @@ class DDQNAgent:
 
 
         # 3) Loss only for the chosen actions
-        loss = F.mse_loss(q_values_for_actions, target)
+        # Compute the TD errors for priority update
+        td_errors = torch.abs(q_values_for_actions - target).detach().cpu().numpy()
+
+        # Update priorities in the replay memory (small constant added to avoid zero priority)
+        self.memory.update_priorities(indices, td_errors + 1e-5)
+
+        # Loss computation with importance sampling weights
+        loss = (is_weights * F.mse_loss(q_values_for_actions, target, reduction='none')).mean()
 
         # 4) Backprop
         self.optimizer.zero_grad()
@@ -297,70 +305,57 @@ class DDQNAgent:
         for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1 - tau) * target_param.data)
 
-
     def load_model(self):
-        """
-        Load model weights, optimizer state, epsilon, and replay buffer
-        so training can continue seamlessly next game.
-        """
         if not os.path.exists(self.model_filename):
-            print("⚠️ No saved model found. Starting with fresh model and empty replay buffer.")
+            print("⚠️ No saved model found. Starting with a fresh model and empty replay buffer.")
             return
 
         try:
-            checkpoint = torch.load(self.model_filename, map_location=device)
+            # Set weights_only=False since you trust your checkpoints
+            checkpoint = torch.load(self.model_filename, map_location=device, weights_only=False)
             self.model.load_state_dict(checkpoint['model_state_dict'])
             self.target_model.load_state_dict(checkpoint['target_model_state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.epsilon = checkpoint['epsilon']
 
-
-            # Rebuild replay buffer from saved transitions
-            saved_memory = checkpoint.get('memory', [])
-            self.memory.memory = deque(saved_memory, maxlen=self.memory.memory.maxlen)
+            # Restore the prioritized replay memory components:
+            self.memory.memory = checkpoint.get('memory', [])
+            saved_priorities = checkpoint.get('priorities', None)
+            if saved_priorities is not None:
+                self.memory.priorities = saved_priorities
+            self.memory.pos = checkpoint.get('pos', 0)
 
             print(f"✅ Model {self.model_filename} loaded successfully.")
             print(f"Replay buffer size after load: {len(self.memory)}")
-            print("Epsilon: ", self.epsilon)
-
-
+            print("Epsilon:", self.epsilon)
         except Exception as e:
             print(f"⚠️ Could not load {self.model_filename}: {e}")
             raise
 
     def save_model(self):
         """
-        Save model weights, optimizer state, epsilon, and replay buffer
-        so training can continue seamlessly next game.
+        Save the model weights, optimizer state, epsilon, and all parts of the replay memory.
         """
-
         checkpoint = {
             'model_state_dict': self.model.state_dict(),
             'target_model_state_dict': self.target_model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'epsilon': self.epsilon,
-            'memory': list(self.memory.memory)
+            # Save the prioritized replay memory components:
+            'memory': self.memory.memory,  # list of transitions
+            'priorities': self.memory.priorities,  # numpy array of priorities
+            'pos': self.memory.pos  # current insertion position
         }
-
-        print("While saving epsilon: ", self.epsilon)
-
-        # Create a temporary filename
+        print("Saving model with epsilon:", self.epsilon)
         temp_filename = self.model_filename + ".tmp"
-
-        # Write the checkpoint to the temp file
         with open(temp_filename, 'wb') as f:
             torch.save(checkpoint, f)
-            f.flush()               # Flush Python-level buffers
-            os.fsync(f.fileno())    # Force the OS to flush to disk
-
-        # Atomically replace the old file with the new one
+            f.flush()
+            os.fsync(f.fileno())
         os.replace(temp_filename, self.model_filename)
-
-        print(f"✅ Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
-
+        print(f"Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
         with open("scores.txt", "a") as file:
             file.write(str(self.total_episode_reward) + ",")
-
 
     def get_available_actions_for_dqn(self):
         available_actions = self.game_service.get_available_actions(self.color)

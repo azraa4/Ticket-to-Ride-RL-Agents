@@ -4,6 +4,7 @@ from Model.agent_qlearning_basic import QLearningAgent
 from Model.DQNModel.dqn_agent import DQNAgent
 from Model.DQNModel2.dqn_agent import DQNAgent as DQNAgent2
 from Model.DDQNModel_1_0.dqn_agent import DDQNAgent
+from Model.DDQNModel_1_1.dqn_agent import DDQNAgent as DDQNAgent_PM
 class AIManager:
     def __init__(self, game_service):
         self.game_service = game_service
@@ -41,6 +42,10 @@ class AIManager:
             deep_q_network_agent.model_filename = "2" + deep_q_network_agent.model_filename
             self.agents.append(deep_q_network_agent)
             # console print(f"AI Agent Added with color {color}, and agent type {agent_type}")
+        if (agent_type == "DDQNAgent_PM"):
+            deep_q_network_agent_pm = DDQNAgent_PM(color, self.game_service)
+            self.agents.append(deep_q_network_agent_pm)
+            print(f"DDQNAGENTPM AI Agent Added with color {color}, and agent type {agent_type}")
         #console print(self.agents)
 
     def reset_ai_list(self):
