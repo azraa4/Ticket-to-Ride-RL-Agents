@@ -67,7 +67,7 @@ class PanelGUI:
 
         self.agent_type_var = tk.StringVar()
         agent_dropdown = ttk.Combobox(self.frame2, textvariable=self.agent_type_var, state="readonly", width=15)
-        agent_dropdown["values"] = ["RandomAgent", "AgentX", "QLearningAgent", "DeepQNetworkAgent","2DeepQNetworkAgent", "DDQNAgent", "2DDQNAgent", "DDQNAgent_PM"]
+        agent_dropdown["values"] = ["RandomAgent", "AgentX", "QLearningAgent", "DeepQNetworkAgent","2DeepQNetworkAgent", "DDQNAgent", "2DDQNAgent", "DDQNAgent_PM", "DDQNAgent_1_2"]
         agent_dropdown.pack(side=tk.LEFT, padx=5)
 
         # Label, Color Dropdown and Button

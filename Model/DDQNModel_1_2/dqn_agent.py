@@ -5,8 +5,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 import global_vars
-from Model.DDQNModel_1_1.dqn import DQN
-from Model.DDQNModel_1_1.replay_memory import PrioritizedReplayMemory
+from Model.DDQNModel_1_2.dqn import DQN
+from Model.DDQNModel_1_2.replay_memory import PrioritizedReplayMemory
 import random
 import heapq
 
@@ -24,7 +24,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_1_0.pth"  # Model file for saving/loading
+        self.model_filename = f"ddqn_model_1_2_0.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 11  # Fixed number of state features
@@ -72,6 +72,17 @@ class DDQNAgent:
             print("Device name:", torch.cuda.get_device_name(0))
         '''
 
+    def get_action_mask(self):
+        # Get available actions from the game service (e.g., "claim_route", "draw_red_card", etc.)
+        available_actions = self.get_available_actions_for_dqn()
+        # Convert valid actions to indices in the fixed action space
+        valid_indices = [self.action_space.index(action) for action in available_actions]
+        # Create a mask of length equal to total actions: valid actions get 0, invalid get a very low value.
+        mask = torch.full((len(self.action_space),), -1e9, device=device)
+        for idx in valid_indices:
+            mask[idx] = 0.0
+        # Reshape mask to match Q-value output (batch_size, num_actions)
+        return mask.unsqueeze(0)
 
     def get_state(self):
         """
@@ -122,8 +133,10 @@ class DDQNAgent:
         ]
 
         print("STATE VECTOR: ", state_vector)
-
-        return torch.tensor(state_vector, dtype=torch.float32, device=device).unsqueeze(0)
+        state_tensor = torch.tensor(state_vector, dtype=torch.float32, device=device).unsqueeze(0)
+        # Get the action mask for the current state
+        action_mask = self.get_action_mask()
+        return state_tensor, action_mask
 
 
     def choose_action(self):
@@ -131,28 +144,18 @@ class DDQNAgent:
         Selects an action using an epsilon-greedy policy, ensuring only valid actions are chosen.
         """
         available_actions = self.get_available_actions_for_dqn()
-
         if random.uniform(0, 1) < self.epsilon:
-            return random.choice(available_actions)  # Random exploration within available actions
+            return random.choice(available_actions)  # Random exploration
         else:
-            state = self.get_state()
+            # Get both state tensor and action mask
+            state, action_mask = self.get_state()
             with torch.no_grad():
-                q_values = self.model(state)  # Get Q-values for all actions
-
-            # Convert action names to indices (action space mapping)
-            action_indices = [self.action_space.index(action) for action in available_actions]
-            print(action_indices)
-
-            # Get the best Q-value action among the available ones
-            best_action_index = max(action_indices, key=lambda idx: q_values[0, idx].item())
-
-            for idx in action_indices:
-                print(f"Q[{idx}] = {q_values[0, idx].item()}")
-
-            print(f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {q_values[0, best_action_index].item()}")
-            print(q_values)
-
-
+                q_values = self.model(state)  # shape: [1, num_actions]
+            # Add the mask so that invalid actions have very low Q-values
+            masked_q_values = q_values + action_mask
+            best_action_index = masked_q_values.argmax(dim=1).item()
+            print(
+                f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {masked_q_values[0, best_action_index].item()}")
             return self.action_space[best_action_index]
 
     def perform_action(self):
@@ -172,12 +175,11 @@ class DDQNAgent:
         if not available_actions:
             self.game_service.pass_the_turn()
             return
-        
-
 
         action = self.choose_action()
-        state = self.get_state()
+        state, state_mask = self.get_state()
         reward, next_state, done = self.execute_action(action)
+        next_state, next_state_mask = self.get_state()
 
         print("################## ⚔ PLAYER INFO ######################")
         print("#  AVAILABLE ACTIONS:", available_actions)
@@ -188,7 +190,7 @@ class DDQNAgent:
         # Store experience in replay memory
         # NEW - store action as an integer index
         action_idx = self.action_space.index(action)
-        self.memory.push(state, action_idx, reward, next_state, done)
+        self.memory.push(state, action_idx, reward, next_state, done, state_mask, next_state_mask)
 
         # Train the model
         self.replay()
@@ -238,51 +240,38 @@ class DDQNAgent:
 
         self.batch_count += 1
 
+        # Now each transition contains 7 items: state, action, reward, next_state, done, state_mask, next_state_mask
         batch, indices, is_weights = self.memory.sample(self.batch_size)
         is_weights = torch.tensor(is_weights, dtype=torch.float32, device=device)
-        states, actions, rewards, next_states, dones = zip(*batch)
 
-        # Concatenate states and next_states. E.g. each is a single Tensor [1, 24], so we do:
-        states = torch.cat(states).to(device)  # shape: [batch_size, 24]
-        next_states = torch.cat(next_states).to(device)  # shape: [batch_size, 24]
-        actions = torch.tensor(actions, dtype=torch.long, device=device)  # shape: [batch_size]
-        rewards = torch.tensor(rewards, dtype=torch.float32, device =device)  # shape: [batch_size]
-        dones = torch.tensor(dones, dtype=torch.float32, device=device)  # shape: [batch_size]
+        states, actions, rewards, next_states, dones, state_masks, next_state_masks = zip(*batch)
 
-        # 1) Current Q-values
-        q_values = self.model(states)  # shape: [batch_size, num_actions]
+        states = torch.cat(states).to(device)
+        next_states = torch.cat(next_states).to(device)
+        actions = torch.tensor(actions, dtype=torch.long, device=device)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=device)
+        dones = torch.tensor(dones, dtype=torch.float32, device=device)
+        next_state_masks = torch.cat(next_state_masks).to(device)  # [batch_size, num_actions]
+
+        q_values = self.model(states)
         q_values_for_actions = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
 
-        # 2) Target Q-values for Double DQN
         with torch.no_grad():
-            # Use the online network to select the best next action
             next_q_values_online = self.model(next_states)
-            next_actions = next_q_values_online.argmax(dim=1, keepdim=True)
-
-            # Use the target network to evaluate the chosen action
+            # Apply the stored mask for each next state to ensure only valid actions are considered
+            masked_next_q_values_online = next_q_values_online + next_state_masks
+            next_actions = masked_next_q_values_online.argmax(dim=1, keepdim=True)
             next_q_values_target = self.target_model(next_states).gather(1, next_actions).squeeze(1)
-
             target = rewards + (1 - dones) * self.gamma * next_q_values_target
 
-
-        # 3) Loss only for the chosen actions
-        # Compute the TD errors for priority update
         td_errors = torch.abs(q_values_for_actions - target).detach().cpu().numpy()
-
-        # Update priorities in the replay memory (small constant added to avoid zero priority)
         self.memory.update_priorities(indices, td_errors + 1e-5)
 
-        # Loss computation with importance sampling weights
         loss = (is_weights * F.mse_loss(q_values_for_actions, target, reduction='none')).mean()
 
-        # 4) Backprop
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
-        # Write loss to a file
-        with open(self.log_file, "a") as f:
-            f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
 
         self.soft_update_target(tau=0.005)
 
@@ -397,13 +386,14 @@ class DDQNAgent:
         with big final reward that includes route points, completed tickets,
         penalty for uncompleted tickets, etc.
         """
-        last_state = self.get_state()
+        last_state, last_state_mask = self.get_state()
         done = True
         print("Final Reward Applied ", done)
 
         action_idx = self.action_space.index("end_of_game")
 
-        self.memory.push(last_state, action_idx, final_reward, last_state, True)
+        # Use the same last_state and mask for the terminal next state.
+        self.memory.push(last_state, action_idx, final_reward, last_state, True, last_state_mask, last_state_mask)
         self.replay()
 
         self.total_episode_reward += final_reward

@@ -15,13 +15,13 @@ class PrioritizedReplayMemory:
         self.priorities = np.zeros((capacity,), dtype=np.float32)
         self.pos = 0
 
-    def push(self, state, action, reward, next_state, done):
-        """Store a new transition and assign it the maximum current priority."""
+    def push(self, state, action, reward, next_state, done, state_mask, next_state_mask):
         max_priority = self.priorities.max() if self.memory else 1.0
+        transition = (state, action, reward, next_state, done, state_mask, next_state_mask)
         if len(self.memory) < self.capacity:
-            self.memory.append((state, action, reward, next_state, done))
+            self.memory.append(transition)
         else:
-            self.memory[self.pos] = (state, action, reward, next_state, done)
+            self.memory[self.pos] = transition
         self.priorities[self.pos] = max_priority
         self.pos = (self.pos + 1) % self.capacity
 
