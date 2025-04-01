@@ -1,78 +1,54 @@
 import os
-from collections import deque
 import torch
 import torch.nn.functional as F
-import torch.optim as optim
-
-import global_vars
-from Model.DDQNModel_1_2.dqn import DQN
-from Model.DDQNModel_1_2.replay_memory import PrioritizedReplayMemory
 import random
-import heapq
+from Controller.PersistentModel.persistent_model_manager import PersistentModelManager
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
-
 class DDQNAgent:
-    def __init__(self, color, game_service, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128):
+    def __init__(self, color, game_service, persistent_model_manager=None, gamma=0.99, batch_size=128):
         self.color = color
         self.game_service = game_service
-
         self.gamma = gamma
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.model_filename = f"ddqn_model_1_2_3.pth"  # Model file for saving/loading
-
-        # Define fixed state size and action space
-        self.state_size = 11  # Fixed number of state features
-        self.action_space = ["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
-                             "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
-                             "draw_black_card", "draw_joker_card", "end_of_game"]  # Fixed action space
-
-        # Neural Networks
-        self.model = DQN(self.state_size, len(self.action_space)).to(device)
-        self.target_model = DQN(self.state_size, len(self.action_space)).to(device)
-        self.target_model.load_state_dict(self.model.state_dict())  # Copy weights
-        self.target_model.eval()
-
-        # Optimizer and memory
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        self.memory = PrioritizedReplayMemory(memory_size)
-
-        # Try loading an existing model if available
-        self.load_model()
-
-        #Agent specific
+        self.log_file = "training_loss.txt"
         self.first_turn = True
         self.routes_needed_to_claim = []
-
         self.total_episode_reward = 0
-
-        #print loss
-        self.log_file = "training_loss.txt"
-
-        # Only create/write header if file doesn't exist yet
-        if not os.path.exists(self.log_file):
-            with open(self.log_file, "w") as f:
-                f.write("episode,batch,loss\n")  # single header line, do this once
-
         self.episode_count = 0
         self.batch_count = 0
 
+        # Use persistent model if provided; else create a local one (fallback)
+        if persistent_model_manager is not None:
+            self.persistent_model = persistent_model_manager
+        else:
+            action_space = ["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
+                            "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
+                            "draw_black_card", "draw_joker_card", "end_of_game"]
+            self.persistent_model = PersistentModelManager(state_size=11, action_space=action_space)
 
-        '''
-        print("Model is on device:", next(self.model.parameters()).device)
+        # Use the persistent manager's components:
+        self.model = self.persistent_model.model
+        self.target_model = self.persistent_model.target_model
+        self.optimizer = self.persistent_model.optimizer
+        self.memory = self.persistent_model.memory
+        self.epsilon = self.persistent_model.epsilon
+        self.epsilon_min = self.persistent_model.epsilon_min
+        self.epsilon_decay = self.persistent_model.epsilon_decay
 
-        print("PyTorch version:", torch.__version__)
-        print("CUDA available:", torch.cuda.is_available())
-        if torch.cuda.is_available():
-            print("Number of GPUs:", torch.cuda.device_count())
-            print("Current device index:", torch.cuda.current_device())
-            print("Device name:", torch.cuda.get_device_name(0))
-        '''
+        # Define fixed state size and action space
+        self.state_size = self.persistent_model.state_size
+        self.action_space = self.persistent_model.action_space
+
+        # Remove per-game load_model call since the persistent model manager already loads the model.
+        # Setup log file header if not exists
+        if not os.path.exists(self.log_file):
+            with open(self.log_file, "w") as f:
+                f.write("episode,batch,loss\n")
+
+        self.debug_persistent_model()
+
 
     def get_action_mask(self):
         # Get available actions from the game service (e.g., "claim_route", "draw_red_card", etc.)
@@ -299,60 +275,6 @@ class DDQNAgent:
         for target_param, local_param in zip(self.target_model.parameters(), self.model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1 - tau) * target_param.data)
 
-    def load_model(self):
-        print("LOADING")
-        if not os.path.exists(self.model_filename):
-            print("⚠️ No saved model found. Starting with a fresh model and empty replay buffer.")
-            return
-
-        try:
-            # Set weights_only=False since you trust your checkpoints
-            checkpoint = torch.load(self.model_filename, map_location=device, weights_only=False)
-            self.model.load_state_dict(checkpoint['model_state_dict'])
-            self.target_model.load_state_dict(checkpoint['target_model_state_dict'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            self.epsilon = checkpoint['epsilon']
-
-            # Restore the prioritized replay memory components:
-            self.memory.memory = checkpoint.get('memory', [])
-            saved_priorities = checkpoint.get('priorities', None)
-            if saved_priorities is not None:
-                self.memory.priorities = saved_priorities
-            self.memory.pos = checkpoint.get('pos', 0)
-
-            print(f"✅ Model {self.model_filename} loaded successfully.")
-            print(f"Replay buffer size after load: {len(self.memory)}")
-            print("Epsilon:", self.epsilon)
-        except Exception as e:
-            print(f"⚠️ Could not load {self.model_filename}: {e}")
-            raise
-
-    def save_model(self):
-        print("SAVING")
-        """
-        Save the model weights, optimizer state, epsilon, and all parts of the replay memory.
-        """
-        checkpoint = {
-            'model_state_dict': self.model.state_dict(),
-            'target_model_state_dict': self.target_model.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'epsilon': self.epsilon,
-            # Save the prioritized replay memory components:
-            'memory': self.memory.memory,  # list of transitions
-            'priorities': self.memory.priorities,  # numpy array of priorities
-            'pos': self.memory.pos  # current insertion position
-        }
-        print("Saving model with epsilon:", self.epsilon)
-        temp_filename = self.model_filename + ".tmp"
-        with open(temp_filename, 'wb') as f:
-            torch.save(checkpoint, f)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(temp_filename, self.model_filename)
-        print(f"Model saved as {self.model_filename}. Replay buffer size: {len(self.memory)}")
-        with open("scores.txt", "a") as file:
-            file.write(str(self.total_episode_reward) + ",")
-
     def get_available_actions_for_dqn(self):
         available_actions = self.game_service.get_available_actions(self.color)
         current_player_state = self.game_service.get_current_player_state()
@@ -407,9 +329,15 @@ class DDQNAgent:
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+            self.persistent_model.epsilon = self.epsilon
             print("Epsilon decayed to:", self.epsilon)
 
         self.episode_count += 1
+
+        with open("scores.txt", "a") as file:
+            file.write(str(self.total_episode_reward) + ",")
+
+        self.debug_persistent_model()
 
     """ACTIONS PART"""
     def draw_blind(self):
@@ -644,3 +572,20 @@ class DDQNAgent:
             color_counts[c] = color_counts.get(c, 0) + 1
         return color_counts
     '''
+
+    def debug_persistent_model(self):
+        # Check object IDs (should be the same)
+        print("Agent model id:", id(self.model))
+        print("Persistent model id:", id(self.persistent_model.model))
+        print("Agent target_model id:", id(self.target_model))
+        print("Persistent target_model id:", id(self.persistent_model.target_model))
+
+        # Compute a simple checksum for model weights
+        agent_model_sum = sum(p.sum().item() for p in self.model.parameters())
+        persistent_model_sum = sum(p.sum().item() for p in self.persistent_model.model.parameters())
+        print("Agent model weights sum:", agent_model_sum)
+        print("Persistent model weights sum:", persistent_model_sum)
+
+        # Check epsilon values
+        print("Agent epsilon:", self.epsilon)
+        print("Persistent epsilon:", self.persistent_model.epsilon)

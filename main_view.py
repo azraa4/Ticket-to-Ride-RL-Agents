@@ -1,4 +1,3 @@
-from View.destination_tickets_view import DestinationTicketsFrame
 from View.header_info_view import HeaderInfo
 from View.train_card_selection_view import TrainCardSelectionFrame
 from View.claimable_routes_view import ClaimableRoutesFrame
@@ -18,16 +17,15 @@ from Model.ai_manager import AIManager
 from Controller.game_service import GameService
 
 import tkinter as tk
-from PIL import Image, ImageTk
-from View.ttr_gui_view import TTRGui
 
 import threading
-import sys
 import time
 
 import global_vars
+
+
 class MainGameApp:
-    def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None):
+    def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None, persistent_model = None):
         self.game_controller = game_controller
         self.queue = queue  # Queue nesnesi
         self.game_id = game_id  # Bu oyunun kimliği
@@ -53,6 +51,7 @@ class MainGameApp:
         #game_services
         self.game_service = GameService(game_controller)
 
+        self.persistent_model = persistent_model
 
         if self.queue:
             self.message_thread = threading.Thread(target=self.listen_to_queue)
@@ -103,8 +102,9 @@ class MainGameApp:
         if global_vars.test_count != 0:
             global_vars.test_count -= 1
             global_vars.game_id += 1
-            main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0)
+            main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0, persistent_model=self.persistent_model)
         elif global_vars.test_count == 0:
+            self.persistent_model.save_model()
             global_vars.test_count = 50
 
     def withdraw_window(self):
@@ -112,7 +112,7 @@ class MainGameApp:
         self.game_controller.visualize = False
 
 
-def main(queue=None, game_id=None, panel=None, console=True, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None):
+def main(queue=None, game_id=None, panel=None, console=True, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None, persistent_model = None):
     # Define Models
     game_manager = GameManager()
     ai_manager = AIManager(None)
@@ -122,7 +122,7 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
     main_menu_controller = MainMenuController(None, game_manager, ai_manager)
 
     # Define Main View
-    app = MainGameApp(game_controller, main_menu_controller, queue, game_id)
+    app = MainGameApp(game_controller, main_menu_controller, queue, game_id, persistent_model)
 
     ai_manager.game_service = app.game_service
 
@@ -152,7 +152,7 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
             color = agent["color"]
 
             main_menu_controller.add_player_button(f"AI_{color}", color, True)
-            main_menu_controller.add_ai(color, agent_type)
+            main_menu_controller.add_ai(color, agent_type, persistent_model)
 
         app.agents = agents
         app.test_name = test_name

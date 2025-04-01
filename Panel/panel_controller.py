@@ -9,10 +9,10 @@ import main_view
 
 from panel_gui import PanelGUI
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 
 import shutil
-
+from Controller.PersistentModel.persistent_model_manager import PersistentModelManager
 
 class PanelController:
     def __init__(self, gui):
@@ -20,6 +20,13 @@ class PanelController:
         self.game_processes = []
         self.queues = {}
         self.agents = []
+
+        self.persistent_model = PersistentModelManager(
+            state_size=11,
+            action_space=["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
+                          "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
+                          "draw_black_card", "draw_joker_card", "end_of_game"]
+        )
 
         self.move_logs_to_history()
 
@@ -52,6 +59,7 @@ class PanelController:
         self.gui.color_var.set("")
 
     def start_games(self):
+        self.persistent_model.load_model()
         try:
             num_games = int(self.gui.number_of_process_entry.get())
         except ValueError:
@@ -71,7 +79,7 @@ class PanelController:
             game_id = len(self.game_processes) + 1  # Assign a unique ID
             queue = Queue()
             self.queues[game_id] = queue
-            process = multiprocessing.Process(target=self.run_game, args=(self.queues[game_id], game_id, console, self.agents, visualize, test_name, time_action, time_turn))
+            process = multiprocessing.Process(target=self.run_game, args=(self.queues[game_id], game_id, console, self.agents, visualize, test_name, time_action, time_turn, self.persistent_model))
             process.start()
             self.game_processes.append((game_id, process))  # Store ID and process together
             self.gui.processes_listbox.insert(tk.END, game_id)
@@ -81,16 +89,17 @@ class PanelController:
         self.populate_log_files("logs")
 
     @staticmethod
-    def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn):
+    def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model):
         import os
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         os.chdir(project_root)
 
         print(f"Starting game {game_id}...")
-        from main_view import main, MainGameApp
-        main_view.main(queue, game_id, True, console, number_of_ai, visualize, test_name, time_action, time_turn)
+        main_view.main(queue, game_id, True, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model)
 
     def stop_games(self):
+        self.persistent_model.save_model()
+
         for game_id, process in self.game_processes:
             if process.is_alive():
                 print(f"stop_{game_id}")

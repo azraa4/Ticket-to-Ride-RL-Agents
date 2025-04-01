@@ -6,12 +6,13 @@ from Model.DQNModel2.dqn_agent import DQNAgent as DQNAgent2
 from Model.DDQNModel_1_0.dqn_agent import DDQNAgent
 from Model.DDQNModel_1_1.dqn_agent import DDQNAgent as DDQNAgent_PM
 from Model.DDQNModel_1_2.dqn_agent import DDQNAgent as DDQNAgent_1_2
+from Model.DDQNModel_1_3.dqn_agent import DDQNAgent as DDQNAgent_1_3
 class AIManager:
     def __init__(self, game_service):
         self.game_service = game_service
         self.agents = []
 
-    def add_ai(self, color, agent_type):
+    def add_ai(self, color, agent_type, persistent_model=None):
         """Yeni bir yapay zekâ oyuncusu ekler."""
 
         if(agent_type == "RandomAgent"):
@@ -50,6 +51,10 @@ class AIManager:
         if (agent_type == "DDQNAgent_1_2"):
             deep_q_network_agent_pm = DDQNAgent_1_2(color, self.game_service)
             self.agents.append(deep_q_network_agent_pm)
+            print(f"DDQNAgent_1_2 AI Agent Added with color {color}, and agent type {agent_type}")
+        if (agent_type == "DDQNAgent_1_3"):
+            deep_q_network_agent_1_3 = DDQNAgent_1_3(color, self.game_service, persistent_model_manager=persistent_model)
+            self.agents.append(deep_q_network_agent_1_3)
             print(f"DDQNAgent_1_2 AI Agent Added with color {color}, and agent type {agent_type}")
         #console print(self.agents)
 
