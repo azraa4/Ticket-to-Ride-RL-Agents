@@ -5,6 +5,7 @@ from Model.DDQNModel_1_0.dqn_agent import DDQNAgent
 from Model.DDQNModel_1_1.dqn_agent import DDQNAgent as DDQNAgent_PM
 from Model.DDQNModel_1_2.dqn_agent import (DDQNAgent as DDQNAgent_1_2)
 from Model.DDQNModel_1_3.dqn_agent import (DDQNAgent as DDQNAgent_1_3)
+from Model.DDQNModel_1_4.dqn_agent import (DDQNAgent as DDQNAgent_1_4)
 import heapq
 
 class GameService:
@@ -199,7 +200,7 @@ class GameService:
                 ai.save_q_table()
 
         for ai in self.controller.get_ai_list():
-            if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent) or isinstance(ai, DDQNAgent_PM) or isinstance(ai, DDQNAgent_1_2) or isinstance(ai, DDQNAgent_1_3):
+            if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent) or isinstance(ai, DDQNAgent_PM) or isinstance(ai, DDQNAgent_1_2) or isinstance(ai, DDQNAgent_1_3) or isinstance(ai, DDQNAgent_1_4):
                 for player in self.controller.get_players():
                     if player.color == ai.color:
 
