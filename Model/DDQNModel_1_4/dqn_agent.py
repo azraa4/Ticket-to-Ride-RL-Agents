@@ -192,7 +192,7 @@ class DDQNAgent:
         # Store experience in replay memory
         # NEW - store action as an integer index
         action_idx = self.action_space.index(action)
-        self.memory.push(state, action_idx, reward, next_state, done, state_mask, next_state_mask)
+        self.memory.push(state.cpu(), action_idx, reward, next_state.cpu(), done, state_mask.cpu(), next_state_mask.cpu())
 
         # Train the model
         self.replay()
@@ -411,7 +411,7 @@ class DDQNAgent:
         action_idx = self.action_space.index("end_of_game")
 
         # Use the same last_state and mask for the terminal next state.
-        self.memory.push(last_state, action_idx, final_reward, last_state, True, last_state_mask, last_state_mask)
+        self.memory.push(last_state.cpu(), action_idx, final_reward, last_state.cpu(), True, last_state_mask.cpu(), last_state_mask.cpu())
         self.replay()
 
         self.total_episode_reward += final_reward
