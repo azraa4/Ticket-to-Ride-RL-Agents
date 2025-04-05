@@ -1,11 +1,13 @@
 import random
 import global_vars
-random.seed(global_vars.random_seed)
 
 class Deck:
     def __init__(self, cards):
+        random.seed(global_vars.random_seed)
         self.cards = cards
         random.shuffle(cards)
+        print(cards)
+        print(len(cards))
 
     def shuffle(self):
         random.shuffle(self.cards)

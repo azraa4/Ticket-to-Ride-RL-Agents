@@ -2,10 +2,11 @@ import random
 import time
 
 import global_vars
-random.seed(global_vars.random_seed)
 
 class AgentX:
     def __init__(self, color, game_service):
+        random.seed(global_vars.random_seed)
+
         self.color = color
         self.game_service = game_service
         self.first_time_bool = True

@@ -7,6 +7,7 @@ from Model.DDQNModel_1_0.dqn_agent import DDQNAgent
 from Model.DDQNModel_1_1.dqn_agent import DDQNAgent as DDQNAgent_PM
 from Model.DDQNModel_1_2.dqn_agent import DDQNAgent as DDQNAgent_1_2
 from Model.DDQNModel_1_4.dqn_agent import DDQNAgent as DDQNAgent_1_4
+from Model.PPOModel_1_0.ppo_agent import PPOAgent as PPOAgent_1_0
 class AIManager:
     def __init__(self, game_service):
         self.game_service = game_service
@@ -56,6 +57,10 @@ class AIManager:
             deep_q_network_agent_1_4 = DDQNAgent_1_4(color, self.game_service, persistent_model=persistent_model)
             self.agents.append(deep_q_network_agent_1_4)
             print(f"DDQNAgent_1_24 AI Agent Added with color {color}, and agent type {agent_type}")
+        if (agent_type == "PPOAgent_1_0"):
+            ppo_agent_1_0 = PPOAgent_1_0(color, self.game_service)
+            self.agents.append(ppo_agent_1_0)
+            print(f"ppo_agent_1_0 AI Agent Added with color {color}, and agent type {agent_type}")
         #console print(self.agents)
 
     def reset_ai_list(self):

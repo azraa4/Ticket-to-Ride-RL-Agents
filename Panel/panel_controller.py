@@ -21,12 +21,7 @@ class PanelController:
         self.queues = {}
         self.agents = []
 
-        self.persistent_model = PersistentModelManager(
-            state_size=11,
-            action_space=["claim_route", "draw_blind", "draw_red_card", "draw_blue_card", "draw_yellow_card",
-                          "draw_green_card", "draw_pink_card", "draw_orange_card", "draw_white_card",
-                          "draw_black_card", "draw_joker_card", "end_of_game"]
-        )
+        self.persistent_model = PersistentModelManager()
 
         self.move_logs_to_history()
 

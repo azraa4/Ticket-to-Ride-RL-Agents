@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+import global_vars
+torch.manual_seed(global_vars.random_seed)
+
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         """

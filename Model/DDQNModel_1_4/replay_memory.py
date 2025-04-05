@@ -1,6 +1,6 @@
 # prioritized_replay_memory.py
-import random
 import numpy as np
+import global_vars
 
 class PrioritizedReplayMemory:
     def __init__(self, capacity, alpha=0.6):
@@ -9,6 +9,8 @@ class PrioritizedReplayMemory:
         :param capacity: Maximum number of transitions.
         :param alpha: How much prioritization is used (0 = no prioritization, 1 = full prioritization).
         """
+        np.random.seed(global_vars.random_seed)
+
         self.capacity = capacity
         self.alpha = alpha
         self.memory = []  # list of transitions

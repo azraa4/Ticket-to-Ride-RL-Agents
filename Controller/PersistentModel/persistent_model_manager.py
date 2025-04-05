@@ -2,11 +2,10 @@ import os
 import torch
 
 class PersistentModelManager:
-    def __init__(self, state_size, action_space):
+    def __init__(self):
         self.checkpoint_data = None
-        self.state_size = state_size
-        self.action_space = action_space
-        self.filename = 'ddqn_model_1_4_0.pth'
+        self.filename = 'ddqn_model_1_4_1.pth'
+        #self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):
         """Save the dictionary in memory (RAM)."""
