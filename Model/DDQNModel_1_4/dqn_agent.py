@@ -28,7 +28,6 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        #self.model_filename = f"ddqn_model_1_2_3.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space
         self.state_size = 11  # Fixed number of state features
@@ -160,8 +159,13 @@ class DDQNAgent:
             # Add the mask so that invalid actions have very low Q-values
             masked_q_values = q_values + action_mask
             best_action_index = masked_q_values.argmax(dim=1).item()
-            print(
-                f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {masked_q_values[0, best_action_index].item()}")
+
+            print(f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {masked_q_values[0, best_action_index].item()}")
+
+            avg_q_value = q_values.mean().item()
+            with open("q_values.txt", "a") as f:
+                f.write(f"{avg_q_value}\n")
+
             return self.action_space[best_action_index]
 
     def perform_action(self):
@@ -202,6 +206,8 @@ class DDQNAgent:
             # Train the model
             self.replay()
 
+        with open("actions_log.txt", "a") as f:
+            f.write(f"{action}\n")
         print("\n\n")
 
     def execute_action(self, action):
@@ -280,11 +286,14 @@ class DDQNAgent:
         loss.backward()
         self.optimizer.step()
 
+        self.soft_update_target(tau=0.005)
+
         with open(self.log_file, "a") as f:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
 
-        self.soft_update_target(tau=0.005)
-
+        mean_td_error = td_errors.mean()
+        with open("td_errors.txt", "a") as f:
+            f.write(f"{self.batch_count},{mean_td_error}\n")
 
     #HARD UPDATE
     def update_target_model(self):

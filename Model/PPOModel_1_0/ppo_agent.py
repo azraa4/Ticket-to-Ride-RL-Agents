@@ -122,6 +122,7 @@ class PPOAgent:
         # Apply action mask so that invalid actions are set to very low probability
         masked_logits = action_logits + action_mask
         action_probs = torch.softmax(masked_logits, dim=-1)
+        print("Action probabilities:", action_probs.cpu().detach().numpy())
         dist = torch.distributions.Categorical(action_probs)
         action = dist.sample()
         log_prob = dist.log_prob(action)

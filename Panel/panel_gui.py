@@ -37,6 +37,7 @@ class PanelGUI:
         self.update_display_timer()
 
         self.loop_count = 0
+        self.test_count = 50
 
     def create_left_column(self):
         # LEFT COLUMN
@@ -117,11 +118,15 @@ class PanelGUI:
         self.number_of_games_entry.pack(side=tk.LEFT, padx=5)
         self.number_of_games_entry.insert(0, "50")
 
+        self.set_turn_count_button = tk.Button(self.frame4, text="Set",
+                                      command=self.set_turn_count)
+        self.set_turn_count_button.pack(side=tk.LEFT, padx=5)
+
         self.start_buttons_frame = tk.Frame(self.upper_frame)
         self.start_buttons_frame.pack(fill=tk.X, pady=5)
 
         # Add buttons to the left column
-        self.start_button = tk.Button(self.start_buttons_frame, text="Start All Games", command=self.controller.start_games)
+        self.start_button = tk.Button(self.start_buttons_frame, text="Start All Games", command=lambda: self.controller.start_games(self.test_count))
         self.start_button.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
         self.stop_button = tk.Button(self.start_buttons_frame, text="Stop All Games", command=self.controller.stop_games,
@@ -253,6 +258,9 @@ class PanelGUI:
         self.analysis_frame = tk.Frame(self.general_info_frame)
         self.analysis_frame.pack()
 
+        self.graphs_menu_btn = tk.Button(self.analysis_frame, text="Graphs Menu", command=self.controller.open_graphs_menu)
+        self.graphs_menu_btn.pack(side=tk.LEFT, padx=5)
+
         self.mean_of_points_label = tk.Label(self.analysis_frame, text="Mean of Points:")
         self.mean_of_points_label.pack(side=tk.LEFT, padx=5)
 
@@ -329,7 +337,6 @@ class PanelGUI:
     def start_loop_games(self):
         """Oyunları sürekli olarak başlatan loop fonksiyonu."""
         if not self.loop_running:
-            global_vars.test_count = int(self.number_of_games_entry.get()) - 1
             self.loop_running = True
             self.loop_button.config(state=tk.DISABLED)
             self.stop_loop_button.config(state=tk.NORMAL)
@@ -350,5 +357,9 @@ class PanelGUI:
                 self.controller.stop_games()
             elif not self.controller.are_games_running():
                 self.loop_count=0
-                self.controller.start_games()
+                self.controller.start_games(self.test_count)
             self.root.after(1000, self.run_game_loop)
+
+    def set_turn_count(self):
+        self.test_count = int(self.number_of_games_entry.get()) - 1
+

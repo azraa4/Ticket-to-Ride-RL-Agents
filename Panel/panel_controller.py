@@ -3,6 +3,10 @@ import multiprocessing
 from multiprocessing import Queue
 
 import sys
+
+import global_vars
+from Panel.graphs_menu import GraphsMenu
+
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + "/.."))
 
 import main_view
@@ -53,7 +57,7 @@ class PanelController:
         self.gui.color_dropdown["values"] = self.gui.available_colors
         self.gui.color_var.set("")
 
-    def start_games(self):
+    def start_games(self, test_count):
         self.persistent_model.load_model()
         try:
             num_games = int(self.gui.number_of_process_entry.get())
@@ -74,7 +78,7 @@ class PanelController:
             game_id = len(self.game_processes) + 1  # Assign a unique ID
             queue = Queue()
             self.queues[game_id] = queue
-            process = multiprocessing.Process(target=self.run_game, args=(self.queues[game_id], game_id, console, self.agents, visualize, test_name, time_action, time_turn, self.persistent_model))
+            process = multiprocessing.Process(target=self.run_game, args=(self.queues[game_id], game_id, console, self.agents, visualize, test_name, time_action, time_turn, self.persistent_model, test_count))
             process.start()
             self.game_processes.append((game_id, process))  # Store ID and process together
             self.gui.processes_listbox.insert(tk.END, game_id)
@@ -84,13 +88,13 @@ class PanelController:
         self.populate_log_files("logs")
 
     @staticmethod
-    def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model):
+    def run_game(queue, game_id, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model, test_count):
         import os
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         os.chdir(project_root)
 
         print(f"Starting game {game_id}...")
-        main_view.main(queue, game_id, True, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model)
+        main_view.main(queue, game_id, True, console, number_of_ai, visualize, test_name, time_action, time_turn, persistent_model, test_count)
 
     def stop_games(self):
         self.persistent_model.save_model()
@@ -460,6 +464,10 @@ class PanelController:
     def are_games_running(self):
         """Check if any game processes are currently running."""
         return any(process.is_alive() for _, process in self.game_processes)
+
+    def open_graphs_menu(self):
+        GraphsMenu(self.gui.root)
+
 
 if __name__ == "__main__":
     root = tk.Tk()

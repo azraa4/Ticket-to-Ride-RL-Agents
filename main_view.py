@@ -25,7 +25,7 @@ import global_vars
 
 
 class MainGameApp:
-    def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None, persistent_model = None):
+    def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None, persistent_model = None, test_count = 50):
         self.game_controller = game_controller
         self.queue = queue  # Queue nesnesi
         self.game_id = game_id  # Bu oyunun kimliği
@@ -60,6 +60,8 @@ class MainGameApp:
 
         self.agents = None
         self.test_name = None
+
+        self.test_count = test_count
 
 
     def listen_to_queue(self):
@@ -99,20 +101,20 @@ class MainGameApp:
 
     def stop_game(self):
         self.root.destroy()
-        if global_vars.test_count != 0:
-            global_vars.test_count -= 1
+        if self.test_count != 0:
+            self.test_count -= 1
             global_vars.game_id += 1
-            main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0, persistent_model=self.persistent_model)
-        elif global_vars.test_count == 0:
+            main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0, self.persistent_model, self.test_count)
+        elif self.test_count == 0:
             self.persistent_model.save_model()
-            global_vars.test_count = 50
+            self.test_count = 50
 
     def withdraw_window(self):
         self.root.withdraw()
         self.game_controller.visualize = False
 
 
-def main(queue=None, game_id=None, panel=None, console=True, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None, persistent_model = None):
+def main(queue=None, game_id=None, panel=None, console=True, agents=None, visualize=None, test_name=None, time_action=None, time_turn=None, persistent_model = None, test_count = 50):
     # Define Models
     game_manager = GameManager()
     ai_manager = AIManager(None)
@@ -122,7 +124,7 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
     main_menu_controller = MainMenuController(None, game_manager, ai_manager)
 
     # Define Main View
-    app = MainGameApp(game_controller, main_menu_controller, queue, game_id, persistent_model)
+    app = MainGameApp(game_controller, main_menu_controller, queue, game_id, persistent_model, test_count)
 
     ai_manager.game_service = app.game_service
 
