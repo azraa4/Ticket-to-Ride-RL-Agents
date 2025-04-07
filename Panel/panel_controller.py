@@ -4,10 +4,10 @@ from multiprocessing import Queue
 
 import sys
 
-import global_vars
-from Panel.graphs_menu import GraphsMenu
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + "/.."))
+
+from Panel.graphs_menu import GraphsMenu
 
 import main_view
 
