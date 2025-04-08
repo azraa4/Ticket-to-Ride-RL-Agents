@@ -56,7 +56,7 @@ class AIManager:
         if (agent_type == "DDQNAgent_1_4"):
             deep_q_network_agent_1_4 = DDQNAgent_1_4(color, self.game_service, persistent_model=persistent_model)
             self.agents.append(deep_q_network_agent_1_4)
-            print(f"DDQNAgent_1_24 AI Agent Added with color {color}, and agent type {agent_type}")
+            print(f"DDQNAgent_1_4 AI Agent Added with color {color}, and agent type {agent_type}")
         if (agent_type == "PPOAgent_1_0"):
             ppo_agent_1_0 = PPOAgent_1_0(color, self.game_service)
             self.agents.append(ppo_agent_1_0)

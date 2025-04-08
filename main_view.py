@@ -23,6 +23,9 @@ import time
 
 import global_vars
 
+from Controller.PersistentModel.persistent_model_manager import PersistentModelManager
+
+
 
 class MainGameApp:
     def __init__(self, game_controller, main_menu_controller, queue=None, game_id=None, persistent_model = None, test_count = 50):
@@ -164,6 +167,7 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
     app.run()
 
 if __name__ == "__main__":
+    persistent_model = PersistentModelManager()
     main()
 
 
