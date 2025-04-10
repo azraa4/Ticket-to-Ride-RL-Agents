@@ -30,7 +30,7 @@ class PPOAgent:
         self.model = PPOActorCritic(self.state_size, len(self.action_space)).to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
-        self.filename = "ppoagent_1_0_0.pth"
+        self.filename = "ppoagentvsddqn144.pth"
         self.load_model()
 
         # Initialize rollout buffer and timestep counter
@@ -279,7 +279,7 @@ class PPOAgent:
             f.flush()
             os.fsync(f.fileno())
         os.replace(temp_filename, model_filename)
-        with open("scores.txt", "a") as file:
+        with open("ppo_scores.txt", "a") as file:
             file.write(str(self.total_episode_reward) + ",")
 
     def get_available_actions_for_dqn(self):
@@ -333,6 +333,7 @@ class PPOAgent:
         self.update()
         self.total_episode_reward += final_reward
         self.episode_count += 1
+        self.save_model()
 
     """ACTIONS PART"""
     def draw_blind(self):

@@ -45,6 +45,11 @@ class DDQNAgent:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.memory = PrioritizedReplayMemory(memory_size)
 
+        self.not_use_persistent_model = False
+        if self.not_use_persistent_model:
+            self.filename = "ddqn_model_1_4_4.pth"
+            self.checkpoint_data = None
+
         # Try loading an existing model if available
         self.load_model()
 
@@ -64,6 +69,7 @@ class DDQNAgent:
 
         self.episode_count = 0
         self.batch_count = 0
+
 
 
         '''
@@ -323,7 +329,12 @@ class DDQNAgent:
             return
 
         # Retrieve checkpoint data from memory
-        checkpoint = self.persistent_model.load_data()
+        if self.not_use_persistent_model:
+            self.load_model_()
+            checkpoint = self.checkpoint_data
+        else:
+            checkpoint = self.persistent_model.load_data()
+
         if not checkpoint:
             # Means the persistent_model might be empty
             print("No data in persistent_model; starting fresh.")
@@ -370,13 +381,65 @@ class DDQNAgent:
         }
 
         try:
-            self.persistent_model.store_data(checkpoint)
+            if self.not_use_persistent_model:
+                self.checkpoint_data = checkpoint
+                self.save_model_()
+            else:
+                self.persistent_model.store_data(checkpoint)
             print("✅ Model data saved to persistent_model in memory.")
             print("Replay buffer size:", len(self.memory))
             with open("scores.txt", "a") as file:
                 file.write(str(self.total_episode_reward) + ",")
         except Exception as e:
             print(f"⚠️ Could not save to persistent_model: {e}")
+
+    #FOR NO PERSISTENT MODEL SAVING SYSTEM
+    def save_model_(self):
+        """
+        Saves the current checkpoint data to the file on disk (self.filename).
+        If checkpoint_data is None, it does not save and just prints a message.
+        """
+        if self.checkpoint_data is None:
+            print("Checkpoint data is None. Skipping file save.")
+            return
+
+        if os.path.exists(self.filename):
+            print(f"File '{self.filename}' already exists; overwriting with the current checkpoint data.")
+        else:
+            print(f"No file found at '{self.filename}'. Creating a new file with checkpoint data.")
+
+        temp_filename = self.filename + ".tmp"
+        try:
+            with open(temp_filename, 'wb') as f:
+                torch.save(self.checkpoint_data, f)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temp_filename, self.filename)
+            print(f"Model saved successfully to {self.filename}.")
+        except Exception as e:
+            print(f"Error saving model to {self.filename}: {e}")
+            if os.path.exists(temp_filename):
+                os.remove(temp_filename)
+
+    def load_model_(self):
+        """
+        Loads the checkpoint data from the file on disk (self.filename) into memory.
+        If the file doesn't exist, starts fresh (checkpoint_data = None).
+        """
+        if not os.path.exists(self.filename):
+            print(f"No checkpoint file found at {self.filename}. Starting fresh.")
+            self.checkpoint_data = None
+            return
+
+        try:
+            print(f"Loading model from file: {self.filename}")
+            checkpoint = torch.load(self.filename, map_location=torch.device("cpu"), weights_only=False)
+            self.checkpoint_data = checkpoint
+            print("Model loaded successfully into PersistentModelManager.")
+        except Exception as e:
+            print(f"Could not load {self.filename}: {e}")
+            self.checkpoint_data = None
+            raise
 
     def get_available_actions_for_dqn(self):
         available_actions = self.game_service.get_available_actions(self.color)

@@ -4,7 +4,7 @@ import torch
 class PersistentModelManager:
     def __init__(self):
         self.checkpoint_data = None
-        self.filename = 'ddqn_model_1_4_3.pth'
+        self.filename = 'ddqn_model_1_4_4.pth'
         #self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):
@@ -37,6 +37,9 @@ class PersistentModelManager:
                 os.fsync(f.fileno())
             os.replace(temp_filename, self.filename)
             print(f"Model saved successfully to {self.filename}.")
+
+            del self.checkpoint_data
+            self.checkpoint_data = None
         except Exception as e:
             print(f"Error saving model to {self.filename}: {e}")
             if os.path.exists(temp_filename):

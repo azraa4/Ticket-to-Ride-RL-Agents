@@ -24,6 +24,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
+        
         self.model_filename = f"ddqn_model_1_2_3.pth"  # Model file for saving/loading
 
         # Define fixed state size and action space

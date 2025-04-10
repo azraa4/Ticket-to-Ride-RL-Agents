@@ -72,10 +72,10 @@ class GameService:
         player = self.controller.get_player_by_color(player_color)
         if player is None:
             print("!        ERROR: Player not found. Color must be written as Red, Blue, Green etc.")
-            return
+            return []
         if player != self.controller.get_current_player():
             print(f"!        ERROR: No available actions since it is not {player.color}'s turn")
-            return
+            return []
 
         available_actions = []
         if self.controller.get_claimable_routes():
@@ -238,7 +238,8 @@ class GameService:
                 # 1) Update the target model
                 #ai.update_target_model() #hard update için commenti kaldır
                 # 2) Save the model (weights, optimizer, replay buffer)
-                ai.save_model()
+                if not isinstance(ai, PPOAgent_1_0):
+                    ai.save_model()
 
     def get_availability_of_blind_pick(self):
         if self.controller.game_manager.train_cards_deck.get_length() <= 4:
