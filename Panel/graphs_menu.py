@@ -147,7 +147,7 @@ class GraphsMenu:
             if window_size and len(scores) >= window_size:
                 moving_avg = np.convolve(scores, np.ones(window_size) / window_size, mode="valid")
                 plt.figure(figsize=(10, 5))
-                plt.plot(scores, marker="o", linestyle="-", color="b", alpha=0.5, label="Cumulative Reward")
+                #plt.plot(scores, marker="o", linestyle="-", color="b", alpha=0.5, label="Cumulative Reward")
                 plt.plot(range(window_size - 1, len(scores)), moving_avg, linestyle="-", color="r",
                          linewidth=2, label=f"Moving Avg ({window_size} episodes)")
                 plt.axhline(y=0, color="black", linestyle="--", label="Zero Line")

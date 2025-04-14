@@ -4,7 +4,7 @@ import torch
 class PersistentModelManager:
     def __init__(self):
         self.checkpoint_data = None
-        self.filename = 'ddqn_model_1_4_4.pth'
+        self.filename = 'ddqn_model_1_4_5.pth'
         #self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):

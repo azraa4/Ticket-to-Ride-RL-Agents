@@ -5,8 +5,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 import global_vars
-from Model.DDQNModel_1_4.dqn import DQN
-from Model.DDQNModel_1_4.replay_memory import PrioritizedReplayMemory
+from Model.DDQNModel_1_4_1.dqn import DQN
+from Model.DDQNModel_1_4_1.replay_memory import PrioritizedReplayMemory
 import random
 import heapq
 
@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128, train_mode=False):
+                 memory_size=50000, batch_size=128, train_mode=True):
         torch.manual_seed(global_vars.random_seed)
         random.seed(global_vars.random_seed)
 
@@ -45,9 +45,9 @@ class DDQNAgent:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.memory = PrioritizedReplayMemory(memory_size)
 
-        self.not_use_persistent_model = False
+        self.not_use_persistent_model = True
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_1_4_4.pth"
+            self.filename = "ddqn_model_141_0.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -263,8 +263,6 @@ class DDQNAgent:
         batch, indices, is_weights = self.memory.sample(self.batch_size)
         is_weights = torch.tensor(is_weights, dtype=torch.float32, device=device)
 
-        is_weights /= is_weights.max() #new added normalization of weight to prevent loss explode
-
         states, actions, rewards, next_states, dones, state_masks, next_state_masks = zip(*batch)
 
         states = torch.cat(states).to(device)
@@ -390,7 +388,7 @@ class DDQNAgent:
                 self.persistent_model.store_data(checkpoint)
             print("✅ Model data saved to persistent_model in memory.")
             print("Replay buffer size:", len(self.memory))
-            with open("scores.txt", "a") as file:
+            with open("ddqn2_scores.txt", "a") as file:
                 file.write(str(self.total_episode_reward) + ",")
         except Exception as e:
             print(f"⚠️ Could not save to persistent_model: {e}")
