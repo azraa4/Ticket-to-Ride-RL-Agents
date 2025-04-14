@@ -134,6 +134,9 @@ class PPOAgent:
         self.buffer.log_probs.append(log_prob)
         self.buffer.state_values.append(state_value)
         chosen_action = self.action_space[action.item()]
+
+        self.buffer.action_masks.append(action_mask)
+
         return chosen_action
 
     def perform_action(self):
@@ -171,6 +174,9 @@ class PPOAgent:
         if self.timestep >= self.update_timestep:
             self.update()
             self.timestep = 0
+
+        with open("actions_log.txt", "a") as f:
+            f.write(f"{action}\n")
 
     def execute_action(self, action):
         """
@@ -232,7 +238,12 @@ class PPOAgent:
         total_loss = 0
         for _ in range(self.K_epochs):
             action_logits, state_vals = self.model(states)
-            action_probs = torch.softmax(action_logits, dim=-1)
+
+            #action_probs = torch.softmax(action_logits, dim=-1)
+            action_masks = torch.cat(self.buffer.action_masks, dim=0)
+            masked_logits = action_logits + action_masks
+            action_probs = torch.softmax(masked_logits, dim=-1)
+
             dist = torch.distributions.Categorical(action_probs)
             new_log_probs = dist.log_prob(actions)
             # Calculate ratio (new probability / old probability)
@@ -241,7 +252,8 @@ class PPOAgent:
             surr2 = torch.clamp(ratios, 1 - self.clip_param, 1 + self.clip_param) * advantages
             loss_actor = -torch.min(surr1, surr2).mean()
             loss_critic = nn.MSELoss()(state_vals.squeeze(-1), rewards)
-            loss = loss_actor + 0.5 * loss_critic
+            entropy = dist.entropy().mean()
+            loss = loss_actor + 0.5 * loss_critic - 0.01 * entropy
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -323,6 +335,7 @@ class PPOAgent:
         last_state, last_state_mask = self.get_state()
         done = True
         action_idx = self.action_space.index("end_of_game")
+
         # Save final transition in the buffer
         self.buffer.states.append(last_state)
         self.buffer.actions.append(torch.tensor(action_idx, device=device))
@@ -330,6 +343,8 @@ class PPOAgent:
         self.buffer.state_values.append(torch.zeros((1, 1), device=device))
         self.buffer.rewards.append(final_reward)
         self.buffer.is_terminals.append(done)
+        self.buffer.action_masks.append(last_state_mask)
+
         self.update()
         self.total_episode_reward += final_reward
         self.episode_count += 1

@@ -6,6 +6,7 @@ class RolloutBuffer:
         self.rewards = []
         self.is_terminals = []
         self.state_values = []
+        self.action_masks = []
 
     def clear(self):
         del self.states[:]
@@ -14,3 +15,4 @@ class RolloutBuffer:
         del self.rewards[:]
         del self.is_terminals[:]
         del self.state_values[:]
+        del self.action_masks[:]

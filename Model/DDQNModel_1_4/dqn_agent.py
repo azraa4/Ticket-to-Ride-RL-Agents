@@ -60,7 +60,7 @@ class DDQNAgent:
         self.total_episode_reward = 0
 
         #print loss
-        self.log_file = "training_loss.txt"
+        self.log_file = "ddqn_training_loss.txt"
 
         # Only create/write header if file doesn't exist yet
         if not os.path.exists(self.log_file):
@@ -169,7 +169,7 @@ class DDQNAgent:
             print(f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {masked_q_values[0, best_action_index].item()}")
 
             avg_q_value = q_values.mean().item()
-            with open("q_values.txt", "a") as f:
+            with open("ddqn_q_values.txt", "a") as f:
                 f.write(f"{avg_q_value}\n")
 
             return self.action_space[best_action_index]
@@ -212,7 +212,7 @@ class DDQNAgent:
             # Train the model
             self.replay()
 
-        with open("actions_log.txt", "a") as f:
+        with open("ddqn_actions_log.txt", "a") as f:
             f.write(f"{action}\n")
         print("\n\n")
 
@@ -300,7 +300,7 @@ class DDQNAgent:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
 
         mean_td_error = td_errors.mean()
-        with open("td_errors.txt", "a") as f:
+        with open("ddqn_td_errors.txt", "a") as f:
             f.write(f"{self.batch_count},{mean_td_error}\n")
 
     #HARD UPDATE
@@ -390,7 +390,7 @@ class DDQNAgent:
                 self.persistent_model.store_data(checkpoint)
             print("✅ Model data saved to persistent_model in memory.")
             print("Replay buffer size:", len(self.memory))
-            with open("scores.txt", "a") as file:
+            with open("ddqn_scores.txt", "a") as file:
                 file.write(str(self.total_episode_reward) + ",")
         except Exception as e:
             print(f"⚠️ Could not save to persistent_model: {e}")
