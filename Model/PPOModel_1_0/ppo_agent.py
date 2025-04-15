@@ -176,7 +176,7 @@ class PPOAgent:
             self.update()
             self.timestep = 0
 
-        with open("actions_log.txt", "a") as f:
+        with open("ppo_actions_log.txt", "a") as f:
             f.write(f"{action}\n")
 
     def execute_action(self, action):
