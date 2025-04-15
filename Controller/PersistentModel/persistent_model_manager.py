@@ -1,11 +1,13 @@
+import gc
 import os
 import torch
+import time
 
 class PersistentModelManager:
     def __init__(self):
         self.checkpoint_data = None
-        self.filename = 'ddqn_model_1_4_5.pth'
-        #self.filename = 'empty.pth'
+        #self.filename = 'ddqn_model_1_4_5.pth'
+        self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):
         """Save the dictionary in memory (RAM)."""
@@ -40,6 +42,10 @@ class PersistentModelManager:
 
             del self.checkpoint_data
             self.checkpoint_data = None
+
+            gc.collect()
+            torch.cuda.empty_cache()
+            time.sleep(30)
         except Exception as e:
             print(f"Error saving model to {self.filename}: {e}")
             if os.path.exists(temp_filename):

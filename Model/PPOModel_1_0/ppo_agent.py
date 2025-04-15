@@ -6,16 +6,19 @@ import torch.optim as optim
 from Model.PPOModel_1_0.actor_critic import PPOActorCritic
 from Model.PPOModel_1_0.rollout_buffer import RolloutBuffer
 import random
+import global_vars
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class PPOAgent:
-    def __init__(self, color, game_service, lr=0.001, batch_size=64, update_timestep=2000, clip_param=0.2, K_epochs=4, gamma=0.99):
+    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99):
+        torch.manual_seed(global_vars.random_seed)
+        random.seed(global_vars.random_seed)
+
         self.color = color
         self.game_service = game_service
         self.gamma = gamma
-        self.batch_size = batch_size
         self.update_timestep = update_timestep    # Number of steps before an update
         self.clip_param = clip_param              # PPO clipping parameter
         self.K_epochs = K_epochs                  # Number of epochs per update
@@ -30,7 +33,7 @@ class PPOAgent:
         self.model = PPOActorCritic(self.state_size, len(self.action_space)).to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
-        self.filename = "ppoagentvsddqn144.pth"
+        self.filename = "ppoagent_2.pth"
         self.load_model()
 
         # Initialize rollout buffer and timestep counter
@@ -247,7 +250,7 @@ class PPOAgent:
             surr2 = torch.clamp(ratios, 1 - self.clip_param, 1 + self.clip_param) * advantages
             loss_actor = -torch.min(surr1, surr2).mean()
             loss_critic = nn.MSELoss()(state_vals.squeeze(-1), rewards)
-            loss = loss_actor + 0.5 * loss_critic - 0.01
+            loss = loss_actor + 0.5 * loss_critic
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -272,7 +275,7 @@ class PPOAgent:
         except Exception as e:
             print(f"⚠️ Could not load {model_filename}: {e}")
 
-    def save_model(self):
+    def save_model_ppo(self):
         print("SAVING...")
         checkpoint = {
             'model_state_dict': self.model.state_dict(),
@@ -341,7 +344,8 @@ class PPOAgent:
         self.update()
         self.total_episode_reward += final_reward
         self.episode_count += 1
-        self.save_model()
+
+        self.save_model_ppo()
 
     """ACTIONS PART"""
     def draw_blind(self):

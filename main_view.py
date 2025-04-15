@@ -110,7 +110,8 @@ class MainGameApp:
             main(None, self.game_id, True, False, self.agents, False, self.test_name, 0, 0, self.persistent_model, self.test_count)
         elif self.test_count == 0:
             self.persistent_model.save_model()
-            self.test_count = 50
+            self.persistent_model = None
+            self.test_count = 80
 
     def withdraw_window(self):
         self.root.withdraw()

@@ -239,7 +239,7 @@ class GameService:
                 # 1) Update the target model
                 #ai.update_target_model() #hard update için commenti kaldır
                 # 2) Save the model (weights, optimizer, replay buffer)
-                if not isinstance(ai, PPOAgent_1_0) or not isinstance(ai, DDQNAgent_1_4_1):
+                if not isinstance(ai, PPOAgent_1_0) and not isinstance(ai, DDQNAgent_1_4_1):
                     ai.save_model()
 
     def get_availability_of_blind_pick(self):
