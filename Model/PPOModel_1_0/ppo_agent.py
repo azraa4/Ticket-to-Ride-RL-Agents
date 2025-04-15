@@ -135,8 +135,6 @@ class PPOAgent:
         self.buffer.state_values.append(state_value)
         chosen_action = self.action_space[action.item()]
 
-        self.buffer.action_masks.append(action_mask)
-
         return chosen_action
 
     def perform_action(self):
@@ -239,10 +237,7 @@ class PPOAgent:
         for _ in range(self.K_epochs):
             action_logits, state_vals = self.model(states)
 
-            #action_probs = torch.softmax(action_logits, dim=-1)
-            action_masks = torch.cat(self.buffer.action_masks, dim=0)
-            masked_logits = action_logits + action_masks
-            action_probs = torch.softmax(masked_logits, dim=-1)
+            action_probs = torch.softmax(action_logits, dim=-1)
 
             dist = torch.distributions.Categorical(action_probs)
             new_log_probs = dist.log_prob(actions)
@@ -252,8 +247,7 @@ class PPOAgent:
             surr2 = torch.clamp(ratios, 1 - self.clip_param, 1 + self.clip_param) * advantages
             loss_actor = -torch.min(surr1, surr2).mean()
             loss_critic = nn.MSELoss()(state_vals.squeeze(-1), rewards)
-            entropy = dist.entropy().mean()
-            loss = loss_actor + 0.5 * loss_critic - 0.01 * entropy
+            loss = loss_actor + 0.5 * loss_critic - 0.01
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -343,7 +337,6 @@ class PPOAgent:
         self.buffer.state_values.append(torch.zeros((1, 1), device=device))
         self.buffer.rewards.append(final_reward)
         self.buffer.is_terminals.append(done)
-        self.buffer.action_masks.append(last_state_mask)
 
         self.update()
         self.total_episode_reward += final_reward
