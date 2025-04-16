@@ -9,7 +9,7 @@ class PrioritizedReplayMemory:
         :param capacity: Maximum number of transitions.
         :param alpha: How much prioritization is used (0 = no prioritization, 1 = full prioritization).
         """
-        np.random.seed(global_vars.random_seed)
+        np.random.seed(global_vars.random_seed())
 
         self.capacity = capacity
         self.alpha = alpha

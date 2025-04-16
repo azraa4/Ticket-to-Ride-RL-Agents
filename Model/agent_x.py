@@ -5,7 +5,7 @@ import global_vars
 
 class AgentX:
     def __init__(self, color, game_service):
-        random.seed(global_vars.random_seed)
+        random.seed(global_vars.random_seed())
 
         self.color = color
         self.game_service = game_service

@@ -13,8 +13,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class PPOAgent:
     def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99):
-        torch.manual_seed(global_vars.random_seed)
-        random.seed(global_vars.random_seed)
+        torch.manual_seed(global_vars.random_seed())
+        random.seed(global_vars.random_seed())
 
         self.color = color
         self.game_service = game_service
