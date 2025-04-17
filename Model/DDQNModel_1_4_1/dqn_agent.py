@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128, train_mode=True):
+                 memory_size=50000, batch_size=128, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -47,7 +47,7 @@ class DDQNAgent:
 
         self.not_use_persistent_model = True
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_141_0.pth"
+            self.filename = "ddqn_model_early_stopping_15000.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -60,7 +60,7 @@ class DDQNAgent:
         self.total_episode_reward = 0
 
         #print loss
-        self.log_file = "training_loss.txt"
+        self.log_file = "ddqn_training_loss.txt"
 
         # Only create/write header if file doesn't exist yet
         if not os.path.exists(self.log_file):
@@ -169,7 +169,7 @@ class DDQNAgent:
             print(f"Selected action: index: {best_action_index}, action: {self.action_space[best_action_index]}, q value: {masked_q_values[0, best_action_index].item()}")
 
             avg_q_value = q_values.mean().item()
-            with open("q_values.txt", "a") as f:
+            with open("ddqn_q_values.txt", "a") as f:
                 f.write(f"{avg_q_value}\n")
 
             return self.action_space[best_action_index]
@@ -212,7 +212,7 @@ class DDQNAgent:
             # Train the model
             self.replay()
 
-        with open("actions_log.txt", "a") as f:
+        with open("ddqn_actions_log.txt", "a") as f:
             f.write(f"{action}\n")
         print("\n\n")
 
@@ -263,6 +263,8 @@ class DDQNAgent:
         batch, indices, is_weights = self.memory.sample(self.batch_size)
         is_weights = torch.tensor(is_weights, dtype=torch.float32, device=device)
 
+        is_weights /= is_weights.max() #new added normalization of weight to prevent loss explode
+
         states, actions, rewards, next_states, dones, state_masks, next_state_masks = zip(*batch)
 
         states = torch.cat(states).to(device)
@@ -298,7 +300,7 @@ class DDQNAgent:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
 
         mean_td_error = td_errors.mean()
-        with open("td_errors.txt", "a") as f:
+        with open("ddqn_td_errors.txt", "a") as f:
             f.write(f"{self.batch_count},{mean_td_error}\n")
 
     #HARD UPDATE
@@ -388,7 +390,7 @@ class DDQNAgent:
                 self.persistent_model.store_data(checkpoint)
             print("✅ Model data saved to persistent_model in memory.")
             print("Replay buffer size:", len(self.memory))
-            with open("ddqn2_scores.txt", "a") as file:
+            with open("ddqn_scores.txt", "a") as file:
                 file.write(str(self.total_episode_reward) + ",")
         except Exception as e:
             print(f"⚠️ Could not save to persistent_model: {e}")
