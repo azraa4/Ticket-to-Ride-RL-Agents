@@ -7,6 +7,7 @@ from Model.DDQNModel_1_2.dqn_agent import (DDQNAgent as DDQNAgent_1_2)
 from Model.DDQNModel_1_4.dqn_agent import (DDQNAgent as DDQNAgent_1_4)
 from Model.DDQNModel_1_4_1.dqn_agent import (DDQNAgent as DDQNAgent_1_4_1)
 from Model.PPOModel_1_0.ppo_agent import (PPOAgent as PPOAgent_1_0)
+from Model.PPOModel_1_1.ppo_agent import (PPOAgent as PPOAgent_1_1)
 import heapq
 
 class GameService:
@@ -201,7 +202,7 @@ class GameService:
                 ai.save_q_table()
 
         for ai in self.controller.get_ai_list():
-            if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent) or isinstance(ai, DDQNAgent_PM) or isinstance(ai, DDQNAgent_1_2) or isinstance(ai, DDQNAgent_1_4) or isinstance(ai, DDQNAgent_1_4_1) or isinstance(ai, PPOAgent_1_0):
+            if isinstance(ai, DQNAgent) or isinstance(ai, DQNAgent2) or isinstance(ai, DDQNAgent) or isinstance(ai, DDQNAgent_PM) or isinstance(ai, DDQNAgent_1_2) or isinstance(ai, DDQNAgent_1_4) or isinstance(ai, DDQNAgent_1_4_1) or isinstance(ai, PPOAgent_1_0) or isinstance(ai, PPOAgent_1_1):
                 for player in self.controller.get_players():
                     if player.color == ai.color:
 
@@ -239,7 +240,7 @@ class GameService:
                 # 1) Update the target model
                 #ai.update_target_model() #hard update için commenti kaldır
                 # 2) Save the model (weights, optimizer, replay buffer)
-                if not isinstance(ai, PPOAgent_1_0) and not isinstance(ai, DDQNAgent_1_4_1):
+                if not isinstance(ai, PPOAgent_1_0) and not isinstance(ai, DDQNAgent_1_4_1) and not isinstance(ai, PPOAgent_1_1):
                     ai.save_model()
 
     def get_availability_of_blind_pick(self):
