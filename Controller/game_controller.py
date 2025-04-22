@@ -42,7 +42,10 @@ class GameController:
 
         if self.get_current_player().first_turn:
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
-
+            if not self.get_current_player().ai:
+                self.view.main_frame.destroy_block_canvas()
+            else:
+                self.view.main_frame.create_block_canvas()
 
         self.update_turn_text()
         self.update_player_info_text()
@@ -255,11 +258,13 @@ class GameController:
     def go_to_next_turn(self):
         if self.turns_available and not self.game_end:
             if(self.get_current_player().ai):
+                self.change_status_text("TURN CHANGED.")
                 self.view.root.after(global_vars.time_turn * 1000, self._go_to_next_turn)
                 #self._go_to_next_turn()
             else:
-                self.view.root.after(global_vars.time_turn_for_human*1000, self._go_to_next_turn)
                 self.change_status_text("TURN CHANGED.")
+                self.view.root.after(global_vars.time_turn_for_human*1000, self._go_to_next_turn)
+
 
 
     def _go_to_next_turn(self):
@@ -321,7 +326,10 @@ class GameController:
             #console print(self.get_current_player().color, "'s First Turn (PLAYER FIRST TURN CHECK)")
             self.game_start_destination_tickets_list_for_ai = self.open_draw_destination_ticket_frame()
 
-
+        if not self.get_current_player().ai:
+            self.view.main_frame.destroy_block_canvas()
+        else:
+            self.view.main_frame.create_block_canvas()
 
 
         self.selecting_second_train_card = False
@@ -497,7 +505,6 @@ class GameController:
 
     def get_claimable_routes(self):
         routes = self.game_manager.get_claimable_routes()
-
         return routes
 
     def update_claimable_routes_frame(self):

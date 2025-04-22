@@ -240,5 +240,80 @@ class GameManager:
 
         return claimable_routes
 
+    def get_claimable_routes_by_color(self, color):
+        this_player = None
+        for player in self.players:
+            if player.color == color:
+                this_player = player
+
+        claimable_routes = []
+
+        if this_player is not None:
+            blue_card_value = this_player.get_number_of_cards("blue")
+            red_card_value = this_player.get_number_of_cards("red")
+            green_card_value = this_player.get_number_of_cards("green")
+            orange_card_value = this_player.get_number_of_cards("orange")
+            yellow_card_value = this_player.get_number_of_cards("yellow")
+            white_card_value = this_player.get_number_of_cards("white")
+            black_card_value = this_player.get_number_of_cards("black")
+            pink_card_value = this_player.get_number_of_cards("pink")
+            joker_card_value = this_player.get_number_of_cards("joker")
+
+            train_tickets = {
+                "blue": blue_card_value,
+                "red": red_card_value,
+                "green": green_card_value,
+                "orange": orange_card_value,
+                "yellow": yellow_card_value,
+                "white": white_card_value,
+                "black": black_card_value,
+                "pink": pink_card_value,
+            }
+
+            for route in self.board.get_unclaimed_routes():
+                if this_player.train_cars >= route.length:
+                    if route.color == "gray":
+                        for color, card_value in train_tickets.items():
+                            if card_value >= route.length:
+                                claimable_routes.append(route)
+                                break
+                            elif card_value + joker_card_value >= route.length:
+                                claimable_routes.append(route)
+                                break
+                    else:
+                        needed_cards = route.length
+                        available_cards = train_tickets[route.color]
+                        if available_cards >= needed_cards:
+                            claimable_routes.append(route)
+                        else:
+                            missing_cards = needed_cards - available_cards
+                            if missing_cards <= joker_card_value:
+                                claimable_routes.append(route)
+
+            double_routes_list = []
+            for route in claimable_routes:
+                if "_1" in route.id or "_2" in route.id:
+                    double_routes_list.append(route)
+
+            claimed_routes_ids_without_1_2 = []
+            for claimed_route in this_player.claimed_routes:
+                if "_1" in claimed_route.id:
+                    id_without = claimed_route.id.replace("_1", "")
+                    claimed_routes_ids_without_1_2.append(id_without)
+                if "_2" in claimed_route.id:
+                    id_without = claimed_route.id.replace("_2", "")
+                    claimed_routes_ids_without_1_2.append(id_without)
+
+            routes_will_be_removed = []
+            for double_route in double_routes_list:
+                for routes_id_without in claimed_routes_ids_without_1_2:
+                    if routes_id_without in double_route.id:
+                        #print("DOUBLE ROUTE FOUNDED IT WILL BE REMOVED")
+                        routes_will_be_removed.append(double_route)
+
+            claimable_routes = [route for route in claimable_routes if route not in routes_will_be_removed]
+
+        return claimable_routes
+
 
 

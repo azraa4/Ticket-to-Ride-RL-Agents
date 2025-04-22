@@ -137,6 +137,7 @@ def main(queue=None, game_id=None, panel=None, console=True, agents=None, visual
     game_controller.ai_manager = ai_manager
 
     main_menu_controller.view = app.main_menu
+    main_menu_controller.main_view = app
 
 
     if console:

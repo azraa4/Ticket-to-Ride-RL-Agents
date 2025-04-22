@@ -40,6 +40,9 @@ class MainFrame:
         self.pink_card_value = 0
         self.joker_card_value = 0
 
+        self.select_block_canvas = None
+        self.block_humans = True
+
 
     def create_main_frame(self):
         main_frame = tk.Frame(self.root, width=1284, height=527, bg="black")
@@ -187,6 +190,7 @@ class MainFrame:
 
             select_button = ModernButton(self.select_card_for_gray_roads_frame, text="Select", command=lambda: self.controller.claim_gray_route(selected_card.get(), selected_route))
             select_button.pack(pady=5)
+            self.bring_block_canvas_to_front()
 
 
 
@@ -201,7 +205,6 @@ class MainFrame:
         if not self.controller.visualize:  # optimization
             return
         if self.select_destination_tickets_canvas is None:
-
             self.select_destination_tickets_canvas = tk.Canvas(self.root, width=1280, height=270, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
             self.select_destination_tickets_canvas.place(x=-4, y=570)
 
@@ -251,6 +254,7 @@ class MainFrame:
             # Apply Button
             apply_button = ModernButton(self.select_destination_tickets_canvas, text="Apply", command=lambda:self.apply_selection(card1,card2,card3), font_size=18)
             apply_button.place(x=28, y=50)
+            self.bring_block_canvas_to_front()
 
     def apply_selection(self, card1, card2, card3):
         list_of_selected = []
@@ -281,3 +285,23 @@ class MainFrame:
             self.select_destination_tickets_canvas = None
 
 
+    def create_block_canvas(self):
+        if not self.block_humans:
+            return
+        if not self.controller.visualize:  # optimization
+            return
+        if self.select_block_canvas is None:
+            self.select_block_canvas = tk.Canvas(self.root, width=1280, height=270, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
+            self.select_block_canvas.place(x=-4, y=570)
+    def destroy_block_canvas(self):
+        if not self.block_humans:
+            return
+        if self.select_block_canvas is not None:
+            self.select_block_canvas.destroy()
+            self.select_block_canvas = None
+
+    def bring_block_canvas_to_front(self):
+        if not self.block_humans:
+            return
+        if self.select_block_canvas is not None:
+            tk.Widget.lift(self.select_block_canvas)

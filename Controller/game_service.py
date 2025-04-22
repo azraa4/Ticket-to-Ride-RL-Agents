@@ -1,3 +1,4 @@
+import global_vars
 from Model.DQNModel.dqn_agent import DQNAgent
 from Model.DQNModel2.dqn_agent import DQNAgent as DQNAgent2
 from Model.agent_qlearning_basic import QLearningAgent
@@ -70,6 +71,33 @@ class GameService:
         #console print("CURRENT PLAYER STATE: ", current_player_state)
         return current_player_state
 
+    def get_player_state_by_color(self, player_color):
+        '''
+        Problem şu şekilde: Normalde get_current_player_state sayesinde düz agentların birbirinin
+        statelerini alması engelleniyor ve bir kontrol mekanizması sağlanıyor. Ancak RL agentlarda diğerinin
+        sırası gelse bile next_state'i alması gerekiyor bundan dolayı buna ihtiyaç duyabilir. Şimdilik buna bir
+        ihtiyaç yok çünkü zaten next_state'i alana kadar kendisinesıra geçmiş oluyor ANCAK eğer ki bu durum next_state'de
+        bozulmaya sebep olursa bunu kullanabiliriz.
+        '''
+        player = self.controller.get_player_by_color(player_color)
+        claimable_routes = self.controller.game_manager.get_claimable_routes_by_color(player_color)
+        train_cards = player.train_cards
+        destination_cards = player.destination_tickets
+        current_score = player.points
+        remaining_cars = player.train_cars
+        claimed_routes = player.claimed_routes
+
+        current_player_state = {
+            "claimable_routes": claimable_routes,
+            "train_cards": train_cards,
+            "destination_cards": destination_cards,
+            "current score": current_score,
+            "remaining cars": remaining_cars,
+            "claimed routes": claimed_routes,
+        }
+
+        # console print("CURRENT PLAYER STATE: ", current_player_state)
+        return current_player_state
     def get_available_actions(self, player_color):
         player = self.controller.get_player_by_color(player_color)
         if player is None:
@@ -171,6 +199,9 @@ class GameService:
         Sonuç olarak ai'ın sırası geldiğini bilmesi ve sırası geldiğinde burdaki işlemleri gerçekleştirmesi lazım.
         '''
 
+        self.change_status_text("TURN CHANGED.")
+
+        print("ON CHANGE OF TURN")
 
         ai_list = self.controller.get_ai_list()
         current_color = self.controller.get_current_player().color

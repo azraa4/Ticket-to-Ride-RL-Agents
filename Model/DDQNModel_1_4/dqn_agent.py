@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128, train_mode=True):
+                 memory_size=50000, batch_size=128, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -45,7 +45,7 @@ class DDQNAgent:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.memory = PrioritizedReplayMemory(memory_size)
 
-        self.not_use_persistent_model = False
+        self.not_use_persistent_model = True
         if self.not_use_persistent_model:
             self.filename = "ddqn_model_1_4_4.pth"
             self.checkpoint_data = None
@@ -185,6 +185,7 @@ class DDQNAgent:
             action_params = {
                 "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()[:2]}
             self.game_service.perform_action("draw_destination_ticket", action_params)
+            self.game_service.change_status_text(f"{self.color} drawed destination tickets.")
             return
 
         available_actions = self.get_available_actions_for_dqn()
@@ -326,15 +327,16 @@ class DDQNAgent:
         Loads model weights, optimizer, epsilon, replay memory, etc.
         from the in-memory persistent_model instead of from disk.
         """
-        if self.persistent_model is None:
-            print("No persistent model manager available; starting fresh.")
-            return
 
         # Retrieve checkpoint data from memory
         if self.not_use_persistent_model:
             self.load_model_()
             checkpoint = self.checkpoint_data
         else:
+            if self.persistent_model is None:
+                print("No persistent model manager available; starting fresh.")
+                return
+
             checkpoint = self.persistent_model.load_data()
 
         if not checkpoint:
@@ -517,6 +519,8 @@ class DDQNAgent:
         train_cards_list = current_state["train_cards"]
         self.game_service.log(f"Having these train cards: {train_cards_list}")
 
+        self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
+
         return -1  # Reward for drawing blind train cards
 
     def draw_colored(self, color):
@@ -525,12 +529,14 @@ class DDQNAgent:
 
         game_state = self.game_service.get_game_state()
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
+        choosen_cards_list_for_status_change = []
 
         for card in train_cards_on_the_table:
             if card.color == color:
                 action_params = {"selected_card": card}
                 self.game_service.perform_action("draw_train_card", action_params)
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
+                choosen_cards_list_for_status_change.append(card.color)
                 break
 
         game_state = self.game_service.get_game_state()
@@ -547,6 +553,7 @@ class DDQNAgent:
                     action_params = {"selected_card": card}
                     self.game_service.perform_action("draw_train_card", action_params)
                     self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
+                    choosen_cards_list_for_status_change.append(card.color)
                     pass_bool = False
                     check_for_other_colors = False
                     break
@@ -559,12 +566,15 @@ class DDQNAgent:
                     action_params = {"selected_card": card}
                     self.game_service.perform_action("draw_train_card", action_params)
                     self.game_service.log(f"{self.color}, Action: DRAW SECOND TRAIN CARD, {card.color}")
+                    choosen_cards_list_for_status_change.append(card.color)
                     pass_bool = False
                     break
 
         if pass_bool:
             self.game_service.pass_draw_second_train_card()
             print("PASSED SECOND TRAIN CARD")
+
+        self.game_service.change_status_text(f"{self.color} drawed {choosen_cards_list_for_status_change} train cards from table.")
 
         if 0 < needed_color_count or not self.routes_needed_to_claim:
             return 1
@@ -580,6 +590,8 @@ class DDQNAgent:
                 self.game_service.perform_action("draw_train_card", action_params)
                 self.game_service.log(f"{self.color}, Action: DRAW TRAIN CARD, {card.color}")
                 break
+
+        self.game_service.change_status_text(f"{self.color} drawed joker train card from table.")
 
         return 2
 
@@ -607,8 +619,8 @@ class DDQNAgent:
             else:
                 action_params = {"selected_route": route, "use_this_color": None}
                 self.game_service.perform_action("claim_route", action_params)
-                self.game_service.change_status_text(f"{self.color} claimed a colored route.")
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
+                self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
             return length_to_points[route.length]
         else:
             return self.claim_route_random()
@@ -633,8 +645,8 @@ class DDQNAgent:
                 action_params = {"selected_route": random_route, "use_this_color": use_random_color}
                 self.game_service.perform_action("claim_route", action_params)
 
-                self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
                 self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
+                self.game_service.change_status_text(f"{self.color} claim gray route: {random_route.city1} to {random_route.city2}")
 
 
             else:
@@ -642,10 +654,9 @@ class DDQNAgent:
                 action_params = {"selected_route": random_route, "use_this_color": None}
                 self.game_service.perform_action("claim_route", action_params)
 
-                self.game_service.change_status_text(f"{self.color} claimed a colored route.")
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {random_route.city1} to {random_route.city2}")
+                self.game_service.change_status_text(f"{self.color} claim colored route: {random_route.city1} to {random_route.city2}")
 
-            self.game_service.change_status_text("TURN CHANGED.")
 
             if self.routes_needed_to_claim:
                 return -3

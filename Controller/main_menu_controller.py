@@ -7,6 +7,7 @@ class MainMenuController:
         self.ai_manager = ai_manager
         global_vars.time_action = 5
         global_vars.time_turn = 5
+        self.main_view = None
         return
 
     def add_player_button(self, player_name, player_color, ai):
@@ -21,3 +22,9 @@ class MainMenuController:
 
     def force_start_game(self):
         self.view.force_start_game()
+
+    def block_human_vision(self, b):
+        if b:
+            self.main_view.main_frame.block_humans = True
+        else:
+            self.main_view.main_frame.block_humans = False

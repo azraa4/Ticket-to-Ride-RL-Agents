@@ -48,6 +48,23 @@ class MainMenu:
         # Bütün öğeleri sola dayamak için anchor ve side kullanarak pack fonksiyonlarını düzenledik
         self.create_add_player_section()
 
+        checkbox_frame = tk.Frame(self.frame, bg="#d5b570")
+        checkbox_frame.pack(padx=65, pady=0, anchor="w")
+
+        self.block_human_vision_var = tk.IntVar(value=1)
+
+        checkbox = tk.Checkbutton(
+            checkbox_frame,
+            text="Block Human Vision",
+            variable=self.block_human_vision_var,
+            command=self.on_block_human_checkbox_toggled,
+            bg="#d5b570",
+            fg="#ae2907",
+            selectcolor="#f4e1a1",
+            font=("Arial", 14)
+        )
+        checkbox.pack(side="left", padx=(0, 10))
+
         sliders_frame = tk.Frame(self.frame, bg="#d5b570")
         sliders_frame.pack(padx=65, pady=0, anchor="w")
 
@@ -75,11 +92,11 @@ class MainMenu:
         start_quit_frame = tk.Frame(self.frame, bg="#d5b570")
         start_quit_frame.pack(padx=65, pady=5, anchor="w")
 
-        start_button = self.create_modern_button(start_quit_frame, "Start Game", width=11, height=1, font=20)
+        start_button = self.create_modern_button(start_quit_frame, "Start Game", width=16, height=1, font=15)
         start_button.config(command=self.start_game)
         start_button.pack(side="left", padx=(0,5))
 
-        quit_button = self.create_modern_button(start_quit_frame, "Quit Game", width=11, height=1, font=20)
+        quit_button = self.create_modern_button(start_quit_frame, "Quit Game", width=16, height=1, font=15)
         quit_button.config(command=self.quit)
         quit_button.pack(side="left", padx=(0,5))
 
@@ -124,7 +141,7 @@ class MainMenu:
         player_type_frame.pack(padx=65, pady=5, anchor="w")
         player_type_label = tk.Label(player_type_frame, text="Player Type: ", font=("Arial", 20, "bold"), fg="#ae2907", bg="#d5b570")
         player_type_label.pack(side="left")
-        player_type_options = ["Human", "RandomAgent", "AgentX", "DDQNAgent_1_4"]
+        player_type_options = ["Human", "RandomAgent", "AgentX", "DDQNAgent_1_4", "PPOAgent_1_0"]
         player_type_dropdown = ModernOptionMenu(player_type_frame, self.player_type_var, *player_type_options)
         player_type_dropdown.pack(padx=11, side="left")
 
@@ -138,11 +155,11 @@ class MainMenu:
 
         player_edit_frame = tk.Frame(self.frame, bg="#d5b570")
 
-        add_player_button = self.create_modern_button(player_edit_frame, "Add Player", width=11, height=1, font=20)
+        add_player_button = self.create_modern_button(player_edit_frame, "Add Player", width=16, height=1, font=15)
         add_player_button.config(command=self.add_player)
         add_player_button.pack(side="left", padx=(0,5))
 
-        reset_players_list_button = self.create_modern_button(player_edit_frame, "Reset List", width=11, height=1, font=20)
+        reset_players_list_button = self.create_modern_button(player_edit_frame, "Reset List", width=16, height=1, font=15)
         reset_players_list_button.config(command=self.reset_list)
         reset_players_list_button.pack(side="left")
         player_edit_frame.pack(padx=65, pady=5, anchor="w")
@@ -174,6 +191,10 @@ class MainMenu:
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
                 self.controller.add_player_button(player_name, selected_color, True)
             elif (player_type == "DDQNAgent_1_4"):
+                self.controller.add_ai(selected_color, player_type)
+                print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
+                self.controller.add_player_button(player_name, selected_color, True)
+            elif (player_type == "PPOAgent_1_0"):
                 self.controller.add_ai(selected_color, player_type)
                 print(f"GAME MENU: AI added with color {selected_color} and type {player_type}")
                 self.controller.add_player_button(player_name, selected_color, True)
@@ -215,3 +236,11 @@ class MainMenu:
 
     def quit(self):
         self.root.destroy()
+
+    def on_block_human_checkbox_toggled(self):
+        if self.block_human_vision_var.get() == 1:
+            print("Blocked human vision on")
+            self.controller.block_human_vision(True)
+        else:
+            print("Blocked human vision off")
+            self.controller.block_human_vision(False)
