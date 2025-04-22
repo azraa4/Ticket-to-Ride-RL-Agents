@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class PPOAgent:
-    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99):
+    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99, train_mode=True):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -22,6 +22,7 @@ class PPOAgent:
         self.update_timestep = update_timestep    # Number of steps before an update
         self.clip_param = clip_param              # PPO clipping parameter
         self.K_epochs = K_epochs                  # Number of epochs per update
+        self.train_mode = train_mode
 
         # Define fixed state size and discrete action space
         self.state_size = 11  # same as before
@@ -32,6 +33,13 @@ class PPOAgent:
         # Create PPO network and optimizer
         self.model = PPOActorCritic(self.state_size, len(self.action_space)).to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+
+        if self.train_mode:
+            self.model.train()
+        else:
+            self.model.eval()
+            for p in self.model.parameters():
+                p.requires_grad_(False)
 
         self.filename = "ppoagent_2.pth"
         self.load_model()
@@ -121,7 +129,12 @@ class PPOAgent:
         Samples an action from the PPO policy.
         """
         state, action_mask = self.get_state()
-        action_logits, state_value = self.model(state)
+        # Forward pass with or without gradient tracking
+        if self.train_mode:
+            action_logits, state_value = self.model(state)
+        else:
+            with torch.no_grad():
+                action_logits, state_value = self.model(state)
         # Apply action mask so that invalid actions are set to very low probability
         masked_logits = action_logits + action_mask
         action_probs = torch.softmax(masked_logits, dim=-1)
@@ -132,12 +145,13 @@ class PPOAgent:
         if log_prob.dim() == 0:
             log_prob = log_prob.unsqueeze(0)
         # Save for later PPO update
-        self.buffer.states.append(state)
-        self.buffer.actions.append(action)
-        self.buffer.log_probs.append(log_prob)
-        self.buffer.state_values.append(state_value)
-        chosen_action = self.action_space[action.item()]
+        if self.train_mode:
+            self.buffer.states.append(state)
+            self.buffer.actions.append(action)
+            self.buffer.log_probs.append(log_prob)
+            self.buffer.state_values.append(state_value)
 
+        chosen_action = self.action_space[action.item()]
         return chosen_action
 
     def perform_action(self):
@@ -157,11 +171,17 @@ class PPOAgent:
 
         action = self.choose_action()
         reward, next_state, done = self.execute_action(action)
-        self.buffer.rewards.append(reward)
-        self.buffer.is_terminals.append(done)
-        self.timestep += 1
-        self.timestep_count += 1
-        self.total_episode_reward += reward
+        if self.train_mode:
+            self.buffer.rewards.append(reward)
+            self.buffer.is_terminals.append(done)
+            self.timestep += 1
+            self.timestep_count += 1
+            self.total_episode_reward += reward
+
+            # When enough timesteps are collected, update the policy
+            if self.timestep >= self.update_timestep:
+                self.update()
+                self.timestep = 0
 
         print("################## ⚔ PLAYER INFO ######################")
         print("#  AVAILABLE ACTIONS:", available_actions)
@@ -171,13 +191,9 @@ class PPOAgent:
 
         print("\n\n")
 
-        # When enough timesteps are collected, update the policy
-        if self.timestep >= self.update_timestep:
-            self.update()
-            self.timestep = 0
-
         with open("ppo_actions_log.txt", "a") as f:
             f.write(f"{action}\n")
+
 
     def execute_action(self, action):
         """
@@ -329,6 +345,9 @@ class PPOAgent:
         """
         Called at game end to apply a terminal reward.
         """
+        if not self.train_mode:
+            return
+
         last_state, last_state_mask = self.get_state()
         done = True
         action_idx = self.action_space.index("end_of_game")
