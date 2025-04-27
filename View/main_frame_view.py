@@ -42,6 +42,7 @@ class MainFrame:
 
         self.select_block_canvas = None
         self.block_humans = True
+        self.block_inventory = False
 
 
     def create_main_frame(self):
@@ -141,32 +142,60 @@ class MainFrame:
     def update_train_numbers(self):
         if not self.controller.visualize:  # optimization
             return
+        # BLUE
         if hasattr(self.canvas, 'blue_text_id'):
-            self.canvas.itemconfig(self.canvas.blue_text_id, text=str(self.blue_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.blue_text_id, text=str(self.blue_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.blue_text_id, state='hidden')
+        # RED
         if hasattr(self.canvas, 'red_text_id'):
-            self.canvas.itemconfig(self.canvas.red_text_id, text=str(self.red_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.red_text_id, text=str(self.red_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.red_text_id, state='hidden')
+        # GREEN
         if hasattr(self.canvas, 'green_text_id'):
-            self.canvas.itemconfig(self.canvas.green_text_id, text=str(self.green_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.green_text_id, text=str(self.green_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.green_text_id, state='hidden')
+        # ORANGE
         if hasattr(self.canvas, 'orange_text_id'):
-            self.canvas.itemconfig(self.canvas.orange_text_id, text=str(self.orange_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.orange_text_id, text=str(self.orange_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.orange_text_id, state='hidden')
+        # YELLOW
         if hasattr(self.canvas, 'yellow_text_id'):
-            self.canvas.itemconfig(self.canvas.yellow_text_id, text=str(self.yellow_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.yellow_text_id, text=str(self.yellow_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.yellow_text_id, state='hidden')
+        # WHITE
         if hasattr(self.canvas, 'white_text_id'):
-            self.canvas.itemconfig(self.canvas.white_text_id, text=str(self.white_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.white_text_id, text=str(self.white_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.white_text_id, state='hidden')
+        # BLACK
         if hasattr(self.canvas, 'black_text_id'):
-            self.canvas.itemconfig(self.canvas.black_text_id, text=str(self.black_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.black_text_id, text=str(self.black_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.black_text_id, state='hidden')
+        # PINK
         if hasattr(self.canvas, 'pink_text_id'):
-            self.canvas.itemconfig(self.canvas.pink_text_id, text=str(self.pink_card_value))
-
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.pink_text_id, text=str(self.pink_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.pink_text_id, state='hidden')
+        # JOKER
         if hasattr(self.canvas, 'joker_text_id'):
-            self.canvas.itemconfig(self.canvas.joker_text_id, text=str(self.joker_card_value))
+            if not self.block_inventory:
+                self.canvas.itemconfig(self.canvas.joker_text_id, text=str(self.joker_card_value), state='normal')
+            else:
+                self.canvas.itemconfig(self.canvas.joker_text_id, state='hidden')
 
     def create_select_card_for_gray_roads_frame(self, selected_route):
         if not self.controller.visualize:  # optimization
@@ -293,12 +322,15 @@ class MainFrame:
         if self.select_block_canvas is None:
             self.select_block_canvas = tk.Canvas(self.root, width=1280, height=270, bg="#fdf8ed", highlightthickness=2, highlightbackground="#ae2907")
             self.select_block_canvas.place(x=-4, y=570)
+            self.block_inventory = True
+
     def destroy_block_canvas(self):
         if not self.block_humans:
             return
         if self.select_block_canvas is not None:
             self.select_block_canvas.destroy()
             self.select_block_canvas = None
+            self.block_inventory = False
 
     def bring_block_canvas_to_front(self):
         if not self.block_humans:
