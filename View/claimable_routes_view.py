@@ -13,20 +13,22 @@ class ClaimableRoutesFrame:
         self.search_var = tk.StringVar()
 
     def create_claimable_routes_frame(self):
-        claimable_routes_frame = tk.Frame(self.root, width=238, height=175, bg="#fdf8ed",
-                                          highlightthickness=4, highlightbackground="#ae2907")
+        claimable_routes_frame = tk.Frame(self.root, width=234, height=175, bg="#fdf8ed",
+                                          highlightthickness=4, highlightbackground="#ae2907", highlightcolor="#ae2907")
         claimable_routes_frame.place(x=-4, y=540)
 
         # Title
+        '''
         canvas_for_text = tk.Canvas(claimable_routes_frame, bg="#fdf8ed", width=234, height=20)
         canvas_for_text.place(x=-4, y=0)
         canvas_for_text.create_text(5, 5, anchor="nw", text="Claimable Routes", fill="#ae2907",
                                     font=("Helvetica", 10, "bold"))
+        '''
 
         # Search bar
-        search_entry = tk.Entry(claimable_routes_frame, textvariable=self.search_var, width=35,
-                                font=("Arial", 8))
-        search_entry.place(x=5, y=30)
+        search_entry = tk.Entry(claimable_routes_frame, textvariable=self.search_var, width=43,
+                                font=("Arial", 12), highlightthickness=4, highlightbackground="#ae2907", highlightcolor="#ae2907")
+        search_entry.place(x=-4, y=24)
         search_entry.insert(0, "Search...")
         # Clear placeholder on focus
         def on_focus_in(event):
