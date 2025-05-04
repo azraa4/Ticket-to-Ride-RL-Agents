@@ -9,12 +9,13 @@ from Model.DDQNModel_1_4.dqn import DQN
 from Model.DDQNModel_1_4.replay_memory import PrioritizedReplayMemory
 import random
 import heapq
+import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128, train_mode=False):
+                 memory_size=50000, batch_size=128, train_mode=True):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -47,7 +48,7 @@ class DDQNAgent:
 
         self.not_use_persistent_model = True
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_1_4_4.pth"
+            self.filename = "ddqn_model_final_2.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -287,7 +288,8 @@ class DDQNAgent:
             target = rewards + (1 - dones) * self.gamma * next_q_values_target
 
         td_errors = torch.abs(q_values_for_actions - target).detach().cpu().numpy()
-        self.memory.update_priorities(indices, td_errors + 1e-5)
+        clipped_td_errors = np.minimum(td_errors, 1.0)
+        self.memory.update_priorities(indices, clipped_td_errors + 1e-5)
 
         loss = (is_weights * F.mse_loss(q_values_for_actions, target, reduction='none')).mean()
 
