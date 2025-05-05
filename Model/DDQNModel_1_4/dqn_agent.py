@@ -14,7 +14,7 @@ import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
-    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.0001,
+    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
                  memory_size=50000, batch_size=128, train_mode=True):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
@@ -295,7 +295,7 @@ class DDQNAgent:
 
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
+        #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
         self.optimizer.step()
 
         self.soft_update_target(tau=0.005)
