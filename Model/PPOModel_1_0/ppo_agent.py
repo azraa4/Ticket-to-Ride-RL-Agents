@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class PPOAgent:
-    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99, train_mode=True):
+    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -41,7 +41,7 @@ class PPOAgent:
             for p in self.model.parameters():
                 p.requires_grad_(False)
 
-        self.filename = "ppoagent_2.pth"
+        self.filename = "ppoagent_final.pth"
         self.load_model()
 
         # Initialize rollout buffer and timestep counter
