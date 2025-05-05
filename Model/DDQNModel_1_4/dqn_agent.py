@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
-                 memory_size=50000, batch_size=128, train_mode=True):
+                 memory_size=50000, batch_size=128, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -48,7 +48,7 @@ class DDQNAgent:
 
         self.not_use_persistent_model = True
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_final_2.pth"
+            self.filename = "ddqn_model_final.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -617,7 +617,7 @@ class DDQNAgent:
                 use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
                 action_params = {"selected_route": route, "use_this_color": use_random_color}
                 self.game_service.perform_action("claim_route", action_params)
-                self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
+                self.game_service.change_status_text(f"{self.color} claimed a gray route, {route.city1} to {route.city2}, with {use_random_color}")
                 self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {route.city1} to {route.city2}, {use_random_color}")
             else:
                 action_params = {"selected_route": route, "use_this_color": None}
@@ -649,7 +649,7 @@ class DDQNAgent:
                 self.game_service.perform_action("claim_route", action_params)
 
                 self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
-                self.game_service.change_status_text(f"{self.color} claim gray route: {random_route.city1} to {random_route.city2}")
+                self.game_service.change_status_text(f"{self.color} claimed a gray route, {random_route.city1} to {random_route.city2}, with {use_random_color}")
 
 
             else:

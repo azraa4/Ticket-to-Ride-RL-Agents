@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 
 class PPOAgent:
-    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99, train_mode=True):
+    def __init__(self, color, game_service, lr=0.0005, update_timestep=2000, clip_param=0.1, K_epochs=6, gamma=0.99, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -41,7 +41,7 @@ class PPOAgent:
             for p in self.model.parameters():
                 p.requires_grad_(False)
 
-        self.filename = "ppoagent_final_generalized.pth"
+        self.filename = "ppoagent_final.pth"
         self.load_model()
 
         # Initialize rollout buffer and timestep counter
@@ -475,7 +475,7 @@ class PPOAgent:
                 use_random_color = random.choice(cards_can_be_used_to_claim_gray_route)
                 action_params = {"selected_route": route, "use_this_color": use_random_color}
                 self.game_service.perform_action("claim_route", action_params)
-                self.game_service.change_status_text(f"{self.color} claimed a gray route with {use_random_color}")
+                self.game_service.change_status_text(f"{self.color} claimed a gray route, {route.city1} to {route.city2}, with {use_random_color}")
                 self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {route.city1} to {route.city2}, {use_random_color}")
             else:
                 action_params = {"selected_route": route, "use_this_color": None}
@@ -508,7 +508,7 @@ class PPOAgent:
 
                 self.game_service.log(f"{self.color}, Action: CLAIM GRAY ROUTE, {random_route.city1} to {random_route.city2}, {use_random_color}")
                 self.game_service.change_status_text(
-                    f"{self.color} claim gray route: {random_route.city1} to {random_route.city2}")
+                    f"{self.color} claimed a gray route, {random_route.city1} to {random_route.city2}, with {use_random_color}")
 
             else:
                 #console print("AI: A COLORED ROUTE SELECTED")
