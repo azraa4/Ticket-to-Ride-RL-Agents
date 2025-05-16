@@ -6,7 +6,7 @@ import time
 class PersistentModelManager:
     def __init__(self):
         self.checkpoint_data = None
-        self.filename = 'ddqn_model_147.pth'
+        self.filename = 'ddqn_model_final_improved.pth'
         #self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):
