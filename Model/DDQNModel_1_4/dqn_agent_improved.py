@@ -131,9 +131,9 @@ class DDQNAgent:
             destinations_completed = 1
 
         state_vector = [
-            car_state * 6,
-            destinations_completed * 2,
-            max_length_of_claimable_routes/6 * 4,
+            car_state * 10,
+            destinations_completed * 3,
+            max_length_of_claimable_routes/6 * 5,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -212,8 +212,10 @@ class DDQNAgent:
         '''
 
         action = self.choose_action()
+        print("CURRENT STATE")
         state, state_mask = self.get_state()
         reward, next_state, done = self.execute_action(action)
+        print("NEXT STATE")
         next_state, next_state_mask = self.get_state()
 
         print("################## ⚔ PLAYER INFO ######################")
@@ -610,17 +612,17 @@ class DDQNAgent:
         max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
         if min_cars < 15:
             if max_length_of_claimable_routes>=5:
-                return -1
-            return 0
+                return -4
+            return -2
         elif min_cars < 8:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
-                    return -4
-                return -1
+                    return -10
+                return -5
             else:
                 if max_length_of_claimable_routes >= 5:
-                    return -6
-                return -3
+                    return -15
+                return -7
 
         if 0 < needed_color_count or not self.routes_needed_to_claim:
             return 1
@@ -644,8 +646,10 @@ class DDQNAgent:
 
         game_state = self.game_service.get_game_state()
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        if min_cars < 15:
-            return 0
+        if 8 < min_cars < 15:
+            return -2
+        elif min_cars <= 8:
+            return -5
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
@@ -679,6 +683,14 @@ class DDQNAgent:
                 self.game_service.perform_action("claim_route", action_params)
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
+
+            game_state = self.game_service.get_game_state()
+            min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+            if 8 < min_cars < 15:
+                return 2*length_to_points[route.length]
+            elif min_cars <= 8:
+                return 4*length_to_points[route.length]
+
             return length_to_points[route.length]
         else:
             return self.claim_route_random()
