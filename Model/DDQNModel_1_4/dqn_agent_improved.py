@@ -610,11 +610,11 @@ class DDQNAgent:
         game_state = self.game_service.get_game_state()
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
         max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
-        if min_cars < 15:
+        if 8 < min_cars <= 15:
             if max_length_of_claimable_routes>=5:
                 return -4
             return -2
-        elif min_cars < 8:
+        elif min_cars <= 8:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
                     return -10
@@ -646,9 +646,12 @@ class DDQNAgent:
 
         game_state = self.game_service.get_game_state()
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
         if 8 < min_cars < 15:
             return -2
         elif min_cars <= 8:
+            if max_length_of_claimable_routes >= 5:
+                return -8
             return -5
 
         for clr in needed_colors_list:
