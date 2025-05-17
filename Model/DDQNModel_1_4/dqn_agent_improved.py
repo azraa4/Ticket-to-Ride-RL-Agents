@@ -127,13 +127,15 @@ class DDQNAgent:
 
         if self.routes_needed_to_claim:
             destinations_completed = 0
+            scale = max((route.length for route in self.routes_needed_to_claim))
         else:
             destinations_completed = 1
+            scale = 6
 
         state_vector = [
-            car_state * 10,
+            car_state * 8,
             destinations_completed * 3,
-            max_length_of_claimable_routes/6 * 5,
+            max_length_of_claimable_routes/scale * 4,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -690,14 +692,13 @@ class DDQNAgent:
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
 
-            game_state = self.game_service.get_game_state()
-            min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-            if 6 < min_cars <= 10:
-                return 1.5*length_to_points[route.length]
-            elif 2 < min_cars <= 6:
-                return 2*length_to_points[route.length]
-            elif min_cars <= 2:
-                return 30
+
+            max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+            scale = max((route.length for route in self.routes_needed_to_claim))
+
+            if max_length_of_claimable_routes/scale == 1:
+                return 15
+
             return length_to_points[route.length]
         else:
             return self.claim_route_random()
@@ -737,11 +738,19 @@ class DDQNAgent:
             game_state = self.game_service.get_game_state()
             min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
             if min_cars <= 2:
-                return 30
+                return 20
 
             if self.routes_needed_to_claim:
                 return -3
             else:
+                game_state = self.game_service.get_game_state()
+                min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+                if 6 < min_cars <= 10:
+                    return 1.5 * length_to_points[random_route.length]
+                elif 2 < min_cars <= 6:
+                    return 2 * length_to_points[random_route.length]
+                elif min_cars <= 2:
+                    return 30
                 return length_to_points[random_route.length]
         else:
             raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
