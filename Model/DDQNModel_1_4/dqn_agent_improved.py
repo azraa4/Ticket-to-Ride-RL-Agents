@@ -533,6 +533,10 @@ class DDQNAgent:
         """
         Draws a train card.
         """
+        game_state = self.game_service.get_game_state()
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+
         action_params = {"selected_card": "select_blind"}
         returned_item = self.game_service.perform_action("draw_train_card", action_params)
         self.game_service.log(f"{self.color}, Action: DRAW BLIND CARDS")
@@ -543,9 +547,6 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
 
-        game_state = self.game_service.get_game_state()
-        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
         if 6 < min_cars <= 10:
             if max_length_of_claimable_routes >= 5:
                 return -5
