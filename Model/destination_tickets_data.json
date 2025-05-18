@@ -13,10 +13,10 @@
       "points": 4
     },
     {
-      "id": "calgary_nashville",
-      "city1": "Calgary",
-      "city2": "Nashville",
-      "points": 14
+      "id": "montreal_neworleans",
+      "city1": "Montreal",
+      "city2": "New Orleans",
+      "points": 13
     },
     {
       "id": "calgary_phoenix",
@@ -193,10 +193,10 @@
       "points": 13
     },
     {
-      "id": "montreal_neworleans",
-      "city1": "Montreal",
-      "city2": "New Orleans",
-      "points": 13
+      "id": "calgary_nashville",
+      "city1": "Calgary",
+      "city2": "Nashville",
+      "points": 14
     },
     {
       "id": "montreal_raleigh",
