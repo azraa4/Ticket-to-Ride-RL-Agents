@@ -6,7 +6,7 @@ import time
 class PersistentModelManager:
     def __init__(self):
         self.checkpoint_data = None
-        self.filename = 'ddqn_model_final_improved.pth'
+        self.filename = 'ddqn_model_final_improved_4.pth'
         #self.filename = 'empty.pth'
 
     def store_data(self, checkpoint: dict):
@@ -70,3 +70,8 @@ class PersistentModelManager:
             print(f"Could not load {self.filename}: {e}")
             self.checkpoint_data = None
             raise
+
+    def unload(self):
+        """Drop large tensors/arrays so the memory can be reclaimed."""
+        self.checkpoint_data = None
+        gc.collect()
