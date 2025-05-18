@@ -14,7 +14,7 @@ import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
-    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.001,
+    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.0001,
                  memory_size=50000, batch_size=128, train_mode=True):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
@@ -228,7 +228,7 @@ class DDQNAgent:
             # Store experience in replay memory
             # NEW - store action as an integer index
             action_idx = self.action_space.index(action)
-            self.memory.push(state.cpu(), action_idx, reward, next_state.cpu(), done, state_mask.cpu(), next_state_mask.cpu())
+            self.memory.push(state.cpu(), action_idx, self._scale(reward), next_state.cpu(), done, state_mask.cpu(), next_state_mask.cpu())
 
             # Train the model
             self.replay()
@@ -317,7 +317,7 @@ class DDQNAgent:
         #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
         self.optimizer.step()
 
-        self.soft_update_target(tau=0.005)
+        self.soft_update_target(tau=0.001)
 
         with open(self.log_file, "a") as f:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
@@ -517,7 +517,7 @@ class DDQNAgent:
         action_idx = self.action_space.index("end_of_game")
 
         # Use the same last_state and mask for the terminal next state.
-        self.memory.push(last_state.cpu(), action_idx, final_reward, last_state.cpu(), True, last_state_mask.cpu(), last_state_mask.cpu())
+        self.memory.push(last_state.cpu(), action_idx, self._scale(final_reward), last_state.cpu(), True, last_state_mask.cpu(), last_state_mask.cpu())
         self.replay()
 
         self.total_episode_reward += final_reward
@@ -814,6 +814,10 @@ class DDQNAgent:
         if not claimable_routes:
             return 0
         return max(route.length for route in claimable_routes)
+
+    def _scale(self, r):  # inline helper so we write it once
+        REWARD_SCALE = 20.0
+        return r / REWARD_SCALE
 
     '''
     def _count_train_cards_by_color(self, train_cards):
