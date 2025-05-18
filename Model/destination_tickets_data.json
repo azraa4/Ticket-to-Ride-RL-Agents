@@ -331,10 +331,10 @@
       "points": 20
     },
     {
-      "id": "seattle_oklahomacity",
-      "city1": "Seattle",
-      "city2": "Oklahoma City",
-      "points": 14
+      "id": "winnipeg_santafe",
+      "city1": "Winnipeg",
+      "city2": "Santa Fe",
+      "points": 10
     },
     {
       "id": "toronto_charleston",
@@ -403,10 +403,10 @@
       "points": 6
     },
     {
-      "id": "winnipeg_santafe",
-      "city1": "Winnipeg",
-      "city2": "Santa Fe",
-      "points": 10
+      "id": "seattle_oklahomacity",
+      "city1": "Seattle",
+      "city2": "Oklahoma City",
+      "points": 14
     }
   ]
 }
