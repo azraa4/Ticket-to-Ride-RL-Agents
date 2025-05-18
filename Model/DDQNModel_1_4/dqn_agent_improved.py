@@ -48,7 +48,7 @@ class DDQNAgent:
 
         self.not_use_persistent_model = False
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_final.pth"
+            self.filename = "ddqn_model_final_improved_5.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -76,7 +76,7 @@ class DDQNAgent:
         '''
         print("Model is on device:", next(self.model.parameters()).device)
 
-        print("PyTorch version:", torch.__version__)
+        print("PyTorch version:", torch._version_)
         print("CUDA available:", torch.cuda.is_available())
         if torch.cuda.is_available():
             print("Number of GPUs:", torch.cuda.device_count())
@@ -118,10 +118,8 @@ class DDQNAgent:
 
         car_state = 0
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        if 6 < min_cars <= 10:
+        if 2 < min_cars <= 8:
             car_state = 0.5
-        elif 2 < min_cars <= 6:
-            car_state = 0.8
         elif min_cars <=2:
             car_state = 1
 
@@ -386,7 +384,7 @@ class DDQNAgent:
             print(f"Replay buffer size after load: {len(self.memory)}")
             print("Epsilon:", self.epsilon)
         except Exception as e:
-            print(f"⚠️ Could not load from persistent_model: {e}")
+            print(f"⚠ Could not load from persistent_model: {e}")
             raise
 
     def save_model(self):
@@ -419,7 +417,7 @@ class DDQNAgent:
             with open("ddqn_scores.txt", "a") as file:
                 file.write(str(self.total_episode_reward) + ",")
         except Exception as e:
-            print(f"⚠️ Could not save to persistent_model: {e}")
+            print(f"⚠ Could not save to persistent_model: {e}")
 
     #FOR NO PERSISTENT MODEL SAVING SYSTEM
     def save_model_(self):
@@ -567,6 +565,9 @@ class DDQNAgent:
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
         choosen_cards_list_for_status_change = []
 
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+
         for card in train_cards_on_the_table:
             if card.color == color:
                 action_params = {"selected_card": card}
@@ -612,18 +613,11 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed {choosen_cards_list_for_status_change} train cards from table.")
 
-        game_state = self.game_service.get_game_state()
-        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
-        if 6 < min_cars <= 10:
-            if max_length_of_claimable_routes >= 5:
-                return -4
-            return -1
-        elif min_cars <= 6:
+        if min_cars <= 8:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
                     return -10
-                return -3
+                return -4
             else:
                 if max_length_of_claimable_routes >= 5:
                     return -15
@@ -637,6 +631,12 @@ class DDQNAgent:
     def draw_joker(self):
         game_state = self.game_service.get_game_state()
         train_cards_on_the_table = game_state["train_cards_on_the_table"]
+
+        needed_colors = self.needed_colors()
+        needed_colors_list = [clr for clr, value in needed_colors.items() if value > 0]
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+
         for card in train_cards_on_the_table:
             if card.color == "joker":
                 action_params = {"selected_card": card}
@@ -646,23 +646,15 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed joker train card from table.")
 
-        needed_colors = self.needed_colors()
-        needed_colors_list = [clr for clr, value in needed_colors.items() if value > 0]
-
-        game_state = self.game_service.get_game_state()
-        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
-        if 6 < min_cars <= 10:
-            return -2
-        elif min_cars <= 6:
+        if min_cars <= 8:
             if max_length_of_claimable_routes >= 5:
                 return -8
-            return -5
+            return -4
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
                 if card.color == clr:
-                    return 0.5
+                    return 1
         return 2
 
     def claim_route(self):
@@ -674,6 +666,9 @@ class DDQNAgent:
         length_to_points = {1: 1, 2: 2, 3: 4, 4: 7, 5: 10, 6: 15}
 
         if routes_available_to_claim:
+            max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+            scale = max((route.length for route in self.routes_needed_to_claim))
+
             route = routes_available_to_claim[-1]
             if route.color == "gray":
                 action_params = {"selected_route": route, "use_this_color": None}
@@ -692,10 +687,6 @@ class DDQNAgent:
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
 
-
-            max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
-            scale = max((route.length for route in self.routes_needed_to_claim))
-
             if max_length_of_claimable_routes/scale == 1:
                 return 15
 
@@ -708,6 +699,9 @@ class DDQNAgent:
         claimable_routes = current_state["claimable_routes"]
         max_length_route = sorted(claimable_routes, key=lambda route: route.length)
         length_to_points = {1: 1, 2: 2, 3: 4, 4: 7, 5: 10, 6: 15}
+
+        game_state = self.game_service.get_game_state()
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
 
         if claimable_routes:
             random_route = max_length_route[-1]
@@ -735,19 +729,14 @@ class DDQNAgent:
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {random_route.city1} to {random_route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {random_route.city1} to {random_route.city2}")
 
-            game_state = self.game_service.get_game_state()
-            min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+
             if min_cars <= 2:
                 return 20
 
             if self.routes_needed_to_claim:
                 return -3
             else:
-                game_state = self.game_service.get_game_state()
-                min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-                if 6 < min_cars <= 10:
-                    return 1.5 * length_to_points[random_route.length]
-                elif 2 < min_cars <= 6:
+                if 2 < min_cars <= 8:
                     return 2 * length_to_points[random_route.length]
                 elif min_cars <= 2:
                     return 30
