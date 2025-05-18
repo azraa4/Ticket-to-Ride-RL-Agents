@@ -118,7 +118,7 @@ class DDQNAgent:
 
         car_state = 0
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        if 2 < min_cars <= 8:
+        if 2 < min_cars <= 11:
             car_state = 0.5
         elif min_cars <=2:
             car_state = 1
@@ -614,7 +614,7 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed {choosen_cards_list_for_status_change} train cards from table.")
 
-        if min_cars <= 8:
+        if min_cars <= 11:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
                     return -10
@@ -647,7 +647,7 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed joker train card from table.")
 
-        if min_cars <= 8:
+        if min_cars <= 11:
             if max_length_of_claimable_routes >= 5:
                 return -8
             return -4
@@ -737,7 +737,7 @@ class DDQNAgent:
             if self.routes_needed_to_claim:
                 return -3
             else:
-                if 2 < min_cars <= 8:
+                if 2 < min_cars <= 11:
                     return 2 * length_to_points[random_route.length]
                 elif min_cars <= 2:
                     return 30
