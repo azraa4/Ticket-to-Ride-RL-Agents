@@ -125,15 +125,15 @@ class DDQNAgent:
 
         if self.routes_needed_to_claim:
             destinations_completed = 0
-            scale = max((route.length for route in self.routes_needed_to_claim))
+            max_claimable_route_state = 1
         else:
             destinations_completed = 1
-            scale = 6
+            max_claimable_route_state = max_length_of_claimable_routes/6
 
         state_vector = [
             car_state * 8,
             destinations_completed * 3,
-            max_length_of_claimable_routes/scale * 4,
+            max_claimable_route_state * 4,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -547,14 +547,10 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
 
-        if 6 < min_cars <= 10:
+        if min_cars <= 14:
             if max_length_of_claimable_routes >= 5:
-                return -5
-            return -2
-        elif min_cars <= 6:
-            if max_length_of_claimable_routes >= 5:
-                return -15
-            return -7
+                return -10
+            return -4
 
         return -1  # Reward for drawing blind train cards
 
@@ -618,7 +614,7 @@ class DDQNAgent:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
                     return -10
-                return -4
+                return -3
             else:
                 if max_length_of_claimable_routes >= 5:
                     return -15
@@ -649,8 +645,8 @@ class DDQNAgent:
 
         if min_cars <= 14:
             if max_length_of_claimable_routes >= 5:
-                return -8
-            return -4
+                return -10
+            return -3
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
@@ -670,7 +666,7 @@ class DDQNAgent:
             max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
             scale = max((route.length for route in self.routes_needed_to_claim))
 
-            route = routes_available_to_claim[-1]
+            route = routes_available_to_claim[0]
             if route.color == "gray":
                 action_params = {"selected_route": route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
@@ -688,10 +684,12 @@ class DDQNAgent:
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
 
+            '''
             if max_length_of_claimable_routes/scale == 1:
                 return 15
+            '''
 
-            return length_to_points[route.length]
+            return 15
         else:
             return self.claim_route_random()
 
@@ -738,9 +736,8 @@ class DDQNAgent:
                 return -3
             else:
                 if 2 < min_cars <= 14:
-                    return 2 * length_to_points[random_route.length]
-                elif min_cars <= 2:
-                    return 30
+                    return 1.4 * length_to_points[random_route.length]
+
                 return length_to_points[random_route.length]
         else:
             raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
