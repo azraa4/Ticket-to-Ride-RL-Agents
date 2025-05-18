@@ -184,7 +184,7 @@ class DDQNAgent:
             #console print(f"It is the first turn of {self.color}ed DeepQNetworkAgent")
             self.first_turn = False
             action_params = {
-                "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()[:2]}
+                "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()[:3]}
             self.game_service.perform_action("draw_destination_ticket", action_params)
             self.game_service.change_status_text(f"{self.color} drawed destination tickets.")
             return
