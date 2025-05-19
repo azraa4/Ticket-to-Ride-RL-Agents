@@ -6,8 +6,8 @@ class Deck:
         random.seed(global_vars.random_seed())
         self.cards = cards
         random.shuffle(cards)
-        print(cards)
-        print(len(cards))
+        #print(cards)
+        #print(len(cards))
 
     def shuffle(self):
         random.shuffle(self.cards)
