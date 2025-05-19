@@ -119,8 +119,10 @@ class DDQNAgent:
 
         car_state = 0
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        if 2 < min_cars <= 14:
+        if 7 < min_cars <= 14:
             car_state = 0.5
+        elif 2 < min_cars <= 7:
+            car_state = 0.8
         elif min_cars <=2:
             car_state = 1
 
@@ -511,6 +513,8 @@ class DDQNAgent:
         with big final reward that includes route points, completed tickets,
         penalty for uncompleted tickets, etc.
         """
+        final_reward = 0
+
         if not self.train_mode:
             return
 
@@ -553,16 +557,7 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
 
-        if 6 < min_cars <= 10:
-            if max_length_of_claimable_routes >= 5:
-                return -5
-            return -2
-        elif min_cars <= 6:
-            if max_length_of_claimable_routes >= 5:
-                return -15
-            return -7
-
-        return -1  # Reward for drawing blind train cards
+        return 0  # Reward for drawing blind train cards
 
     def draw_colored(self, color):
         needed_colors = self.needed_colors()
@@ -620,16 +615,6 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed {choosen_cards_list_for_status_change} train cards from table.")
 
-        if min_cars <= 14:
-            if 0 < needed_color_count or not self.routes_needed_to_claim:
-                if max_length_of_claimable_routes >= 5:
-                    return -10
-                return -4
-            else:
-                if max_length_of_claimable_routes >= 5:
-                    return -15
-                return -5
-
         if 0 < needed_color_count or not self.routes_needed_to_claim:
             return 1
         else:
@@ -652,11 +637,6 @@ class DDQNAgent:
                 break
 
         self.game_service.change_status_text(f"{self.color} drawed joker train card from table.")
-
-        if min_cars <= 14:
-            if max_length_of_claimable_routes >= 5:
-                return -8
-            return -4
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
@@ -740,14 +720,7 @@ class DDQNAgent:
             if min_cars <= 2:
                 return 20
 
-            if self.routes_needed_to_claim:
-                return -3
-            else:
-                if 2 < min_cars <= 14:
-                    return 2 * length_to_points[random_route.length]
-                elif min_cars <= 2:
-                    return 30
-                return length_to_points[random_route.length]
+            return length_to_points[random_route.length]
         else:
             raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
 

@@ -15,8 +15,8 @@ class PrioritizedReplayMemory:
                      (0 = uniform replay, 1 = full prioritisation).
     """
 
-    def __init__(self, capacity: int, alpha: float = 0.6):
-        np.random.seed(global_vars.random_seed())
+    def __init__(self, capacity: int, alpha: float = 0.3):
+        self.rng = np.random.RandomState()
 
         self.capacity   = capacity
         self.alpha      = alpha
@@ -38,11 +38,15 @@ class PrioritizedReplayMemory:
         next_state_mask,
     ):
         """
-        Add a new transition.  New items are assigned **max priority** so they
+        Add a new transition.  New items are assigned *max priority* so they
         are guaranteed to be sampled at least once.
         """
         # Highest priority so far (or 1 for very first insert)
-        max_prio = self.priorities.max() if self.memory else 1.0
+        if self.memory:
+            valid_prios = self.priorities[: len(self.memory)]      # ⟵ CHANGED
+            max_prio    = valid_prios.max()                       # ⟵ CHANGED
+        else:
+            max_prio = 1.0
 
         transition = (
             state, action, reward,
@@ -78,7 +82,7 @@ class PrioritizedReplayMemory:
             probs /= probs_sum
 
         # 2.  Draw sample WITHOUT replacement to avoid duplicates
-        indices = np.random.choice(
+        indices = self.rng.choice(                                 # ⟵ CHANGED
             len(self.memory),
             batch_size,
             p=probs,
