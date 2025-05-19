@@ -29,6 +29,7 @@ class DDQNAgent:
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
+        self.batch_count = 0
 
         # Define fixed state size and action space
         self.state_size = 11  # Fixed number of state features
@@ -69,7 +70,7 @@ class DDQNAgent:
                 f.write("episode,batch,loss\n")  # single header line, do this once
 
         self.episode_count = 0
-        self.batch_count = 0
+
 
 
 
@@ -125,15 +126,15 @@ class DDQNAgent:
 
         if self.routes_needed_to_claim:
             destinations_completed = 0
-            max_claimable_route_state = 1
+            scale = max((route.length for route in self.routes_needed_to_claim))
         else:
             destinations_completed = 1
-            max_claimable_route_state = max_length_of_claimable_routes/6
+            scale = 6
 
         state_vector = [
             car_state * 8,
             destinations_completed * 3,
-            max_claimable_route_state * 4,
+            max_length_of_claimable_routes/scale * 4,
             needed_red/6,
             needed_blue/6,
             needed_green/6,
@@ -184,7 +185,7 @@ class DDQNAgent:
             #console print(f"It is the first turn of {self.color}ed DeepQNetworkAgent")
             self.first_turn = False
             action_params = {
-                "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()[:3]}
+                "selected_destination_tickets": self.game_service.get_destination_tickets_list_at_the_start_of_the_game()[:2]}
             self.game_service.perform_action("draw_destination_ticket", action_params)
             self.game_service.change_status_text(f"{self.color} drawed destination tickets.")
             return
@@ -279,12 +280,13 @@ class DDQNAgent:
             return
 
         self.batch_count += 1
+        beta = min(1.0, 0.4 + 0.00001 * self.batch_count)
 
         # Now each transition contains 7 items: state, action, reward, next_state, done, state_mask, next_state_mask
-        batch, indices, is_weights = self.memory.sample(self.batch_size)
+        batch, indices, is_weights = self.memory.sample(self.batch_size, beta)
         is_weights = torch.tensor(is_weights, dtype=torch.float32, device=device)
 
-        is_weights /= is_weights.max() #new added normalization of weight to prevent loss explode
+        #is_weights /= is_weights.max() #new added normalization of weight to prevent loss explode
 
         states, actions, rewards, next_states, dones, state_masks, next_state_masks = zip(*batch)
 
@@ -372,6 +374,7 @@ class DDQNAgent:
             self.target_model.load_state_dict(checkpoint['target_model_state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
             self.epsilon = checkpoint['epsilon']
+            self.batch_count = checkpoint['batch_count']
 
             # Replay memory
             self.memory.memory = checkpoint.get('memory', [])
@@ -403,7 +406,8 @@ class DDQNAgent:
             'epsilon': self.epsilon,
             'memory': self.memory.memory,
             'priorities': self.memory.priorities,
-            'pos': self.memory.pos
+            'pos': self.memory.pos,
+            'batch_count': self.batch_count,
         }
 
         try:
@@ -526,6 +530,8 @@ class DDQNAgent:
             self.epsilon *= self.epsilon_decay
             print("Epsilon decayed to:", self.epsilon)
 
+        print("Batch count:", self.batch_count)
+
         self.episode_count += 1
 
     """ACTIONS PART"""
@@ -547,10 +553,14 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
 
-        if min_cars <= 14:
+        if 6 < min_cars <= 10:
             if max_length_of_claimable_routes >= 5:
-                return -10
-            return -4
+                return -5
+            return -2
+        elif min_cars <= 6:
+            if max_length_of_claimable_routes >= 5:
+                return -15
+            return -7
 
         return -1  # Reward for drawing blind train cards
 
@@ -614,7 +624,7 @@ class DDQNAgent:
             if 0 < needed_color_count or not self.routes_needed_to_claim:
                 if max_length_of_claimable_routes >= 5:
                     return -10
-                return -3
+                return -4
             else:
                 if max_length_of_claimable_routes >= 5:
                     return -15
@@ -645,8 +655,8 @@ class DDQNAgent:
 
         if min_cars <= 14:
             if max_length_of_claimable_routes >= 5:
-                return -10
-            return -3
+                return -8
+            return -4
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
@@ -666,7 +676,7 @@ class DDQNAgent:
             max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
             scale = max((route.length for route in self.routes_needed_to_claim))
 
-            route = routes_available_to_claim[0]
+            route = routes_available_to_claim[-1]
             if route.color == "gray":
                 action_params = {"selected_route": route, "use_this_color": None}
                 cards_can_be_used_to_claim_gray_route = self.game_service.perform_action("claim_route", action_params)
@@ -684,12 +694,10 @@ class DDQNAgent:
                 self.game_service.log(f"{self.color}, Action: CLAIM COLORED ROUTE, {route.city1} to {route.city2}")
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
 
-            '''
             if max_length_of_claimable_routes/scale == 1:
                 return 15
-            '''
 
-            return 15
+            return length_to_points[route.length]
         else:
             return self.claim_route_random()
 
@@ -736,8 +744,9 @@ class DDQNAgent:
                 return -3
             else:
                 if 2 < min_cars <= 14:
-                    return 1.4 * length_to_points[random_route.length]
-
+                    return 2 * length_to_points[random_route.length]
+                elif min_cars <= 2:
+                    return 30
                 return length_to_points[random_route.length]
         else:
             raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
