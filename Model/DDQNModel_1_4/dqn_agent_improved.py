@@ -316,7 +316,7 @@ class DDQNAgent:
 
         self.optimizer.zero_grad()
         loss.backward()
-        #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=5.0) #for preventing exploding gradients
         self.optimizer.step()
 
         self.soft_update_target(tau=0.001)
