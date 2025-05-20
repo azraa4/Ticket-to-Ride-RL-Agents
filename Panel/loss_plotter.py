@@ -39,7 +39,7 @@ def main():
         return
 
     # 4. Define the chunk size (window) for averaging
-    chunk_size = 10  # change to 5, 20, etc. to get more or less smoothing
+    chunk_size = 1000  # change to 5, 20, etc. to get more or less smoothing
     chunked_losses = []
     temp_chunk = []
 

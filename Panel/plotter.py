@@ -32,7 +32,7 @@ class Plotter:
                 exit()
 
             # Split, filter out empty values, and convert to integers
-            scores = [int(value) for value in raw_data.split(",") if value.strip().lstrip("-").isdigit()]
+            scores = [float(value) for value in raw_data.split(",") if value.strip().replace("-", "").replace(".","").isdigit()]
 
         if not scores:
             print("Error: No valid scores found in the file!")

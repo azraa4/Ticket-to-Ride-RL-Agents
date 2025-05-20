@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
     def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.997, lr=0.001,
-                 memory_size=50000, batch_size=256, train_mode=False):
+                 memory_size=50000, batch_size=256, train_mode=True):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -47,7 +47,7 @@ class DDQNAgent:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.memory = PrioritizedReplayMemory(memory_size)
 
-        self.not_use_persistent_model = True
+        self.not_use_persistent_model = False
         if self.not_use_persistent_model:
             self.filename = "ddqn_model_final_improved_10.pth"
             self.checkpoint_data = None
@@ -77,7 +77,7 @@ class DDQNAgent:
         '''
         print("Model is on device:", next(self.model.parameters()).device)
 
-        print("PyTorch version:", torch.version)
+        print("PyTorch version:", torch.__version__)
         print("CUDA available:", torch.cuda.is_available())
         if torch.cuda.is_available():
             print("Number of GPUs:", torch.cuda.device_count())
@@ -134,17 +134,17 @@ class DDQNAgent:
             scale = 6
 
         state_vector = [
-            (car_state * 8) / 8 ,
-            (destinations_completed * 3) / 8,
-            (max_length_of_claimable_routes/scale * 4) / 8,
-            (needed_red/6)/8,
-            (needed_blue/6)/8,
-            (needed_green/6)/8,
-            (needed_yellow/6)/8,
-            (needed_orange/6)/8,
-            (needed_pink/6)/8,
-            (needed_white/6)/8,
-            (needed_black/6)/8,
+            (car_state * 4) / 4,
+            (destinations_completed * 3) / 4,
+            (max_length_of_claimable_routes/scale * 4) / 4,
+            (needed_red/6)/4,
+            (needed_blue/6)/4,
+            (needed_green/6)/4,
+            (needed_yellow/6)/4,
+            (needed_orange/6)/4,
+            (needed_pink/6)/4,
+            (needed_white/6)/4,
+            (needed_black/6)/4,
         ]
 
         print("STATE VECTOR: ", state_vector)
@@ -321,7 +321,7 @@ class DDQNAgent:
         #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
         self.optimizer.step()
 
-        self.soft_update_target(tau=0.005)
+        self.soft_update_target(tau=0.03)
 
         with open(self.log_file, "a") as f:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
@@ -513,7 +513,6 @@ class DDQNAgent:
         with big final reward that includes route points, completed tickets,
         penalty for uncompleted tickets, etc.
         """
-        final_reward = 0
 
         if not self.train_mode:
             return
@@ -545,7 +544,7 @@ class DDQNAgent:
         """
         game_state = self.game_service.get_game_state()
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+        #max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
 
         action_params = {"selected_card": "select_blind"}
         returned_item = self.game_service.perform_action("draw_train_card", action_params)
@@ -556,6 +555,9 @@ class DDQNAgent:
         self.game_service.log(f"Having these train cards: {train_cards_list}")
 
         self.game_service.change_status_text(f"{self.color} drawed train card from blind deck.")
+
+        if min_cars<=2:
+            return -3
 
         return 0  # Reward for drawing blind train cards
 
@@ -568,7 +570,7 @@ class DDQNAgent:
         choosen_cards_list_for_status_change = []
 
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+        #max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
 
         for card in train_cards_on_the_table:
             if card.color == color:
@@ -615,6 +617,9 @@ class DDQNAgent:
 
         self.game_service.change_status_text(f"{self.color} drawed {choosen_cards_list_for_status_change} train cards from table.")
 
+        if min_cars<=2:
+            return -3
+
         if 0 < needed_color_count or not self.routes_needed_to_claim:
             return 1
         else:
@@ -627,7 +632,7 @@ class DDQNAgent:
         needed_colors = self.needed_colors()
         needed_colors_list = [clr for clr, value in needed_colors.items() if value > 0]
         min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
-        max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+        #max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
 
         for card in train_cards_on_the_table:
             if card.color == "joker":
@@ -637,6 +642,9 @@ class DDQNAgent:
                 break
 
         self.game_service.change_status_text(f"{self.color} drawed joker train card from table.")
+
+        if min_cars<=2:
+            return -3
 
         for clr in needed_colors_list:
             for card in train_cards_on_the_table:
@@ -719,6 +727,9 @@ class DDQNAgent:
 
             if min_cars <= 2:
                 return 7.5
+
+            if self.routes_needed_to_claim:
+                return -1
 
             return length_to_points[random_route.length]/2
         else:
