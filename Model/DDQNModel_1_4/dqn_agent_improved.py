@@ -14,8 +14,8 @@ import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #GPU
 
 class DDQNAgent:
-    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.995, lr=0.0001,
-                 memory_size=50000, batch_size=128, train_mode=True):
+    def __init__(self, color, game_service, persistent_model=None, gamma=0.99, epsilon=1.0, epsilon_min=0.05, epsilon_decay=0.997, lr=0.001,
+                 memory_size=50000, batch_size=256, train_mode=False):
         torch.manual_seed(global_vars.random_seed())
         random.seed(global_vars.random_seed())
 
@@ -47,9 +47,9 @@ class DDQNAgent:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.memory = PrioritizedReplayMemory(memory_size)
 
-        self.not_use_persistent_model = False
+        self.not_use_persistent_model = True
         if self.not_use_persistent_model:
-            self.filename = "ddqn_model_final_improved_5.pth"
+            self.filename = "ddqn_model_final_improved_10.pth"
             self.checkpoint_data = None
 
         # Try loading an existing model if available
@@ -77,7 +77,7 @@ class DDQNAgent:
         '''
         print("Model is on device:", next(self.model.parameters()).device)
 
-        print("PyTorch version:", torch._version_)
+        print("PyTorch version:", torch.version)
         print("CUDA available:", torch.cuda.is_available())
         if torch.cuda.is_available():
             print("Number of GPUs:", torch.cuda.device_count())
@@ -134,17 +134,17 @@ class DDQNAgent:
             scale = 6
 
         state_vector = [
-            car_state * 8,
-            destinations_completed * 3,
-            max_length_of_claimable_routes/scale * 4,
-            needed_red/6,
-            needed_blue/6,
-            needed_green/6,
-            needed_yellow/6,
-            needed_orange/6,
-            needed_pink/6,
-            needed_white/6,
-            needed_black/6,
+            (car_state * 8) / 8 ,
+            (destinations_completed * 3) / 8,
+            (max_length_of_claimable_routes/scale * 4) / 8,
+            (needed_red/6)/8,
+            (needed_blue/6)/8,
+            (needed_green/6)/8,
+            (needed_yellow/6)/8,
+            (needed_orange/6)/8,
+            (needed_pink/6)/8,
+            (needed_white/6)/8,
+            (needed_black/6)/8,
         ]
 
         print("STATE VECTOR: ", state_vector)
@@ -318,10 +318,10 @@ class DDQNAgent:
 
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=5.0) #for preventing exploding gradients
+        #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0) #for preventing exploding gradients
         self.optimizer.step()
 
-        self.soft_update_target(tau=0.001)
+        self.soft_update_target(tau=0.005)
 
         with open(self.log_file, "a") as f:
             f.write(f"{self.episode_count},{self.batch_count},{loss.item()}\n")
@@ -675,9 +675,9 @@ class DDQNAgent:
                 self.game_service.change_status_text(f"{self.color} claim colored route: {route.city1} to {route.city2}")
 
             if max_length_of_claimable_routes/scale == 1:
-                return 15
+                return 7.5
 
-            return length_to_points[route.length]
+            return length_to_points[route.length]/2
         else:
             return self.claim_route_random()
 
@@ -718,9 +718,9 @@ class DDQNAgent:
 
 
             if min_cars <= 2:
-                return 20
+                return 7.5
 
-            return length_to_points[random_route.length]
+            return length_to_points[random_route.length]/2
         else:
             raise ValueError("CLAIMABLE ROUTE YOKKEN NASIL CLAIMLEMEYE CALISIYON!")
 
@@ -795,7 +795,7 @@ class DDQNAgent:
         return max(route.length for route in claimable_routes)
 
     def _scale(self, r):  # inline helper so we write it once
-        REWARD_SCALE = 20.0
+        REWARD_SCALE = 7.5
         return r / REWARD_SCALE
 
     '''
