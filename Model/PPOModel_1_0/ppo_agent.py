@@ -170,6 +170,19 @@ class PPOAgent:
             self.game_service.pass_the_turn()
             return
 
+        # daha sonra silinecek
+        game_state = self.game_service.get_game_state()
+        min_cars = min(p["remaining_train_cars"] for p in game_state["players"])
+        if "claim_route" in available_actions:
+            if 2 < min_cars <= 8:
+                max_length_of_claimable_routes = self.get_length_of_max_claimable_route()
+                if max_length_of_claimable_routes >= 4:
+                    self.execute_action("claim_route")
+                    return
+            elif min_cars <= 2:
+                self.execute_action("claim_route")
+                return
+
         action = self.choose_action()
         reward, next_state, done = self.execute_action(action)
         if self.train_mode:

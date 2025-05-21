@@ -241,10 +241,10 @@
       "points": 8
     },
     {
-      "id": "portland_houston",
-      "city1": "Portland",
-      "city2": "Houston",
-      "points": 16
+      "id": "vancouver_montreal",
+      "city1": "Vancouver",
+      "city2": "Montreal",
+      "points": 20
     },
     {
       "id": "portland_nashville",
@@ -301,16 +301,16 @@
       "points": 21
     },
     {
-      "id": "saultstmarie_miami",
-      "city1": "Sault St Marie",
-      "city2": "Miami",
-      "points": 12
-    },
-    {
       "id": "saultstmarie_oklahomacity",
       "city1": "Sault St Marie",
       "city2": "Oklahoma City",
       "points": 8
+    },
+    {
+      "id": "saultstmarie_miami",
+      "city1": "Sault St Marie",
+      "city2": "Miami",
+      "points": 12
     },
     {
       "id": "seattle_lasvegas",
@@ -361,10 +361,10 @@
       "points": 13
     },
     {
-      "id": "vancouver_montreal",
-      "city1": "Vancouver",
-      "city2": "Montreal",
-      "points": 20
+      "id": "portland_houston",
+      "city1": "Portland",
+      "city2": "Houston",
+      "points": 16
     },
     {
       "id": "vancouver_portland",
