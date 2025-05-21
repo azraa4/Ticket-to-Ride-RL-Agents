@@ -71,20 +71,6 @@
       "color": "white"
     },
     {
-      "id": "sanfransisco_losangeles_1",
-      "city1": "San Francisco",
-      "city2": "Los Angeles",
-      "length": 3,
-      "color": "yellow"
-    },
-    {
-      "id": "sanfransisco_losangeles_2",
-      "city1": "San Fransisco",
-      "city2": "Los Angeles",
-      "length": 3,
-      "color": "pink"
-    },
-    {
       "id": "losangales_lasvegas",
       "city1": "Los Angeles",
       "city2": "Las Vegas",

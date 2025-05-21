@@ -38,12 +38,14 @@ class Player:
         # Create adjacency list from claimed routes
         adjacency_list = {}
         for route in self.claimed_routes:
-            if route.city1 not in adjacency_list:
-                adjacency_list[route.city1] = []
-            if route.city2 not in adjacency_list:
-                adjacency_list[route.city2] = []
-            adjacency_list[route.city1].append(route.city2)
-            adjacency_list[route.city2].append(route.city1)
+            city1 = route.city1.strip()
+            city2 = route.city2.strip()
+            if city1 not in adjacency_list:
+                adjacency_list[city1] = []
+            if city2 not in adjacency_list:
+                adjacency_list[city2] = []
+            adjacency_list[city1].append(city2)
+            adjacency_list[city2].append(city1)
 
         # Function to perform DFS to check connection between two cities
         def dfs(current_city, target_city, visited):
@@ -58,12 +60,12 @@ class Player:
 
         # Check each destination ticket for completion
         for ticket in self.destination_tickets:
-            if dfs(ticket.city1, ticket.city2, set()):
+            city1 = ticket.city1.strip()
+            city2 = ticket.city2.strip()
+            if dfs(city1, city2, set()):
                 ticket.mark_as_completed()
                 total_points += ticket.points
-
-        for ticket in self.destination_tickets:
-            if not ticket.is_completed:
+            else:
                 total_points -= ticket.points
 
         return total_points
