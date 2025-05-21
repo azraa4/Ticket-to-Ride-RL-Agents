@@ -306,6 +306,9 @@ class PPOAgent:
             print(f"⚠️ Could not load {model_filename}: {e}")
 
     def save_model_ppo(self):
+        if not self.train_mode:
+            return
+
         print("SAVING...")
         checkpoint = {
             'model_state_dict': self.model.state_dict(),

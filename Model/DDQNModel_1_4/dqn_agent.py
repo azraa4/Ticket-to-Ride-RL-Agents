@@ -386,6 +386,9 @@ class DDQNAgent:
         Saves model weights, optimizer, epsilon, replay memory, etc.
         into the in-memory persistent_model instead of to disk.
         """
+        if not self.train_mode:
+            return
+
         if self.persistent_model is None:
             print("No persistent model manager available; not saving.")
             return
